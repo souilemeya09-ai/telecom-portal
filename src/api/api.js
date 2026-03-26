@@ -152,3 +152,65 @@ export async function getPlansTarifaires() {
   });
   return res.data;
 }
+
+
+// GET /api/reclamations
+export async function getReclamations() {
+  const res = await api.get(`${BASE_URL}/reclamations`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  return res.data;
+}
+
+// GET /api/reclamations/:id
+export async function getReclamationById(id) {
+  const res = await api.get(`${BASE_URL}/reclamations/${id}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  return res.data;
+}
+
+// GET /api/reclamations/client/:clientId
+export async function getReclamationsByClient(clientId) {
+  const res = await api.get(`${BASE_URL}/reclamations/client/${clientId}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  return res.data;
+}
+
+// POST /api/reclamations
+export async function createReclamation(dto) {
+  const res = await api.post(`${BASE_URL}/reclamations`, dto, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  return res.data;
+}
+
+// PUT /api/reclamations/:id
+export async function updateReclamation(id, dto) {
+  const res = await api.put(`${BASE_URL}/reclamations/${id}`, dto, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  return res.data;
+}
+
+// PATCH /api/reclamations/:id/statut?statut=EN_COURS
+export async function changerStatutReclamation(id, statut) {
+  const res = await api.patch(
+    `${BASE_URL}/reclamations/${id}/statut`,
+    null,
+    {
+      params: { statut },
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    }
+  );
+  return res.data;
+}
+
+// DELETE /api/reclamations/:id
+export async function deleteReclamation(id) {
+  const res = await api.delete(`${BASE_URL}/reclamations/${id}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  return res.data;
+}

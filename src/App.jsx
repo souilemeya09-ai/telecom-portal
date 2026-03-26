@@ -18,6 +18,7 @@ import CreateService from "./pages/metier/service/CreateService";
 import Customers from "./pages/Vente/customer/Customers";
 import Offres from "./pages/metier/offre/Offres";
 import CreateOffre from "./pages/metier/offre/CreateOffre";
+import Reclamations from "./pages/Vente/reclamation/Reclamations";
 function App() {
   return (
     <BrowserRouter>
@@ -51,9 +52,8 @@ function App() {
           <Route path="/services" element={<ServiceList />} />
           <Route path="/AddService" element={<CreateService />} />
           <Route path="/customers" element={<Customers />} />
-           <Route path="/" element={<Navigate to="/offres" />} />
-            <Route path="/offres" element={<Offres />} />
-
+          <Route path="/offres" element={<Offres />} />
+          <Route path="/reclamations" element={<Reclamations />} />
         </Route>
 
         {/* Redirection */}

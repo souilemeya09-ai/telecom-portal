@@ -6,12 +6,12 @@ function Sidebar() {
 
   return (
     <div className="sidebar">
-     
+
 
       {/* Menu DSI */}
       {role === "DSI" && (
         <>
-        
+
           <Link to="/users" className="sidebar-link">
             Gérer Utilisateurs
           </Link>
@@ -37,6 +37,9 @@ function Sidebar() {
           <Link to="/promotion" className="sidebar-link">
             Souscrire Promotion
           </Link>
+          <Link to="/reclamations" className="sidebar-link">
+            Gérer Réclamations
+          </Link> 
         </>
       )}
 

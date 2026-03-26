@@ -1,0 +1,200 @@
+/* ── Stats row ── */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 1.75rem;
+}
+
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-ouverte {
+    border-left: 3px solid #f59e0b;
+}
+
+.stat-ouverte .stat-value {
+    color: #d97706;
+}
+
+.stat-encours {
+    border-left: 3px solid #3b82f6;
+}
+
+.stat-encours .stat-value {
+    color: #2563eb;
+}
+
+.stat-fermee {
+    border-left: 3px solid #22c55e;
+}
+
+.stat-fermee .stat-value {
+    color: #16a34a;
+}
+
+/* ── Badges statut ── */
+.badge-ouverte {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.badge-encours {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.badge-fermee {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+/* ── Filter bar ── */
+.filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.filter-btn-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.filter-btn-active:hover {
+    color: #fff;
+}
+
+.filter-count {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 0.75rem;
+}
+
+.filter-btn-active .filter-count {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Table cells ── */
+.desc-cell {
+    max-width: 260px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.date-cell {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* ── Description in modal ── */
+.rec-description {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.rec-comment {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* ── Statut change buttons ── */
+.statut-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.statut-btn {
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-family: var(--font);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.statut-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
+.statut-btn:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.statut-btn-active {
+    border-color: var(--accent) !important;
+    background: var(--accent) !important;
+    color: #fff !important;
+    opacity: 1 !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+}
