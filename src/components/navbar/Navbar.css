@@ -1,0 +1,107 @@
+/* src/components/navbar/Navbar.css */
+
+/* Container principal */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  height: 70px;
+  background-color: #000000;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 100;
+}
+
+/* Logo */
+.navbar-logo img {
+  height: 70px; /* taille fixe pour ne pas agrandir la navbar */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo img:hover {
+  transform: scale(1.05);
+}
+
+/* Section droite (notification + logout) */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Notification wrapper */
+.notification-wrapper {
+  position: relative;
+}
+
+/* Bouton notification */
+.notification-button {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ffffff;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.notification-button:hover {
+  color: #ff9800;
+  transform: scale(1.2);
+}
+
+/* Badge notification pro */
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #ff3b30, #ff5e57);
+  color: white;
+  font-size: 12px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+
+/* Hover sur badge */
+.notification-wrapper:hover .notification-badge {
+  transform: scale(1.5);
+  box-shadow: 0 0 10px rgba(255,59,48,0.7);
+}
+
+/* Animation pulsation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.notification-badge.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+/* Bouton logout */
+.logout-button {
+  background-color: #ff7a00;
+  color: #fff;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #ff7a00;
+  transform: scale(1.05);
+}

@@ -1,0 +1,136 @@
+/* customers.css */
+
+/* Conteneur principal */
+.customers-container {
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #1F2937; /* gris foncé pour texte */
+  background-color: #f9fafb; /* fond léger */
+}
+
+/* Titre */
+.customers-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #111827;
+}
+
+/* Tableau */
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* En-tête du tableau */
+.customers-table th {
+  background-color: #4f46e5; /* violet pro */
+  color: #ffffff;
+  text-align: left;
+  padding: 12px 15px;
+  font-size: 14px;
+}
+
+/* Lignes du tableau */
+.customers-table td {
+  padding: 12px 15px;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb; /* gris clair */
+  vertical-align: middle;
+}
+
+/* Alternance des lignes */
+.customers-table tbody tr:nth-child(even) {
+  background-color: #f3f4f6; /* gris très clair */
+}
+
+/* Hover sur ligne */
+.customers-table tbody tr:hover {
+  background-color: #e0e7ff; /* léger violet */
+  transition: 0.2s;
+}
+
+/* Image du document */
+.doc-image {
+  width: 60px;
+  height: auto;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #d1d5db; /* bord gris clair */
+}
+
+/* Responsive : sur petit écran */
+@media (max-width: 768px) {
+  .customers-table th,
+  .customers-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .doc-image {
+    width: 40px;
+  }
+}
+/* Barre de recherche et bouton Reset pour Customers */
+.customers-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px; /* espace avec le tableau */
+  padding: 10px 15px;
+  background-color: #ffffff; /* fond blanc */
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* légère ombre */
+  flex-wrap: wrap; /* responsive */
+}
+
+/* Input recherche full-width */
+.customers-search-input {
+  flex: 1; /* prend toute la largeur disponible */
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #d1d5db; /* cohérent avec tes images */
+  border-radius: 6px;
+  outline: none;
+  background-color: #f9fafb;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.customers-search-input:focus {
+  border-color: #4f46e5; /* violet pro, comme ton tableau */
+  box-shadow: 0 0 5px rgba(79,70,229,0.3);
+}
+
+/* Bouton Reset */
+.customers-filter-bar button {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #4f46e5; /* violet pro */
+  color: #ffffff;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.customers-filter-bar button:hover {
+  background-color: #4338ca;
+  transform: translateY(-1px);
+}
+
+/* Responsive : input + bouton empilés sur mobile */
+@media (max-width: 600px) {
+  .customers-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customers-filter-bar button {
+    width: 100%;
+  }
+}

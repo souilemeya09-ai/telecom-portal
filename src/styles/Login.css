@@ -1,0 +1,161 @@
+/* ============================ */
+/* Wrapper page */
+.login-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #ffffff;
+  /* fond blanc */
+  font-family: 'Poppins', sans-serif;
+  padding-top: 70px;
+  /* login un peu en haut */
+}
+
+/* Contenu centré horizontalement, aligné en haut */
+.login-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-bottom: auto;
+}
+
+/* ============================ */
+/* Cadre transparent moderne et plus grand */
+.login-card {
+  background: rgba(255, 255, 255, 0.85);
+  /* fond semi-transparent blanc */
+  border-radius: 20px;
+  padding: 50px 40px;
+  /* plus d’espace intérieur */
+  max-width: 450px;
+  width: 100%;
+  /* largeur plus grande */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: #333;
+  transition: transform 0.3s ease;
+}
+
+/* ============================ */
+/* Logo utilisateur */
+.login-logo img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  border: 2px solid #FF7A00;
+  padding: 5px;
+}
+
+/* ============================ */
+/* Titre */
+.login-card h2 {
+  margin-bottom: 30px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #333;
+}
+
+/* ============================ */
+/* Labels et inputs */
+.login-card .form-group {
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.login-card label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #333;
+  font-weight: 700;
+  /* labels en gras */
+}
+
+/* Inputs blancs avec effet doux */
+.login-card input {
+  padding: 12px 15px;
+  width: 93%;
+  border: 1px solid #ccc;
+  /* bord gris clair */
+  border-radius: 12px;
+  /* coins arrondis */
+  background-color: #ffffff;
+  /* fond blanc pur */
+  color: #333;
+  /* texte sombre */
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  /* ombre subtile pour détacher du cadre */
+}
+
+/* Placeholder texte */
+.login-card input::placeholder {
+  color: #888;
+}
+
+/* Focus sur le champ */
+.login-card input:focus {
+  border: 1px solid #FF7A00;
+  /* bord orange */
+  box-shadow: 0 0 10px rgba(255, 122, 0, 0.2);
+  /* glow doux */
+  background-color: #ffffff;
+  /* reste blanc */
+}
+
+/* ============================ */
+/* Bouton login */
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background-color: #FF7A00;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.login-card button:hover {
+  background-color: #E66900;
+  transform: scale(1.05);
+}
+
+/* ============================ */
+/* Message d'erreur */
+.login-card .error {
+  color: #ff4d4d;
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ============================ */
+/* Footer */
+.login-page-wrapper footer {
+  margin-top: auto;
+  padding: 15px 0;
+  text-align: center;
+  background: #f0f0f0;
+  color: #333;
+  font-size: 14px;
+}
+
+.forgot-password {
+  position: relative;
+}
+
+.forgot-password>a {
+  text-decoration: none;
+  color: rgb(220, 127, 27);
+  position: absolute;
+  right: 0;
+  top: 1em;
+}

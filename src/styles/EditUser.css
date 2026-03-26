@@ -1,0 +1,43 @@
+.adduser-container{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding-top:80px;
+    background: linear-gradient(135deg,#f6f8fb,#eef2f7);
+}
+
+.adduser-form{
+    width:420px;
+    padding:35px;
+    border-radius:15px;
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.85);
+    box-shadow:0 15px 35px rgba(0,0,0,0.1);
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.adduser-form h2{
+    text-align:center;
+    color:#333;
+    font-weight:700;
+}
+
+.adduser-form input,
+.adduser-form select{
+    padding:12px 14px;
+    border-radius:8px;
+    border:1px solid #ddd;
+}
+
+.adduser-form button{
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#ff7a00;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}

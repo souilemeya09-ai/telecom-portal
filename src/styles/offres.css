@@ -1,0 +1,128 @@
+/* Container */
+.offres-container {
+  padding: 30px;
+  background: #f8fafc;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Title */
+.offres-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #1e293b;
+}
+
+/* Table */
+.offres-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* HEADER (CORRIGÉ ✅) */
+.offres-table thead {
+  background: #f1f5f9; /* gris très clair */
+}
+
+.offres-table th {
+  text-align: left;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #969fac; /* gris comme ton image */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Body */
+.offres-table td {
+  padding: 16px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+/* Hover effect */
+.offres-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* Zebra (léger) */
+.offres-table tbody tr:nth-child(even) {
+  background: #fcfcfd;
+}
+
+/* Services column */
+.offres-table td:last-child {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* BADGES STATUS (🔥 important comme ton image) */
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* ACTIF (vert) */
+.badge-actif {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* RESILIE (rouge) */
+.badge-resilie {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Loading */
+.offres-container p {
+  font-size: 16px;
+  color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .offres-table thead {
+    display: none;
+  }
+
+  .offres-table,
+  .offres-table tbody,
+  .offres-table tr,
+  .offres-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .offres-table tr {
+    margin-bottom: 15px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .offres-table td {
+    padding: 10px;
+    text-align: right;
+    position: relative;
+  }
+
+  .offres-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    font-weight: bold;
+    color: #1e293b;
+    text-align: left;
+  }
+}

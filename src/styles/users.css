@@ -1,0 +1,194 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* style PFE pro */
+  color: #1F2937; /* gris foncé pour le texte */
+  background-color: #f9fafb; /* léger fond clair */
+}
+
+/* Conteneur du bouton Ajouter utilisateur */
+.add-button-container {
+  text-align: right;
+  margin: 0 0 20px 0;
+}
+
+/* Style du bouton Ajouter utilisateur */
+.add-button {
+  padding: 10px 18px;
+  background-color: #FF7A00; /* orange vif */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.add-button:hover {
+  background-color: #de7643;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+}
+
+/* Titre de la liste */
+.users-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #000000;
+}
+
+/* Tableau */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+thead {
+  background-color: #f8f9fa; /* gris clair */
+  color: #1F2937; /* texte gris foncé pour contraste */
+}
+
+tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+/* Centrer les boutons dans la colonne Actions */
+td:last-child {
+  text-align: center;
+}
+
+td:last-child button {
+  display: inline-block;
+  margin: 0 5px;
+}
+
+/* Style commun aux boutons du tableau */
+button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+/* Bouton Modifier */
+button.modify-btn {
+  background-color: #FF7A00; /* orange */
+  color: #fff;
+}
+
+button.modify-btn:hover {
+  background-color: #de7643;
+}
+
+/* Bouton Supprimer */
+button.delete-btn {
+  background-color: #e74c3c; /* rouge */
+  color: #fff;
+}
+
+button.delete-btn:hover {
+  background-color: #c53030; /* rouge foncé */
+}
+
+/* Responsive pour petits écrans */
+@media screen and (max-width: 768px) {
+  th, td {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .add-button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .users-title {
+    font-size: 20px;
+  }
+}
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.page-btn {
+  background-color: #fff;
+  border: 1px solid #f26b38; /* bordure orange */
+  color: #f26b38;             /* texte orange */
+  border-radius: 50%;         /* rond */
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background-color: #f26b38;
+  color: #fff;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.page-info {
+  margin: 0 10px;
+  font-weight: 500;
+  color: #101616;
+}
+.search-container {
+  text-align: right;
+  margin-bottom: 15px;
+}
+
+.search-container input {
+  padding: 6px 10px;
+  width: 250px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.search-container {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.search-container input {
+  padding: 8px 12px;
+  width: 280px;
+  border: 1px solid #d1d5db; /* gris clair */
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+

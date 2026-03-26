@@ -1,0 +1,15 @@
+/* Footer global */
+.footer {
+  width: 100%;
+  background-color:#f5f5f5ae; /* couleur sombre professionnelle */
+  color: #000000;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 14px;
+  position: fixed; /* toujours en bas */
+  bottom: 0;
+  left: 0;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
