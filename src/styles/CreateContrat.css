@@ -158,3 +158,32 @@ hr {
   background-color: #e5e7eb; /* gris clair */
   color: #374151;
 }
+
+.input-with-action {
+  display: flex;
+  gap: 8px;
+}
+.input-with-action .form-control { flex: 1; }
+
+.btn-generate {
+  background: var(--accent-light);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0 1rem;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition);
+}
+.btn-generate:hover { background: var(--accent); color: #fff; }
+
+.input-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-family: var(--mono);
+  display: block;
+}

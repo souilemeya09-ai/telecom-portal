@@ -1,12 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
-  getContrats,
-  createContrat,
-  updateContrat,
-  deleteContrat,
-  resilierContrat,
-  getClients,
-  getOffres,
+  getContrats, createContrat, updateContrat,
+  deleteContrat, resilierContrat, getClients, getOffres,
 } from "../../../api/api";
 import "../../../styles/CreateContrat.css";
 
@@ -15,20 +10,51 @@ const EMPTY_FORM = {
   dateDebut: "", dateFin: "", directoryNumber: "",
 };
 
+// ── Tri helper ──────────────────────────────────────────────────
+function getValue(obj, field) {
+  switch (field) {
+    case "id": return obj.id;
+    case "client": return obj.client ? `${obj.client.nom} ${obj.client.prenom}` : "";
+    case "offre": return obj.offre?.nom ?? "";
+    case "dateDebut": return obj.dateDebut ?? "";
+    case "dateFin": return obj.dateFin ?? "";
+    case "statut": return obj.statut ?? "";
+    case "directoryNumber": return obj.directoryNumber ?? "";
+    default: return "";
+  }
+}
+
+function SortIcon({ field, sortField, sortOrder }) {
+  if (sortField !== field) return <span className="sort-icon sort-idle">⇅</span>;
+  return <span className="sort-icon sort-active">{sortOrder === "asc" ? "↑" : "↓"}</span>;
+}
+
+function Th({ label, field, sortField, sortOrder, onSort }) {
+  return (
+    <th className="sortable-th" onClick={() => onSort(field)}>
+      <span className="th-inner">
+        {label}
+        <SortIcon field={field} sortField={sortField} sortOrder={sortOrder} />
+      </span>
+    </th>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────
 function Contrats() {
   const [contrats, setContrats] = useState([]);
   const [clients, setClients] = useState([]);
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  // panels / modals
   const [showForm, setShowForm] = useState(false);
-  const [editingContrat, setEditing] = useState(null);   // null = create, obj = edit
-  const [detailContrat, setDetail] = useState(null);   // modal détail
-  const [deleteConfirm, setDeleteConfirm] = useState(null); // modal suppression
-
+  const [editingContrat, setEditing] = useState(null);
+  const [detailContrat, setDetail] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [sortField, setSortField] = useState("id");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [search, setSearch] = useState("");
 
   useEffect(() => { loadData(); }, []);
 
@@ -41,33 +67,72 @@ function Contrats() {
     finally { setLoading(false); }
   };
 
-  /* ── Ouvrir formulaire création ── */
+  // ── Sort + search ─────────────────────────────────────────────
+  const displayed = useMemo(() => {
+    const term = search.toLowerCase();
+    const filtered = term
+      ? contrats.filter((c) =>
+        `${c.client?.nom} ${c.client?.prenom}`.toLowerCase().includes(term) ||
+        c.offre?.nom?.toLowerCase().includes(term) ||
+        c.statut?.toLowerCase().includes(term) ||
+        (c.directoryNumber ?? "").toLowerCase().includes(term)
+      )
+      : contrats;
+
+    return [...filtered].sort((a, b) => {
+      const va = getValue(a, sortField);
+      const vb = getValue(b, sortField);
+      const cmp = typeof va === "number"
+        ? va - vb
+        : String(va).localeCompare(String(vb), "fr", { sensitivity: "base" });
+      return sortOrder === "asc" ? cmp : -cmp;
+    });
+  }, [contrats, sortField, sortOrder, search]);
+
+  const handleSort = (field) => {
+    if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
+    else { setSortField(field); setSortOrder("asc"); }
+  };
+
+  // Génère côté front pour preview — le backend re-génère si besoin
+  function genererNumero() {
+    const prefixes = ["20", "21", "22", "23", "25", "50", "52", "53", "55", "58", "90", "92", "94", "97", "98"];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const suffix = Math.floor(1000000 + Math.random() * 9000000);
+    return `216${prefix}${suffix}`;
+  }
+
+  function formatNumero(num) {
+    const s = String(num);
+    // Format : +216 XX XXX XXX
+    if (s.length === 11 && s.startsWith("216")) {
+      return `+${s.slice(0, 3)} ${s.slice(3, 5)} ${s.slice(5, 8)} ${s.slice(8, 11)}`;
+    }
+    return s;
+  }
+
+  // ── Formulaire ───────────────────────────────────────────────
   const openCreate = () => {
     setEditing(null);
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, directoryNumber: genererNumero() }); // ✅ pré-rempli
     setShowForm(true);
   };
 
-  /* ── Ouvrir formulaire édition ── */
-  const openEdit = (contrat) => {
-    setEditing(contrat);
+  const openEdit = (c) => {
+    setEditing(c);
     setForm({
-      clientId: contrat.clientId || contrat.client?.id || "",
-      offreId: contrat.offreId || contrat.offre?.id || "",
-      dateDebut: contrat.dateDebut || "",
-      dateFin: contrat.dateFin || "",
-      directoryNumber: contrat.directoryNumber || "",
+      clientId: c.clientId || c.client?.id || "",
+      offreId: c.offreId || c.offre?.id || "",
+      dateDebut: c.dateDebut || "",
+      dateFin: c.dateFin || "",
+      directoryNumber: c.directoryNumber || "",
     });
-    setShowForm(true);
-    setDetail(null);
+    setShowForm(true); setDetail(null);
   };
-
   const closeForm = () => { setShowForm(false); setEditing(null); setForm(EMPTY_FORM); };
 
-  /* ── Submit création / modification ── */
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+    e.preventDefault(); setSubmitting(true);
     try {
       const payload = {
         clientId: Number(form.clientId),
@@ -78,23 +143,16 @@ function Contrats() {
       };
       if (editingContrat) await updateContrat(editingContrat.id, payload);
       else await createContrat(payload);
-      closeForm();
-      loadData();
+      closeForm(); loadData();
     } catch (err) { console.error(err); }
     finally { setSubmitting(false); }
   };
 
-const handleDelete = async (id) => {
-  try {
-    await deleteContrat(id);
-    setDeleteConfirm(null);
-    loadData();
-  } catch (err) {
-    console.error("Erreur suppression :", err);
-  }
-};
+  const handleDelete = async (id) => {
+    try { await deleteContrat(id); setDeleteConfirm(null); loadData(); }
+    catch (err) { console.error(err); }
+  };
 
-  /* ── Résilier ── */
   const handleResilier = async (id) => {
     try { await resilierContrat(id); setDetail(null); loadData(); }
     catch (err) { console.error(err); }
@@ -106,7 +164,9 @@ const handleDelete = async (id) => {
     return "badge badge-default";
   };
 
-  /* ─────────────────────────────────────────── */
+  const thProps = { sortField, sortOrder, onSort: handleSort };
+
+  // ────────────────────────────────────────────────────────────
   return (
     <div className="page-wrapper">
 
@@ -121,55 +181,65 @@ const handleDelete = async (id) => {
         <button className="btn-primary" onClick={openCreate}>+ Nouveau contrat</button>
       </div>
 
-      {/* ── Formulaire panel (création + édition) ── */}
+      {/* ── Formulaire panel ── */}
       {showForm && (
         <div className="form-panel">
           <h3 className="form-panel-title">
             {editingContrat ? `Modifier contrat #${editingContrat.id}` : "Créer un nouveau contrat"}
           </h3>
           <form className="form-grid" onSubmit={handleSubmit}>
-
             <div className="form-group">
               <label className="form-label">Client *</label>
               <select className="form-control" value={form.clientId}
                 onChange={(e) => setForm({ ...form, clientId: e.target.value })} required>
                 <option value="">Sélectionner un client</option>
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>{c.nom} {c.prenom}</option>
-                ))}
+                {clients.map((c) => <option key={c.id} value={c.id}>{c.nom} {c.prenom}</option>)}
               </select>
             </div>
-
             <div className="form-group">
               <label className="form-label">Offre *</label>
               <select className="form-control" value={form.offreId}
                 onChange={(e) => setForm({ ...form, offreId: e.target.value })} required>
                 <option value="">Sélectionner une offre</option>
-                {offers.map((o) => (
-                  <option key={o.id} value={o.id}>{o.nomOffre || o.nom || "Sans nom"}</option>
-                ))}
+                {offers.map((o) => <option key={o.id} value={o.id}>{o.nomOffre || o.nom || "Sans nom"}</option>)}
               </select>
             </div>
-
             <div className="form-group">
               <label className="form-label">Date début *</label>
               <input className="form-control" type="date" value={form.dateDebut}
                 onChange={(e) => setForm({ ...form, dateDebut: e.target.value })} required />
             </div>
-
             <div className="form-group">
               <label className="form-label">Date fin</label>
               <input className="form-control" type="date" value={form.dateFin}
                 onChange={(e) => setForm({ ...form, dateFin: e.target.value })} />
             </div>
-
+            {/* ── Directory Number avec génération auto ── */}
             <div className="form-group form-group-full">
               <label className="form-label">Directory Number</label>
-              <input className="form-control" type="text" placeholder="ex: 21620123456"
-                value={form.directoryNumber}
-                onChange={(e) => setForm({ ...form, directoryNumber: e.target.value })} />
+              <div className="input-with-action">
+                <input
+                  className="form-control"
+                  type="text"
+                  placeholder="Sera généré automatiquement si vide"
+                  value={form.directoryNumber}
+                  onChange={(e) => setForm({ ...form, directoryNumber: e.target.value })}
+                />
+                <button
+                  type="button"
+                  className="btn-generate"
+                  onClick={() => setForm({ ...form, directoryNumber: genererNumero() })}
+                  title="Générer un numéro aléatoire"
+                >
+                  🔄 Générer
+                </button>
+              </div>
+              {form.directoryNumber && (
+                <span className="input-hint">
+                  📞 {formatNumero(form.directoryNumber)}
+                </span>
+              )}
             </div>
-
             <div className="form-actions">
               <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
               <button type="submit" className="btn-primary" disabled={submitting}>
@@ -184,17 +254,14 @@ const handleDelete = async (id) => {
       {detailContrat && (
         <div className="modal-overlay" onClick={() => setDetail(null)}>
           <div className="modal-box modal-large" onClick={(e) => e.stopPropagation()}>
-
             <div className="modal-header">
-              <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <h4 className="modal-title">Contrat #{detailContrat.id}</h4>
                 <span className={statutClass(detailContrat.statut)}>{detailContrat.statut}</span>
               </div>
               <button className="modal-close" onClick={() => setDetail(null)}>✕</button>
             </div>
-
             <div className="detail-grid">
-              {/* Client */}
               <div className="detail-section">
                 <p className="detail-section-title">Client</p>
                 {detailContrat.client ? (
@@ -210,8 +277,6 @@ const handleDelete = async (id) => {
                   </>
                 ) : <p className="detail-empty">—</p>}
               </div>
-
-              {/* Offre */}
               <div className="detail-section">
                 <p className="detail-section-title">Offre</p>
                 {detailContrat.offre ? (
@@ -222,8 +287,6 @@ const handleDelete = async (id) => {
                   </>
                 ) : <p className="detail-empty">—</p>}
               </div>
-
-              {/* Contrat */}
               <div className="detail-section detail-section-full">
                 <p className="detail-section-title">Informations contrat</p>
                 <div className="detail-row-grid">
@@ -234,7 +297,6 @@ const handleDelete = async (id) => {
                 </div>
               </div>
             </div>
-
             <div className="modal-actions">
               {detailContrat.statut !== "RESILIE" && (
                 <button className="btn-warning"
@@ -249,61 +311,56 @@ const handleDelete = async (id) => {
         </div>
       )}
 
- {/* ── Modal Suppression ── */}
-{deleteConfirm && (
-  <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
-    <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-      <h4 className="modal-title">Confirmer la suppression</h4>
+      {/* ── Modal Suppression ── */}
+      {deleteConfirm && (
+        <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h4 className="modal-title">Confirmer la suppression</h4>
+            <p className="modal-text">
+              Supprimer le contrat <strong>#{deleteConfirm.id}</strong> de&nbsp;
+              <strong>{deleteConfirm.client?.nom} {deleteConfirm.client?.prenom}</strong> ?
+              Cette action est irréversible.
+            </p>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setDeleteConfirm(null)}>Annuler</button>
+              <button className="btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>Supprimer</button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <p className="modal-text">
-        Supprimer le contrat <strong>#{deleteConfirm.id}</strong> de&nbsp;
-        <strong>
-          {deleteConfirm.client?.nom} {deleteConfirm.client?.prenom}
-        </strong> ?
-        Cette action est irréversible.
-      </p>
-
-      <div className="modal-actions">
-        <button
-          className="btn-secondary"
-          onClick={() => setDeleteConfirm(null)}
-        >
-          Annuler
-        </button>
-
-        <button
-          className="btn-danger"
-          onClick={() => handleDelete(deleteConfirm.id)}
-        >
-          Supprimer
-        </button>
+      {/* ── Search bar ── */}
+      <div className="search-bar">
+        <input type="text" placeholder="Rechercher client, offre, statut, numéro..."
+          value={search} onChange={(e) => setSearch(e.target.value)} />
+        {search && (
+          <button className="btn-secondary" onClick={() => setSearch("")}>Effacer</button>
+        )}
       </div>
-    </div>
-  </div>
-)}
+
       {/* ── Table ── */}
       <div className="table-card">
         {loading ? (
           <div className="loading-state">Chargement des contrats...</div>
-        ) : contrats.length === 0 ? (
-          <div className="empty-state"><p>Aucun contrat enregistré.</p></div>
+        ) : displayed.length === 0 ? (
+          <div className="empty-state"><p>Aucun contrat trouvé.</p></div>
         ) : (
           <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Client</th>
-                  <th>Offre</th>
-                  <th>Date début</th>
-                  <th>Date fin</th>
-                  <th>Statut</th>
-                  <th>Numéro</th>
+                  <Th label="#" field="id"              {...thProps} />
+                  <Th label="Client" field="client"          {...thProps} />
+                  <Th label="Offre" field="offre"           {...thProps} />
+                  <Th label="Date début" field="dateDebut"       {...thProps} />
+                  <Th label="Date fin" field="dateFin"         {...thProps} />
+                  <Th label="Statut" field="statut"          {...thProps} />
+                  <Th label="Numéro" field="directoryNumber" {...thProps} />
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {contrats.map((c) => (
+                {displayed.map((c) => (
                   <tr key={c.id}>
                     <td className="id-cell">{c.id}</td>
                     <td>
@@ -322,18 +379,9 @@ const handleDelete = async (id) => {
                     <td className="mono">{c.directoryNumber || "—"}</td>
                     <td>
                       <div className="action-buttons">
-                        <button className="btn-action btn-view"
-                          onClick={() => setDetail(c)} title="Voir détails">
-                          👁
-                        </button>
-                        <button className="btn-action btn-edit"
-                          onClick={() => openEdit(c)} title="Modifier">
-                          ✏️
-                        </button>
-                        <button className="btn-action btn-delete"
-                          onClick={() => setDeleteConfirm(c)} title="Supprimer">
-                          🗑️
-                        </button>
+                        <button className="btn-action btn-view" onClick={() => setDetail(c)} title="Voir">👁</button>
+                        <button className="btn-action btn-edit" onClick={() => openEdit(c)} title="Modifier">✏️</button>
+                        <button className="btn-action btn-delete" onClick={() => setDeleteConfirm(c)} title="Supprimer">🗑️</button>
                       </div>
                     </td>
                   </tr>
@@ -347,7 +395,6 @@ const handleDelete = async (id) => {
   );
 }
 
-/* ── Petit composant utilitaire ── */
 function DetailRow({ label, value, mono }) {
   return (
     <div className="detail-row">
