@@ -16,6 +16,83 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// ── Request interceptor : injecter le token ──────────────────
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// ── Response interceptor : refresh automatique sur 401 ───────
+let isRefreshing = false;
+let pendingQueue = []; // requêtes en attente pendant le refresh
+
+function processQueue(error, token = null) {
+  pendingQueue.forEach(({ resolve, reject }) =>
+    error ? reject(error) : resolve(token)
+  );
+  pendingQueue = [];
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Ignorer si c'est déjà une tentative de refresh ou une route auth
+    if (
+      error.response?.status !== 401 ||
+      originalRequest._retry ||
+      originalRequest.url?.includes("/auth/")
+    ) {
+      return Promise.reject(error);
+    }
+
+    if (isRefreshing) {
+      // Mettre en file d'attente les autres requêtes pendant le refresh
+      return new Promise((resolve, reject) => {
+        pendingQueue.push({ resolve, reject });
+      }).then((token) => {
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return api(originalRequest);
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      const storedRefresh = localStorage.getItem("refreshToken");
+      if (!storedRefresh) throw new Error("Pas de refresh token");
+
+      const { accessToken, refreshToken } = await refreshApi(storedRefresh);
+
+      // Sauvegarder les nouveaux tokens
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
+      // Débloquer la file d'attente
+      processQueue(null, accessToken);
+
+      // Rejouer la requête originale
+      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      return api(originalRequest);
+
+    } catch (refreshError) {
+      processQueue(refreshError, null);
+
+      // Refresh échoué → déconnexion forcée
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      window.dispatchEvent(new Event("auth:logout"));
+
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
+  }
+);
+
 // ==================== AUTH ====================
 
 export const register = async (username, email, password, role) => {
@@ -26,11 +103,6 @@ export const register = async (username, email, password, role) => {
     role,
   });
   return res.data;
-};
-
-export const login = async (email, password) => {
-  const res = await api.post("/auth/login", { email, password });
-  return res.data; // { token, role }
 };
 
 // ==================== USERS ====================
@@ -212,5 +284,60 @@ export async function deleteReclamation(id) {
   const res = await api.delete(`${BASE_URL}/reclamations/${id}`, {
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
   });
+  return res.data;
+}
+
+
+// ── À ajouter dans src/api/api.js ──────────────────────────────
+
+// GET /api/promotions
+export async function getPromotions() {
+  const res = await api.get("/promotions");
+  return res.data;
+}
+
+// GET /api/promotions/:id
+export async function getPromotionById(id) {
+  const res = await api.get(`/promotions/${id}`);
+  return res.data;
+}
+
+// GET /api/promotions/statut/:statut
+export async function getPromotionsByStatut(statut) {
+  const res = await api.get(`/promotions/statut/${statut}`);
+  return res.data;
+}
+
+// POST /api/promotions
+export async function createPromotion(dto) {
+  const res = await api.post("/promotions", dto);
+  return res.data;
+}
+
+// PUT /api/promotions/:id/valider?validateurId=1
+export async function validerPromotion(id, validateurId) {
+  const res = await api.put(`/promotions/${id}/valider`, null, {
+    params: { validateurId },
+  });
+  return res.data;
+}
+
+// PUT /api/promotions/:id/rejeter?validateurId=1
+export async function rejeterPromotion(id, validateurId) {
+  const res = await api.put(`/promotions/${id}/rejeter`, null, {
+    params: { validateurId },
+  });
+  return res.data;
+}
+
+// PUT /api/promotions/:id/activer
+export async function activerPromotion(id) {
+  const res = await api.put(`/promotions/${id}/activer`);
+  return res.data;
+}
+
+// PUT /api/promotions/:id/suspendre
+export async function suspendrePromotion(id) {
+  const res = await api.put(`/promotions/${id}/suspendre`);
   return res.data;
 }

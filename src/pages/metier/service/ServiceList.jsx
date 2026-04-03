@@ -5,10 +5,13 @@ export default function ServiceList({ onEdit, refreshTrigger }) {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    const token = localStorage.getItem("token")
 
     useEffect(() => {
-        fetchServices();
-    }, [refreshTrigger]);
+        if (token)
+            fetchServices();
+    }, [token]);
 
     async function fetchServices() {
         try {

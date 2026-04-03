@@ -4,30 +4,36 @@ import "../../../styles/offres.css";
 const Offres = () => {
   const [offres, setOffres] = useState([]);
   const [loading, setLoading] = useState(true);
-const token=localStorage.getItem("token")
+
+  const token = localStorage.getItem("token")
+
   useEffect(() => {
-    if(token)
-    fetchOffres();
+    if (token)
+      fetchOffres();
   }, [token]);
 
- 
-const fetchOffres = async () => {
-  try {
-    const response = await getOffres();
-    console.log("Données reçues :", response); // <-- vérifier ici
-    setOffres(response);
-  } catch (error) {
-    console.error("Erreur chargement offres", error);
-  } finally {
-    setLoading(false);
-  }
-};
+
+  const fetchOffres = async () => {
+    try {
+      const response = await getOffres();
+      console.log("Données reçues :", response); // <-- vérifier ici
+      setOffres(response);
+    } catch (error) {
+      console.error("Erreur chargement offres", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   if (loading) return <p>Chargement des offres...</p>;
 
   return (
     <div className="offres-container">
-      <h2 className="offres-title">Liste des Offres</h2>
-
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2 className="offres-title">Liste des Offres</h2>
+        <button  onClick={() => (window.location.href = "/create-offre")} className="create-offre-link" >
+          Créer une offre
+        </button>
+      </div>
       <table className="offres-table">
         <thead>
           <tr>

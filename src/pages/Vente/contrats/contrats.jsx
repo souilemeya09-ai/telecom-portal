@@ -10,17 +10,36 @@ const EMPTY_FORM = {
   dateDebut: "", dateFin: "", directoryNumber: "",
 };
 
-// ── Tri helper ──────────────────────────────────────────────────
+// ── Date helpers ─────────────────────────────────────────────
+const today = () => new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+
+function validateDates(dateDebut, dateFin) {
+  const errors = {};
+  const now = today();
+
+  if (dateDebut && dateDebut < now) {
+    errors.dateDebut = "La date de début doit être aujourd'hui ou dans le futur.";
+  }
+  if (dateFin && dateDebut && dateFin <= dateDebut) {
+    errors.dateFin = "La date de fin doit être postérieure à la date de début.";
+  }
+  if (dateFin && dateFin < now) {
+    errors.dateFin = "La date de fin doit être dans le futur.";
+  }
+  return errors;
+}
+
+// ── Sort helpers ─────────────────────────────────────────────
 function getValue(obj, field) {
   switch (field) {
-    case "id": return obj.id;
-    case "client": return obj.client ? `${obj.client.nom} ${obj.client.prenom}` : "";
-    case "offre": return obj.offre?.nom ?? "";
-    case "dateDebut": return obj.dateDebut ?? "";
-    case "dateFin": return obj.dateFin ?? "";
-    case "statut": return obj.statut ?? "";
+    case "id":              return obj.id;
+    case "client":          return obj.client ? `${obj.client.nom} ${obj.client.prenom}` : "";
+    case "offre":           return obj.offre?.nom ?? "";
+    case "dateDebut":       return obj.dateDebut ?? "";
+    case "dateFin":         return obj.dateFin   ?? "";
+    case "statut":          return obj.statut    ?? "";
     case "directoryNumber": return obj.directoryNumber ?? "";
-    default: return "";
+    default:                return "";
   }
 }
 
@@ -40,21 +59,22 @@ function Th({ label, field, sortField, sortOrder, onSort }) {
   );
 }
 
-// ────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────
 function Contrats() {
-  const [contrats, setContrats] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [offers, setOffers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editingContrat, setEditing] = useState(null);
-  const [detailContrat, setDetail] = useState(null);
+  const [contrats, setContrats]           = useState([]);
+  const [clients, setClients]             = useState([]);
+  const [offers, setOffers]               = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const [submitting, setSubmitting]       = useState(false);
+  const [showForm, setShowForm]           = useState(false);
+  const [editingContrat, setEditing]      = useState(null);
+  const [detailContrat, setDetail]        = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [sortField, setSortField] = useState("id");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [search, setSearch] = useState("");
+  const [form, setForm]                   = useState(EMPTY_FORM);
+  const [dateErrors, setDateErrors]       = useState({});
+  const [sortField, setSortField]         = useState("id");
+  const [sortOrder, setSortOrder]         = useState("asc");
+  const [search, setSearch]               = useState("");
 
   useEffect(() => { loadData(); }, []);
 
@@ -67,16 +87,16 @@ function Contrats() {
     finally { setLoading(false); }
   };
 
-  // ── Sort + search ─────────────────────────────────────────────
+  // ── Sort + search ─────────────────────────────────────────
   const displayed = useMemo(() => {
     const term = search.toLowerCase();
     const filtered = term
       ? contrats.filter((c) =>
-        `${c.client?.nom} ${c.client?.prenom}`.toLowerCase().includes(term) ||
-        c.offre?.nom?.toLowerCase().includes(term) ||
-        c.statut?.toLowerCase().includes(term) ||
-        (c.directoryNumber ?? "").toLowerCase().includes(term)
-      )
+          `${c.client?.nom} ${c.client?.prenom}`.toLowerCase().includes(term) ||
+          c.offre?.nom?.toLowerCase().includes(term) ||
+          c.statut?.toLowerCase().includes(term) ||
+          (c.directoryNumber ?? "").toLowerCase().includes(term)
+        )
       : contrats;
 
     return [...filtered].sort((a, b) => {
@@ -94,9 +114,9 @@ function Contrats() {
     else { setSortField(field); setSortOrder("asc"); }
   };
 
-  // Génère côté front pour preview — le backend re-génère si besoin
+  // ── Numéro helpers ────────────────────────────────────────
   function genererNumero() {
-    const prefixes = ["20", "21", "22", "23", "25", "50", "52", "53", "55", "58", "90", "92", "94", "97", "98"];
+    const prefixes = ["20","21","22","23","25","50","52","53","55","58","90","92","94","97","98"];
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
     const suffix = Math.floor(1000000 + Math.random() * 9000000);
     return `216${prefix}${suffix}`;
@@ -104,45 +124,70 @@ function Contrats() {
 
   function formatNumero(num) {
     const s = String(num);
-    // Format : +216 XX XXX XXX
-    if (s.length === 11 && s.startsWith("216")) {
-      return `+${s.slice(0, 3)} ${s.slice(3, 5)} ${s.slice(5, 8)} ${s.slice(8, 11)}`;
-    }
+    if (s.length === 11 && s.startsWith("216"))
+      return `+${s.slice(0,3)} ${s.slice(3,5)} ${s.slice(5,8)} ${s.slice(8,11)}`;
     return s;
   }
 
-  // ── Formulaire ───────────────────────────────────────────────
+  // ── Mise à jour form avec validation dates en temps réel ──
+  const updateForm = (patch) => {
+    const next = { ...form, ...patch };
+    setForm(next);
+    if (patch.dateDebut !== undefined || patch.dateFin !== undefined) {
+      setDateErrors(validateDates(next.dateDebut, next.dateFin));
+    }
+  };
+
+  // ── Formulaire ────────────────────────────────────────────
   const openCreate = () => {
     setEditing(null);
-    setForm({ ...EMPTY_FORM, directoryNumber: genererNumero() }); // ✅ pré-rempli
+    setForm({ ...EMPTY_FORM, directoryNumber: genererNumero() });
+    setDateErrors({});
     setShowForm(true);
   };
 
   const openEdit = (c) => {
     setEditing(c);
     setForm({
-      clientId: c.clientId || c.client?.id || "",
-      offreId: c.offreId || c.offre?.id || "",
-      dateDebut: c.dateDebut || "",
-      dateFin: c.dateFin || "",
+      clientId:        c.clientId || c.client?.id || "",
+      offreId:         c.offreId  || c.offre?.id  || "",
+      dateDebut:       c.dateDebut       || "",
+      dateFin:         c.dateFin         || "",
       directoryNumber: c.directoryNumber || "",
     });
-    setShowForm(true); setDetail(null);
+    setDateErrors({});
+    setShowForm(true);
+    setDetail(null);
   };
-  const closeForm = () => { setShowForm(false); setEditing(null); setForm(EMPTY_FORM); };
+
+  const closeForm = () => {
+    setShowForm(false); setEditing(null);
+    setForm(EMPTY_FORM); setDateErrors({});
+  };
+
+  const hasDateErrors = Object.keys(dateErrors).length > 0;
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setSubmitting(true);
+    e.preventDefault();
+
+    // Validation finale avant envoi
+    const errors = validateDates(form.dateDebut, form.dateFin);
+    if (Object.keys(errors).length > 0) {
+      setDateErrors(errors);
+      return;
+    }
+
+    setSubmitting(true);
     try {
       const payload = {
-        clientId: Number(form.clientId),
-        offreId: Number(form.offreId),
-        dateDebut: form.dateDebut,
-        dateFin: form.dateFin || null,
+        clientId:        Number(form.clientId),
+        offreId:         Number(form.offreId),
+        dateDebut:       form.dateDebut,
+        dateFin:         form.dateFin || null,
         directoryNumber: form.directoryNumber ? String(form.directoryNumber) : null,
       };
       if (editingContrat) await updateContrat(editingContrat.id, payload);
-      else await createContrat(payload);
+      else                await createContrat(payload);
       closeForm(); loadData();
     } catch (err) { console.error(err); }
     finally { setSubmitting(false); }
@@ -159,7 +204,7 @@ function Contrats() {
   };
 
   const statutClass = (s) => {
-    if (s === "ACTIF") return "badge badge-actif";
+    if (s === "ACTIF")   return "badge badge-actif";
     if (s === "RESILIE") return "badge badge-resilie";
     return "badge badge-default";
   };
@@ -188,33 +233,57 @@ function Contrats() {
             {editingContrat ? `Modifier contrat #${editingContrat.id}` : "Créer un nouveau contrat"}
           </h3>
           <form className="form-grid" onSubmit={handleSubmit}>
+
             <div className="form-group">
               <label className="form-label">Client *</label>
               <select className="form-control" value={form.clientId}
-                onChange={(e) => setForm({ ...form, clientId: e.target.value })} required>
+                onChange={(e) => updateForm({ clientId: e.target.value })} required>
                 <option value="">Sélectionner un client</option>
                 {clients.map((c) => <option key={c.id} value={c.id}>{c.nom} {c.prenom}</option>)}
               </select>
             </div>
+
             <div className="form-group">
               <label className="form-label">Offre *</label>
               <select className="form-control" value={form.offreId}
-                onChange={(e) => setForm({ ...form, offreId: e.target.value })} required>
+                onChange={(e) => updateForm({ offreId: e.target.value })} required>
                 <option value="">Sélectionner une offre</option>
                 {offers.map((o) => <option key={o.id} value={o.id}>{o.nomOffre || o.nom || "Sans nom"}</option>)}
               </select>
             </div>
+
+            {/* ── Date début ── */}
             <div className="form-group">
               <label className="form-label">Date début *</label>
-              <input className="form-control" type="date" value={form.dateDebut}
-                onChange={(e) => setForm({ ...form, dateDebut: e.target.value })} required />
+              <input
+                className={`form-control ${dateErrors.dateDebut ? "input-error" : ""}`}
+                type="date"
+                value={form.dateDebut}
+                min={today()}                              // ✅ interdit les dates passées dans le picker
+                onChange={(e) => updateForm({ dateDebut: e.target.value })}
+                required
+              />
+              {dateErrors.dateDebut && (
+                <span className="field-error">{dateErrors.dateDebut}</span>
+              )}
             </div>
+
+            {/* ── Date fin ── */}
             <div className="form-group">
               <label className="form-label">Date fin</label>
-              <input className="form-control" type="date" value={form.dateFin}
-                onChange={(e) => setForm({ ...form, dateFin: e.target.value })} />
+              <input
+                className={`form-control ${dateErrors.dateFin ? "input-error" : ""}`}
+                type="date"
+                value={form.dateFin}
+                min={form.dateDebut || today()}            // ✅ doit être après dateDebut
+                onChange={(e) => updateForm({ dateFin: e.target.value })}
+              />
+              {dateErrors.dateFin && (
+                <span className="field-error">{dateErrors.dateFin}</span>
+              )}
             </div>
-            {/* ── Directory Number avec génération auto ── */}
+
+            {/* ── Directory Number ── */}
             <div className="form-group form-group-full">
               <label className="form-label">Directory Number</label>
               <div className="input-with-action">
@@ -223,26 +292,21 @@ function Contrats() {
                   type="text"
                   placeholder="Sera généré automatiquement si vide"
                   value={form.directoryNumber}
-                  onChange={(e) => setForm({ ...form, directoryNumber: e.target.value })}
+                  onChange={(e) => updateForm({ directoryNumber: e.target.value })}
                 />
-                <button
-                  type="button"
-                  className="btn-generate"
-                  onClick={() => setForm({ ...form, directoryNumber: genererNumero() })}
-                  title="Générer un numéro aléatoire"
-                >
+                <button type="button" className="btn-generate"
+                  onClick={() => updateForm({ directoryNumber: genererNumero() })}>
                   🔄 Générer
                 </button>
               </div>
               {form.directoryNumber && (
-                <span className="input-hint">
-                  📞 {formatNumero(form.directoryNumber)}
-                </span>
+                <span className="input-hint">📞 {formatNumero(form.directoryNumber)}</span>
               )}
             </div>
+
             <div className="form-actions">
               <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-              <button type="submit" className="btn-primary" disabled={submitting}>
+              <button type="submit" className="btn-primary" disabled={submitting || hasDateErrors}>
                 {submitting ? "Enregistrement..." : editingContrat ? "Mettre à jour" : "Créer le contrat"}
               </button>
             </div>
@@ -281,19 +345,19 @@ function Contrats() {
                 <p className="detail-section-title">Offre</p>
                 {detailContrat.offre ? (
                   <>
-                    <DetailRow label="Nom" value={detailContrat.offre.nom} />
+                    <DetailRow label="Nom"         value={detailContrat.offre.nom} />
                     <DetailRow label="Description" value={detailContrat.offre.description} />
-                    <DetailRow label="Prix" value={detailContrat.offre.prix ? `${detailContrat.offre.prix} TND/mois` : "—"} />
+                    <DetailRow label="Prix"        value={detailContrat.offre.prix ? `${detailContrat.offre.prix} TND/mois` : "—"} />
                   </>
                 ) : <p className="detail-empty">—</p>}
               </div>
               <div className="detail-section detail-section-full">
                 <p className="detail-section-title">Informations contrat</p>
                 <div className="detail-row-grid">
-                  <DetailRow label="Date début" value={detailContrat.dateDebut} />
-                  <DetailRow label="Date fin" value={detailContrat.dateFin || "—"} />
+                  <DetailRow label="Date début"       value={detailContrat.dateDebut} />
+                  <DetailRow label="Date fin"         value={detailContrat.dateFin || "—"} />
                   <DetailRow label="Directory Number" value={detailContrat.directoryNumber || "—"} mono />
-                  <DetailRow label="Statut" value={detailContrat.statut} />
+                  <DetailRow label="Statut"           value={detailContrat.statut} />
                 </div>
               </div>
             </div>
@@ -323,7 +387,7 @@ function Contrats() {
             </p>
             <div className="modal-actions">
               <button className="btn-secondary" onClick={() => setDeleteConfirm(null)}>Annuler</button>
-              <button className="btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>Supprimer</button>
+              <button className="btn-danger"    onClick={() => handleDelete(deleteConfirm.id)}>Supprimer</button>
             </div>
           </div>
         </div>
@@ -333,9 +397,7 @@ function Contrats() {
       <div className="search-bar">
         <input type="text" placeholder="Rechercher client, offre, statut, numéro..."
           value={search} onChange={(e) => setSearch(e.target.value)} />
-        {search && (
-          <button className="btn-secondary" onClick={() => setSearch("")}>Effacer</button>
-        )}
+        {search && <button className="btn-secondary" onClick={() => setSearch("")}>Effacer</button>}
       </div>
 
       {/* ── Table ── */}
@@ -349,13 +411,13 @@ function Contrats() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <Th label="#" field="id"              {...thProps} />
-                  <Th label="Client" field="client"          {...thProps} />
-                  <Th label="Offre" field="offre"           {...thProps} />
+                  <Th label="#"          field="id"              {...thProps} />
+                  <Th label="Client"     field="client"          {...thProps} />
+                  <Th label="Offre"      field="offre"           {...thProps} />
                   <Th label="Date début" field="dateDebut"       {...thProps} />
-                  <Th label="Date fin" field="dateFin"         {...thProps} />
-                  <Th label="Statut" field="statut"          {...thProps} />
-                  <Th label="Numéro" field="directoryNumber" {...thProps} />
+                  <Th label="Date fin"   field="dateFin"         {...thProps} />
+                  <Th label="Statut"     field="statut"          {...thProps} />
+                  <Th label="Numéro"     field="directoryNumber" {...thProps} />
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -379,8 +441,8 @@ function Contrats() {
                     <td className="mono">{c.directoryNumber || "—"}</td>
                     <td>
                       <div className="action-buttons">
-                        <button className="btn-action btn-view" onClick={() => setDetail(c)} title="Voir">👁</button>
-                        <button className="btn-action btn-edit" onClick={() => openEdit(c)} title="Modifier">✏️</button>
+                        <button className="btn-action btn-view"   onClick={() => setDetail(c)}       title="Voir">👁</button>
+                        <button className="btn-action btn-edit"   onClick={() => openEdit(c)}         title="Modifier">✏️</button>
                         <button className="btn-action btn-delete" onClick={() => setDeleteConfirm(c)} title="Supprimer">🗑️</button>
                       </div>
                     </td>
@@ -394,7 +456,7 @@ function Contrats() {
     </div>
   );
 }
-
+  
 function DetailRow({ label, value, mono }) {
   return (
     <div className="detail-row">

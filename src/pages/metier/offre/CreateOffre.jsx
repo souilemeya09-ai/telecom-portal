@@ -97,7 +97,7 @@ const CreateOffre = () => {
 
       <h3>Offres existantes</h3>
       <ul>
-        {offres.map((offre) => (
+        {offres?.map((offre) => (
           <li key={offre.id}>
             {offre.nomOffre} - {offre.typeOffre}
           </li>

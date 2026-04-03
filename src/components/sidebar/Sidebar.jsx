@@ -49,10 +49,10 @@ function Sidebar() {
           <Link to="/plan-tarifaire" className="sidebar-link">
             Configurer Plan Tarifaire
           </Link>
-          <Link to="/CreateOffre" className="sidebar-link">
+          <Link to="/offres" className="sidebar-link">
             Gérer Offres
           </Link>
-          <Link to="/create-promotion" className="sidebar-link">
+          <Link to="/promotions" className="sidebar-link">
             Créer Promotion
           </Link>
           <Link to="/services" className="sidebar-link">

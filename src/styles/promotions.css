@@ -1,0 +1,202 @@
+/* ── Stats row ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 1.75rem;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-attente       { border-left: 3px solid #f59e0b; }
+.stat-attente       .stat-value { color: #d97706; }
+.stat-active-promo  { border-left: 3px solid #22c55e; }
+.stat-active-promo  .stat-value { color: #16a34a; }
+.stat-validee       { border-left: 3px solid #3b82f6; }
+.stat-validee       .stat-value { color: #2563eb; }
+
+/* ── Statut badges ── */
+.badge-attente   { background: #fef3c7; color: #d97706; }
+.badge-validee   { background: #eff6ff; color: #2563eb; }
+.badge-rejetee   { background: #fef2f2; color: #dc2626; }
+.badge-active    { background: #f0fdf4; color: #16a34a; }
+.badge-suspendue { background: #f5f3ff; color: #7c3aed; }
+
+/* ── Remise badge ── */
+.remise-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+.remise-value {
+  color: #c2410c;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* ── Promo icon ── */
+.promo-icon {
+  font-size: 1.1rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Filter + search row ── */
+.filter-search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+/* ── Filter bar (from reclamations) ── */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.filter-count {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 0.75rem;
+}
+.filter-btn-active .filter-count { background: rgba(255,255,255,0.25); }
+
+/* ── Action buttons spécifiques ── */
+.btn-action-valider:hover   { background: #f0fdf4; border-color: #22c55e; }
+.btn-action-rejeter:hover   { background: var(--danger-light); border-color: var(--danger); }
+.btn-action-activer:hover   { background: var(--accent-light); border-color: var(--accent); }
+.btn-action-suspendre:hover { background: #f5f3ff; border-color: #7c3aed; }
+
+/* ── Statut action buttons in modal ── */
+.btn-success {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-success:hover { background: #15803d; }
+
+/* ── Input with prefix (shared with services) ── */
+.input-with-prefix {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-with-prefix:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.input-prefix {
+  padding: 0 10px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.input-with-prefix .form-control {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+.input-with-prefix .form-control:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* ── Warning text ── */
+.warning-text {
+  display: block;
+  color: var(--warning);
+  font-size: 0.8rem;
+  margin-top: 6px;
+}
+
+/* ── Date cell ── */
+.date-cell {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .stats-row          { grid-template-columns: 1fr 1fr; }
+  .filter-search-row  { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr; }
+}

@@ -1,35 +1,31 @@
 import { useState } from "react";
 import userLogo from "../../assets/userr.png";
-import { login } from "../../api/api.js";
 import "../../styles/Login.css";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
     try {
-      const data = await login(email, password);
-      const token = data.token;
-      localStorage.setItem("token", token);
-      const role = data.role;
-      localStorage.setItem("role", role);
-
-      // Décodage JWT (exemple si besoin)
-      // const decoded = jwtDecode.default(token);
-      // console.log(decoded);
-
+      await login(email, password);
       navigate("/");
+
     } catch (err) {
       setError("Nom d'utilisateur ou mot de passe incorrect");
     }
   };
-
+  
   return (
     <div className="login-page-wrapper">
       <div className="login-content">
@@ -75,7 +71,7 @@ const Login = () => {
         </div>
       </div>
 
-    
+
     </div>
   );
 };

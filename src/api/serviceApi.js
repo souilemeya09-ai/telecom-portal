@@ -2,11 +2,14 @@ const BASE_URL = "http://localhost:8080/api";
 
 const headers = {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
 };
 
 // GET /api/services
 export async function getAllServices() {
-    const res = await fetch(`${BASE_URL}/services`, { headers });
+    const res = await fetch(`${BASE_URL}/services`, {
+        headers
+    });
     if (!res.ok) throw new Error(`Failed to fetch services: ${res.status}`);
     return res.json();
 }

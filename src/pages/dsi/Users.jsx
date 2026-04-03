@@ -124,9 +124,9 @@ const Users = () => {
                 {/* Status */}
                 <td>
                   <span
-                    className={user.actif ? "status-active" : "status-inactive"}
+                    className={user.enabled ? "status-active" : "status-inactive"}
                   >
-                    {user.actif ? "Actif" : "Inactif"}
+                    {user.enabled ? "Actif" : "Inactif"}
                   </span>
                 </td>
 
@@ -149,11 +149,11 @@ const Users = () => {
 
                     <button
                       className={
-                        user.actif ? "deactivate-btn" : "activate-btn"
+                        user.enabled ? "deactivate-btn" : "activate-btn"
                       }
                       onClick={() => handleToggle(user.id)}
                     >
-                      {user.actif ? "Désactiver" : "Activer"}
+                      {user.enabled ? "Désactiver" : "Activer"}
                     </button>
                   </div>
                 </td>
