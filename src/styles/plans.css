@@ -1,0 +1,112 @@
+/* ── Stats row ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 1.75rem;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.stat-value small { font-size: 0.75rem; font-weight: 400; color: var(--text-muted); }
+
+.stat-min { border-left: 3px solid #22c55e; }
+.stat-min .stat-value { color: #16a34a; }
+.stat-max { border-left: 3px solid #ef4444; }
+.stat-max .stat-value { color: #dc2626; }
+.stat-avg { border-left: 3px solid #3b82f6; }
+.stat-avg .stat-value { color: #2563eb; }
+
+/* ── Plan name cell ── */
+.plan-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.plan-icon {
+  font-size: 1.1rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Prix badge ── */
+.plan-prix-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+.plan-prix-value {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* ── Input with prefix ── */
+.input-with-prefix {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-with-prefix:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.input-prefix {
+  padding: 0 10px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.input-with-prefix .form-control { border: none; border-radius: 0; box-shadow: none; }
+.input-with-prefix .form-control:focus { border: none; box-shadow: none; }
+
+/* ── Desc cell ── */
+.desc-cell {
+  max-width: 280px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .stats-row { grid-template-columns: 1fr; } }

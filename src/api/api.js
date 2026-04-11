@@ -163,15 +163,15 @@ export const deleteClient = async (id) => {
 };
 
 // ==================== OFFRES ====================
-export const getOffres = async () => {
-  const res = await api.get("/offres");
-  return res.data;
-};
+// export const getOffres = async () => {
+//   const res = await api.get("/offres");
+//   return res.data;
+// };
 
-export const createOffre = async (offre) => {
-  const res = await api.post("/offres", offre);
-  return res.data;
-};
+// export const createOffre = async (offre) => {
+//   const res = await api.post("/offres", offre);
+//   return res.data;
+// };
 
 // ==================== CONTRATS ====================
 
@@ -218,12 +218,12 @@ export const addOffreToContrat = async (contratId, offreId) => {
   return res.data;
 };
 
-export async function getPlansTarifaires() {
-  const res = await api.get(`${BASE_URL}/plans-tarifaires`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-  });
-  return res.data;
-}
+// export async function getPlansTarifaires() {
+//   const res = await api.get(`${BASE_URL}/plans-tarifaires`, {
+//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//   });
+//   return res.data;
+// }
 
 
 // GET /api/reclamations
@@ -339,5 +339,92 @@ export async function activerPromotion(id) {
 // PUT /api/promotions/:id/suspendre
 export async function suspendrePromotion(id) {
   const res = await api.put(`/promotions/${id}/suspendre`);
+  return res.data;
+}
+
+
+// ── À ajouter dans src/api/api.js ──────────────────────────────
+
+// ── Services ─────────────────────────────────────────────────
+export async function getServices() {
+  const res = await api.get("/services");
+  return res.data;
+}
+export async function createService(dto) {
+  const res = await api.post("/services", dto);
+  return res.data;
+}
+export async function updateService(id, dto) {
+  const res = await api.put(`/services/${id}`, dto);
+  return res.data;
+}
+export async function deleteService(id) {
+  const res = await api.delete(`/services/${id}`);
+  return res.data;
+}
+
+// ── Offres ───────────────────────────────────────────────────
+export async function getOffres() {
+  const res = await api.get("/offres");
+  return res.data;
+}
+export async function getOffreById(id) {
+  const res = await api.get(`/offres/${id}`);
+  return res.data;
+}
+export async function createOffre(dto) {
+  const res = await api.post("/offres", dto);
+  return res.data;
+}
+export async function updateOffre(id, dto) {
+  const res = await api.put(`/offres/${id}`, dto);
+  return res.data;
+}
+export async function deleteOffre(id) {
+  const res = await api.delete(`/offres/${id}`);
+  return res.data;
+}
+
+// PUT /api/offres/:offreId/services  — ajouter des services
+export async function ajouterServicesOffre(offreId, serviceIds) {
+  const res = await api.put(`/offres/${offreId}/services`, serviceIds);
+  return res.data;
+}
+
+// DELETE /api/offres/:offreId/services/:serviceId  — retirer un service
+export async function retirerServiceOffre(offreId, serviceId) {
+  const res = await api.delete(`/offres/${offreId}/services/${serviceId}`);
+  return res.data;
+}
+
+// ── À ajouter dans src/api/api.js ──────────────────────────────
+
+// GET /api/plans-tarifaires
+export async function getPlansTarifaires() {
+  const res = await api.get("/plans-tarifaires");
+  return res.data;
+}
+
+// GET /api/plans-tarifaires/:id
+export async function getPlanTarifaireById(id) {
+  const res = await api.get(`/plans-tarifaires/${id}`);
+  return res.data;
+}
+
+// POST /api/plans-tarifaires
+export async function createPlanTarifaire(dto) {
+  const res = await api.post("/plans-tarifaires", dto);
+  return res.data;
+}
+
+// PUT /api/plans-tarifaires/:id
+export async function updatePlanTarifaire(id, dto) {
+  const res = await api.put(`/plans-tarifaires/${id}`, dto);
+  return res.data;
+}
+
+// DELETE /api/plans-tarifaires/:id
+export async function deletePlanTarifaire(id) {
+  const res = await api.delete(`/plans-tarifaires/${id}`);
   return res.data;
 }

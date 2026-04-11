@@ -1,128 +1,193 @@
-/* Container */
-.offres-container {
-  padding: 30px;
-  background: #f8fafc;
-  min-height: 100vh;
-  font-family: "Segoe UI", sans-serif;
+/* ── Service name cell ── */
+.service-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Title */
-.offres-title {
-  font-size: 26px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #1e293b;
+.service-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* Table */
-.offres-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #ffffff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-/* HEADER (CORRIGÉ ✅) */
-.offres-table thead {
-  background: #f1f5f9; /* gris très clair */
-}
-
-.offres-table th {
-  text-align: left;
-  padding: 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #969fac; /* gris comme ton image */
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Body */
-.offres-table td {
-  padding: 16px 14px;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 14px;
-  color: #0f172a;
-}
-
-/* Hover effect */
-.offres-table tbody tr:hover {
-  background: #f9fafb;
-}
-
-/* Zebra (léger) */
-.offres-table tbody tr:nth-child(even) {
-  background: #fcfcfd;
-}
-
-/* Services column */
-.offres-table td:last-child {
-  font-size: 13px;
-  color: #64748b;
-}
-
-/* BADGES STATUS (🔥 important comme ton image) */
-.badge {
-  padding: 4px 10px;
+/* ── Offre type badges ── */
+.offre-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
-  display: inline-block;
+  letter-spacing: 0.03em;
+}
+.type-mobile   { background: #eff6ff; color: #2563eb; }
+.type-fixe     { background: #f0fdf4; color: #16a34a; }
+.type-internet { background: #fdf4ff; color: #7e22ce; }
+.type-tv       { background: #fff7ed; color: #c2410c; }
+.type-bundle   { background: #fef3c7; color: #d97706; }
+.type-default  { background: var(--surface-2); color: var(--text-muted); }
+
+/* ── Services count badge ── */
+.services-count-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
 }
 
-/* ACTIF (vert) */
-.badge-actif {
-  background: #dcfce7;
+/* ── Services picker (multi-select chips) ── */
+.services-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 56px;
+}
+
+.service-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.service-chip:hover { border-color: var(--accent); color: var(--accent); }
+.service-chip-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.service-chip-active:hover { background: var(--accent-hover); }
+
+.picker-empty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 4px;
+}
+
+.picker-count {
+  font-size: 0.78rem;
+  color: var(--accent);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ── Services list in detail modal ── */
+.detail-services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.detail-service-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.btn-remove-service {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-remove-service:hover { background: var(--danger-light); color: var(--danger); }
+
+/* ── Prix value ── */
+.prix-value {
   color: #16a34a;
+  font-weight: 600;
 }
 
-/* RESILIE (rouge) */
-.badge-resilie {
-  background: #fee2e2;
-  color: #dc2626;
+/* ── text-muted utility ── */
+.text-muted { color: var(--text-muted); font-size: 0.85rem; }
+
+/* ── Filter + search row ── */
+.filter-search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
 }
 
-/* Loading */
-.offres-container p {
-  font-size: 16px;
-  color: #64748b;
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-/* Responsive */
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.filter-btn-active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.filter-btn-active:hover { color: #fff; }
+
+.filter-count {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 0.75rem;
+}
+.filter-btn-active .filter-count { background: rgba(255,255,255,0.25); }
+
+/* ── Desc cell ── */
+.desc-cell {
+  max-width: 280px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* ── Responsive ── */
 @media (max-width: 768px) {
-  .offres-table thead {
-    display: none;
-  }
-
-  .offres-table,
-  .offres-table tbody,
-  .offres-table tr,
-  .offres-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .offres-table tr {
-    margin-bottom: 15px;
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px;
-  }
-
-  .offres-table td {
-    padding: 10px;
-    text-align: right;
-    position: relative;
-  }
-
-  .offres-table td::before {
-    content: attr(data-label);
-    position: absolute;
-    left: 10px;
-    font-weight: bold;
-    color: #1e293b;
-    text-align: left;
-  }
+  .filter-search-row { flex-direction: column; align-items: stretch; }
 }

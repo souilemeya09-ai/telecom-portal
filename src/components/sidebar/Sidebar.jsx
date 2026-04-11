@@ -46,14 +46,14 @@ function Sidebar() {
       {/* Menu Métier */}
       {role === "METIER" && (
         <>
-          <Link to="/plan-tarifaire" className="sidebar-link">
+          <Link to="/plans" className="sidebar-link">
             Configurer Plan Tarifaire
           </Link>
           <Link to="/offres" className="sidebar-link">
             Gérer Offres
           </Link>
           <Link to="/promotions" className="sidebar-link">
-            Créer Promotion
+            Gérer promotion
           </Link>
           <Link to="/services" className="sidebar-link">
             Configurer Service

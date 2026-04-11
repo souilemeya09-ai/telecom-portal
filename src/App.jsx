@@ -20,6 +20,7 @@ import Offres from "./pages/metier/offre/Offres";
 import CreateOffre from "./pages/metier/offre/CreateOffre";
 import Reclamations from "./pages/Vente/reclamation/Reclamations";
 import Promotions from "./pages/metier/promotion/Promotions";
+import PlansTarifaires from "./pages/metier/planTarifaire/PlanTarifaire";
 function App() {
   return (
     <BrowserRouter>
@@ -57,6 +58,7 @@ function App() {
           <Route path="/create-offre" element={<CreateOffre />} />
           <Route path="/promotions" element={<Promotions />} />
           <Route path="/reclamations" element={<Reclamations />} />
+          <Route path="/plans" element={<PlansTarifaires />} />
         </Route>
 
         {/* Redirection */}

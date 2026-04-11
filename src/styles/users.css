@@ -1,7 +1,10 @@
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* style PFE pro */
-  color: #1F2937; /* gris foncé pour le texte */
-  background-color: #f9fafb; /* léger fond clair */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  /* style PFE pro */
+  color: #1F2937;
+  /* gris foncé pour le texte */
+  background-color: #f9fafb;
+  /* léger fond clair */
 }
 
 /* Conteneur du bouton Ajouter utilisateur */
@@ -13,7 +16,8 @@ body {
 /* Style du bouton Ajouter utilisateur */
 .add-button {
   padding: 10px 18px;
-  background-color: #FF7A00; /* orange vif */
+  background-color: #FF7A00;
+  /* orange vif */
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -21,13 +25,13 @@ body {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .add-button:hover {
   background-color: #de7643;
   transform: translateY(-2px);
-  box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
 }
 
 /* Titre de la liste */
@@ -38,6 +42,10 @@ body {
   color: #000000;
 }
 
+.users-container {
+  padding: 20px;
+}
+
 /* Tableau */
 table {
   width: 100%;
@@ -45,17 +53,20 @@ table {
   background-color: #fff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-th, td {
+th,
+td {
   padding: 12px 15px;
   text-align: left;
 }
 
 thead {
-  background-color: #f8f9fa; /* gris clair */
-  color: #1F2937; /* texte gris foncé pour contraste */
+  background-color: #f8f9fa;
+  /* gris clair */
+  color: #1F2937;
+  /* texte gris foncé pour contraste */
 }
 
 tbody tr {
@@ -73,7 +84,6 @@ td:last-child {
 }
 
 td:last-child button {
-  display: inline-block;
   margin: 0 5px;
 }
 
@@ -94,7 +104,8 @@ button:hover {
 
 /* Bouton Modifier */
 button.modify-btn {
-  background-color: #FF7A00; /* orange */
+  background-color: #FF7A00;
+  /* orange */
   color: #fff;
 }
 
@@ -104,17 +115,21 @@ button.modify-btn:hover {
 
 /* Bouton Supprimer */
 button.delete-btn {
-  background-color: #e74c3c; /* rouge */
+  background-color: #e74c3c;
+  /* rouge */
   color: #fff;
 }
 
 button.delete-btn:hover {
-  background-color: #c53030; /* rouge foncé */
+  background-color: #c53030;
+  /* rouge foncé */
 }
 
 /* Responsive pour petits écrans */
 @media screen and (max-width: 768px) {
-  th, td {
+
+  th,
+  td {
     font-size: 12px;
     padding: 8px 10px;
   }
@@ -128,6 +143,7 @@ button.delete-btn:hover {
     font-size: 20px;
   }
 }
+
 .pagination {
   margin-top: 20px;
   display: flex;
@@ -139,9 +155,12 @@ button.delete-btn:hover {
 
 .page-btn {
   background-color: #fff;
-  border: 1px solid #f26b38; /* bordure orange */
-  color: #f26b38;             /* texte orange */
-  border-radius: 50%;         /* rond */
+  border: 1px solid #f26b38;
+  /* bordure orange */
+  color: #f26b38;
+  /* texte orange */
+  border-radius: 50%;
+  /* rond */
   width: 30px;
   height: 30px;
   cursor: pointer;
@@ -167,6 +186,7 @@ button.delete-btn:hover {
   font-weight: 500;
   color: #101616;
 }
+
 .search-container {
   text-align: right;
   margin-bottom: 15px;
@@ -178,6 +198,7 @@ button.delete-btn:hover {
   border: 1px solid #ccc;
   border-radius: 5px;
 }
+
 .search-container {
   text-align: right;
   margin-bottom: 20px;
@@ -186,9 +207,9 @@ button.delete-btn:hover {
 .search-container input {
   padding: 8px 12px;
   width: 280px;
-  border: 1px solid #d1d5db; /* gris clair */
+  border: 1px solid #d1d5db;
+  /* gris clair */
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.3s ease;
 }
-
