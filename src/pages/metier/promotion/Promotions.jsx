@@ -412,7 +412,7 @@ function Promotions() {
                             </div>
 
                             {/* Actions métier */}
-                            {getActions(detailPromo).length > 0 && (
+                            {/* {getActions(detailPromo).length > 0 && (
                                 <div className="detail-section detail-section-full">
                                     <p className="detail-section-title">Actions disponibles</p>
                                     <div className="statut-actions">
@@ -425,7 +425,7 @@ function Promotions() {
                                         ))}
                                     </div>
                                 </div>
-                            )}
+                            )} */}
                         </div>
 
                         <div className="modal-actions">
@@ -534,14 +534,14 @@ function Promotions() {
                                                 <div className="action-buttons">
                                                     <button className="btn-action btn-view"
                                                         onClick={() => setDetail(p)} title="Voir">👁</button>
-                                                    {actions.map((type) => (
+                                                    {/* {actions.map((type) => (
                                                         <button key={type}
                                                             className={`btn-action btn-action-${type}`}
                                                             onClick={() => setConfirmAction({ type, promo: p })}
                                                             title={actionMeta[type].label}>
                                                             {type === "valider" ? "✅" : type === "rejeter" ? "❌" : type === "activer" ? "▶️" : "⏸️"}
                                                         </button>
-                                                    ))}
+                                                    ))} */}
                                                 </div>
                                             </td>
                                         </tr>

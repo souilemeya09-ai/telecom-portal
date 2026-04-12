@@ -21,6 +21,8 @@ import CreateOffre from "./pages/metier/offre/CreateOffre";
 import Reclamations from "./pages/Vente/reclamation/Reclamations";
 import Promotions from "./pages/metier/promotion/Promotions";
 import PlansTarifaires from "./pages/metier/planTarifaire/PlanTarifaire";
+import SouscriptionsPromotion from "./pages/Vente/promotion/SouscriptionsPromotion";
+import ExploitPromotion from "./pages/exploit/ExploitPromotion";
 function App() {
   return (
     <BrowserRouter>
@@ -57,8 +59,19 @@ function App() {
           <Route path="/offres" element={<Offres />} />
           <Route path="/create-offre" element={<CreateOffre />} />
           <Route path="/promotions" element={<Promotions />} />
+          <Route path="/souscriptions" element={<SouscriptionsPromotion />} />
           <Route path="/reclamations" element={<Reclamations />} />
           <Route path="/plans" element={<PlansTarifaires />} />
+
+          <Route path="/exploit/promotions" element={<ExploitPromotion />} />
+          <Route path="/exploit/promotions/attente" element={<ExploitPromotion />} />
+          <Route path="/exploit/valider" element={<ExploitPromotion />} />
+          <Route path="/exploit/rejeter" element={<ExploitPromotion />} />
+          <Route path="/exploit/activer" element={<ExploitPromotion />} />
+          <Route path="/exploit/suspendre" element={<ExploitPromotion />} />
+          <Route path="/exploit/souscriptions" element={<ExploitPromotion />} />
+          <Route path="/exploit/historique" element={<ExploitPromotion />} />
+          <Route path="/exploit/offres" element={<ExploitPromotion />} />
         </Route>
 
         {/* Redirection */}

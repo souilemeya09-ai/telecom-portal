@@ -39,7 +39,7 @@
   font-family: var(--font);
   background: var(--bg);
   min-height: 100vh;
-  padding: 2rem 2.5rem;
+  padding: 2rem 0.5rem;
   color: var(--text-primary);
 }
 

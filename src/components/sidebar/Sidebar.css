@@ -1,5 +1,4 @@
 .sidebar {
-    width: 200px;
     height: 100vh;
 
     /* Effet transparent */
@@ -8,12 +7,17 @@
 
     border-right: 1px solid rgba(255,255,255,0.3);
 
-    padding: 20px;
+    padding: 20px 10px;
     display: flex;
     flex-direction: column;
 
     /* effet ombre */
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar-title {

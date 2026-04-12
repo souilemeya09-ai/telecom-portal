@@ -1,77 +1,69 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 
+const NAV = {
+  DSI: [
+    { to: "/users",  label: "👥 Gérer Utilisateurs" },
+    { to: "/roles",  label: "🔐 Gérer Rôles"        },
+  ],
+
+  VENTE: [
+    { to: "/customers",         label: "👤 Gérer Clients"       },
+    { to: "/contrats",          label: "📄 Gérer Contrats"       },
+    { to: "/offres",            label: "📦 Consulter Offres"     },
+    { to: "/souscriptions",     label: "🎁 Souscrire Promotion"  },
+    { to: "/reclamations",      label: "📢 Gérer Réclamations"   },
+  ],
+
+  METIER: [
+    { to: "/plans",       label: "💰 Plans Tarifaires"    },
+    { to: "/offres",      label: "📦 Gérer Offres"        },
+    { to: "/services",    label: "⚙️ Configurer Services" },
+    { to: "/promotions",  label: "🏷️ Gérer Promotions"   },
+  ],
+
+  EXPLOIT: [
+    // Examiner les promotions
+    { to: "/exploit/promotions",          label: "🔍 Examiner Promotions"      },
+    { to: "/exploit/promotions/attente",  label: "⏳ Promotions en attente"    },
+    // Valider / Rejeter
+    { to: "/exploit/valider",             label: "✅ Valider une Promotion"    },
+    { to: "/exploit/rejeter",             label: "❌ Rejeter une Promotion"    },
+    // Activer / Suspendre
+    { to: "/exploit/activer",             label: "▶️ Activer Promotions"      },
+    { to: "/exploit/suspendre",           label: "⏸️ Suspendre Promotions"    },
+    // Souscriptions & offres
+    { to: "/exploit/souscriptions",       label: "📋 Consulter Souscriptions" },
+    { to: "/exploit/historique",          label: "📊 Suivre état Promotions"  },
+    { to: "/exploit/offres",              label: "📦 Consulter Offres"        },
+  ],
+};
+
 function Sidebar() {
-  const role = localStorage.getItem("role");
+  const role     = localStorage.getItem("role");
+  const location = useLocation();
+  const links    = NAV[role] ?? [];
 
   return (
     <div className="sidebar">
+      <div className="sidebar-brand">
+        <span className="sidebar-brand-icon">📡</span>
+        <span className="sidebar-brand-text">TelecomApp</span>
+      </div>
 
+      <div className="sidebar-role-badge">{role}</div>
 
-      {/* Menu DSI */}
-      {role === "DSI" && (
-        <>
-
-          <Link to="/users" className="sidebar-link">
-            Gérer Utilisateurs
+      <nav className="sidebar-nav">
+        {links.map(({ to, label }) => (
+          <Link
+            key={to}
+            to={to}
+            className={`sidebar-link ${location.pathname === to ? "sidebar-link-active" : ""}`}
+          >
+            {label}
           </Link>
-          <Link to="/roles" className="sidebar-link">
-            Gérer Roles
-          </Link>
-        </>
-      )}
-
-      {/* Menu Vente */}
-      {role === "VENTE" && (
-        <>
-          <Link to="/customers" className="sidebar-link">
-            Gérer Clients
-          </Link>
-          <Link to="/contrats" className="sidebar-link">
-            Gérer Contrats
-          </Link>
-
-          <Link to="/offres" className="sidebar-link">
-            Consulter Offres
-          </Link>
-          <Link to="/promotion" className="sidebar-link">
-            Souscrire Promotion
-          </Link>
-          <Link to="/reclamations" className="sidebar-link">
-            Gérer Réclamations
-          </Link> 
-        </>
-      )}
-
-      {/* Menu Métier */}
-      {role === "METIER" && (
-        <>
-          <Link to="/plans" className="sidebar-link">
-            Configurer Plan Tarifaire
-          </Link>
-          <Link to="/offres" className="sidebar-link">
-            Gérer Offres
-          </Link>
-          <Link to="/promotions" className="sidebar-link">
-            Gérer promotion
-          </Link>
-          <Link to="/services" className="sidebar-link">
-            Configurer Service
-          </Link>
-        </>
-      )}
-
-      {/* Menu Exploit */}
-      {role === "EXPLOIT" && (
-        <>
-          <Link to="/valider-promotion" className="sidebar-link">
-            Valider Promotion
-          </Link>
-          <Link to="/examiner" className="sidebar-link">
-            Examiner
-          </Link>
-        </>
-      )}
+        ))}
+      </nav>
     </div>
   );
 }

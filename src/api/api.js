@@ -428,3 +428,24 @@ export async function deletePlanTarifaire(id) {
   const res = await api.delete(`/plans-tarifaires/${id}`);
   return res.data;
 }
+
+
+// POST /api/souscriptions/contrat/:contratId/promotion/:promotionId
+export async function souscrirePromotion(contratId, promotionId) {
+  const res = await api.post(
+    `/souscriptions/contrat/${contratId}/promotion/${promotionId}`
+  );
+  return res.data;
+}
+ 
+// GET /api/souscriptions/contrat/:contratId
+export async function getSouscriptionsByContrat(contratId) {
+  const res = await api.get(`/souscriptions/contrat/${contratId}`);
+  return res.data;
+}
+ 
+// GET /api/souscriptions/promotion/:promotionId
+export async function getSouscriptionsByPromotion(promotionId) {
+  const res = await api.get(`/souscriptions/promotion/${promotionId}`);
+  return res.data;
+}
