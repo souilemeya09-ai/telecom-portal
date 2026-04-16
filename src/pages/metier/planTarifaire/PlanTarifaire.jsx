@@ -11,11 +11,11 @@ const EMPTY_FORM = { nom: "", prixMensuel: "", description: "" };
 
 function getValue(obj, field) {
   switch (field) {
-    case "id":          return obj.id;
-    case "nom":         return obj.nom         ?? "";
+    case "id": return obj.id;
+    case "nom": return obj.nom ?? "";
     case "prixMensuel": return Number(obj.prixMensuel) || 0;
     case "description": return obj.description ?? "";
-    default:            return "";
+    default: return "";
   }
 }
 
@@ -36,17 +36,17 @@ function Th({ label, field, sortField, sortOrder, onSort }) {
 }
 
 function PlansTarifaires() {
-  const [plans, setPlans]                 = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [submitting, setSubmitting]       = useState(false);
-  const [showForm, setShowForm]           = useState(false);
-  const [editingPlan, setEditing]         = useState(null);
-  const [detailPlan, setDetail]           = useState(null);
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingPlan, setEditing] = useState(null);
+  const [detailPlan, setDetail] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [form, setForm]                   = useState(EMPTY_FORM);
-  const [search, setSearch]               = useState("");
-  const [sortField, setSortField]         = useState("id");
-  const [sortOrder, setSortOrder]         = useState("asc");
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState("id");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   useEffect(() => { loadData(); }, []);
 
@@ -59,7 +59,7 @@ function PlansTarifaires() {
 
   // ── Stats ─────────────────────────────────────────────────
   const stats = useMemo(() => ({
-    total:   plans.length,
+    total: plans.length,
     minPrix: plans.length ? Math.min(...plans.map((p) => Number(p.prixMensuel) || 0)) : 0,
     maxPrix: plans.length ? Math.max(...plans.map((p) => Number(p.prixMensuel) || 0)) : 0,
     avgPrix: plans.length
@@ -72,10 +72,10 @@ function PlansTarifaires() {
     const term = search.toLowerCase();
     const filtered = term
       ? plans.filter((p) =>
-          p.nom?.toLowerCase().includes(term) ||
-          p.description?.toLowerCase().includes(term) ||
-          String(p.prixMensuel).includes(term)
-        )
+        p.nom?.toLowerCase().includes(term) ||
+        p.description?.toLowerCase().includes(term) ||
+        String(p.prixMensuel).includes(term)
+      )
       : plans;
 
     return [...filtered].sort((a, b) => {
@@ -97,7 +97,7 @@ function PlansTarifaires() {
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
   const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); };
-  const openEdit   = (p) => {
+  const openEdit = (p) => {
     setEditing(p);
     setForm({ nom: p.nom || "", prixMensuel: p.prixMensuel || "", description: p.description || "" });
     setShowForm(true); setDetail(null);
@@ -108,12 +108,12 @@ function PlansTarifaires() {
     e.preventDefault(); setSubmitting(true);
     try {
       const payload = {
-        nom:         form.nom,
+        nom: form.nom,
         prixMensuel: Number(form.prixMensuel),
         description: form.description || null,
       };
       if (editingPlan) await updatePlanTarifaire(editingPlan.id, payload);
-      else             await createPlanTarifaire(payload);
+      else await createPlanTarifaire(payload);
       closeForm(); loadData();
     } catch (err) { console.error(err); }
     finally { setSubmitting(false); }
@@ -163,44 +163,49 @@ function PlansTarifaires() {
 
       {/* ── Formulaire panel ── */}
       {showForm && (
-        <div className="form-panel">
-          <h3 className="form-panel-title">
-            {editingPlan ? `Modifier — ${editingPlan.nom}` : "Nouveau plan tarifaire"}
-          </h3>
-          <form className="form-grid" onSubmit={handleSubmit}>
-
-            <div className="form-group">
-              <label className="form-label">Nom du plan *</label>
-              <input className="form-control" value={form.nom} onChange={set("nom")}
-                placeholder="ex: Plan Standard" required />
+        <div className="modal-overlay" onClick={closeForm}>
+          <div className="modal-box modal-form" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {editingPlan ? `Modifier — ${editingPlan.nom}` : "Ajouter un plan"}
+              </h3>
+              <button className="modal-close" onClick={closeForm}>✕</button>
             </div>
+            <form className="form-grid" onSubmit={handleSubmit}>
 
-            <div className="form-group">
-              <label className="form-label">Prix mensuel (TND) *</label>
-              <div className="input-with-prefix">
-                <span className="input-prefix">TND</span>
-                <input className="form-control" type="number" min="0" step="0.01"
-                  value={form.prixMensuel} onChange={set("prixMensuel")}
-                  placeholder="0.00" required />
+              <div className="form-group">
+                <label className="form-label">Nom du plan *</label>
+                <input className="form-control" value={form.nom} onChange={set("nom")}
+                  placeholder="ex: Plan Standard" required />
               </div>
-            </div>
 
-            <div className="form-group form-group-full">
-              <label className="form-label">Description</label>
-              <textarea className="form-control" rows={3}
-                value={form.description} onChange={set("description")}
-                placeholder="ex: Appels illimités + 10 Go data, valable 30 jours..."
-                style={{ resize: "vertical" }}
-              />
-            </div>
+              <div className="form-group">
+                <label className="form-label">Prix mensuel (TND) *</label>
+                <div className="input-with-prefix">
+                  <span className="input-prefix">TND</span>
+                  <input className="form-control" type="number" min="0" step="0.01"
+                    value={form.prixMensuel} onChange={set("prixMensuel")}
+                    placeholder="0.00" required />
+                </div>
+              </div>
 
-            <div className="form-actions">
-              <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-              <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting ? "Enregistrement..." : editingPlan ? "Mettre à jour" : "Créer le plan"}
-              </button>
-            </div>
-          </form>
+              <div className="form-group form-group-full">
+                <label className="form-label">Description</label>
+                <textarea className="form-control" rows={3}
+                  value={form.description} onChange={set("description")}
+                  placeholder="ex: Appels illimités + 10 Go data, valable 30 jours..."
+                  style={{ resize: "vertical" }}
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting ? "Enregistrement..." : editingPlan ? "Mettre à jour" : "Créer le plan"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -237,9 +242,9 @@ function PlansTarifaires() {
             </div>
 
             <div className="modal-actions">
-              <button className="btn-danger"    onClick={() => setDeleteConfirm(detailPlan)}>Supprimer</button>
+              <button className="btn-danger" onClick={() => setDeleteConfirm(detailPlan)}>Supprimer</button>
               <button className="btn-secondary" onClick={() => setDetail(null)}>Fermer</button>
-              <button className="btn-primary"   onClick={() => openEdit(detailPlan)}>✏️ Modifier</button>
+              <button className="btn-primary" onClick={() => openEdit(detailPlan)}>✏️ Modifier</button>
             </div>
           </div>
         </div>
@@ -256,7 +261,7 @@ function PlansTarifaires() {
             </p>
             <div className="modal-actions">
               <button className="btn-secondary" onClick={() => setDeleteConfirm(null)}>Annuler</button>
-              <button className="btn-danger"    onClick={() => handleDelete(deleteConfirm.id)}>Supprimer</button>
+              <button className="btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>Supprimer</button>
             </div>
           </div>
         </div>
@@ -280,9 +285,9 @@ function PlansTarifaires() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <Th label="#"           field="id"          {...thProps} />
-                  <Th label="Nom"         field="nom"         {...thProps} />
-                  <Th label="Prix (TND)"  field="prixMensuel" {...thProps} />
+                  <Th label="#" field="id"          {...thProps} />
+                  <Th label="Nom" field="nom"         {...thProps} />
+                  <Th label="Prix (TND)" field="prixMensuel" {...thProps} />
                   <Th label="Description" field="description" {...thProps} />
                   <th>Actions</th>
                 </tr>

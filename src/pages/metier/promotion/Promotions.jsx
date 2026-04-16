@@ -87,7 +87,7 @@ function Promotions() {
             if (!token) return null;
             const payload = JSON.parse(atob(token.split(".")[1]));
             console.log(payload);
-            
+
             return payload.id || payload.userId || payload.sub || null;
         } catch { return null; }
     }, []);
@@ -253,81 +253,86 @@ function Promotions() {
 
             {/* ── Formulaire ── */}
             {showForm && (
-                <div className="form-panel">
-                    <h3 className="form-panel-title">Nouvelle promotion</h3>
-                    <form className="form-grid" onSubmit={handleSubmit}>
-
-                        {/* Nom */}
-                        <div className="form-group">
-                            <label className="form-label">Nom de la promotion *</label>
-                            <input className="form-control" value={form.nomPromotion}
-                                onChange={set("nomPromotion")}
-                                placeholder="ex: Promo Ramadan 2026" required />
+                <div className="modal-overlay" onClick={closeForm}>
+                    <div className="modal-box modal-form" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3 className="form-panel-title">Nouvelle promotion</h3>
+                            <button className="modal-close" onClick={closeForm}>✕</button>
                         </div>
+                        <form className="form-grid" onSubmit={handleSubmit}>
 
-                        {/* Type réduction */}
-                        <div className="form-group">
-                            <label className="form-label">Type de réduction *</label>
-                            <select className="form-control" value={form.typeReduction}
-                                onChange={set("typeReduction")}>
-                                {TYPE_REDUCTION.map((t) => (
-                                    <option key={t.value} value={t.value}>{t.label}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Valeur réduction */}
-                        <div className="form-group">
-                            <label className="form-label">
-                                Valeur {form.typeReduction === "POURCENTAGE" ? "(%)" : "(TND)"} *
-                            </label>
-                            <div className="input-with-prefix">
-                                <span className="input-prefix">
-                                    {form.typeReduction === "POURCENTAGE" ? "%" : "TND"}
-                                </span>
-                                <input className="form-control" type="number" min="0" step="0.01"
-                                    value={form.valeurReduction} onChange={set("valeurReduction")}
-                                    placeholder="ex: 20" required />
+                            {/* Nom */}
+                            <div className="form-group">
+                                <label className="form-label">Nom de la promotion *</label>
+                                <input className="form-control" value={form.nomPromotion}
+                                    onChange={set("nomPromotion")}
+                                    placeholder="ex: Promo Ramadan 2026" required />
                             </div>
-                        </div>
 
-                        {/* Ancienneté minimale */}
-                        <div className="form-group">
-                            <label className="form-label">Ancienneté minimale (mois)</label>
-                            <input className="form-control" type="number" min="0"
-                                value={form.ancienneteMinimale} onChange={set("ancienneteMinimale")}
-                                placeholder="ex: 6 mois" />
-                        </div>
+                            {/* Type réduction */}
+                            <div className="form-group">
+                                <label className="form-label">Type de réduction *</label>
+                                <select className="form-control" value={form.typeReduction}
+                                    onChange={set("typeReduction")}>
+                                    {TYPE_REDUCTION.map((t) => (
+                                        <option key={t.value} value={t.value}>{t.label}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        {/* Dates */}
-                        <div className="form-group">
-                            <label className="form-label">Date début *</label>
-                            <input className="form-control" type="date" value={form.dateDebut}
-                                onChange={set("dateDebut")} required />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Date fin</label>
-                            <input className="form-control" type="date" value={form.dateFin}
-                                onChange={set("dateFin")} />
-                        </div>
+                            {/* Valeur réduction */}
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Valeur {form.typeReduction === "POURCENTAGE" ? "(%)" : "(TND)"} *
+                                </label>
+                                <div className="input-with-prefix">
+                                    <span className="input-prefix">
+                                        {form.typeReduction === "POURCENTAGE" ? "%" : "TND"}
+                                    </span>
+                                    <input className="form-control" type="number" min="0" step="0.01"
+                                        value={form.valeurReduction} onChange={set("valeurReduction")}
+                                        placeholder="ex: 20" required />
+                                </div>
+                            </div>
 
-                        {/* Règle éligibilité */}
-                        <div className="form-group form-group-full">
-                            <label className="form-label">Règle d'éligibilité</label>
-                            <textarea className="form-control" rows={2}
-                                value={form.regleEligibilite} onChange={set("regleEligibilite")}
-                                placeholder="ex: Réservé aux clients avec offre MOBILE, ancienneté > 6 mois..."
-                                style={{ resize: "vertical" }}
-                            />
-                        </div>
+                            {/* Ancienneté minimale */}
+                            <div className="form-group">
+                                <label className="form-label">Ancienneté minimale (mois)</label>
+                                <input className="form-control" type="number" min="0"
+                                    value={form.ancienneteMinimale} onChange={set("ancienneteMinimale")}
+                                    placeholder="ex: 6 mois" />
+                            </div>
 
-                        <div className="form-actions">
-                            <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-                            <button type="submit" className="btn-primary" disabled={submitting}>
-                                {submitting ? "Création..." : "Créer la promotion"}
-                            </button>
-                        </div>
-                    </form>
+                            {/* Dates */}
+                            <div className="form-group">
+                                <label className="form-label">Date début *</label>
+                                <input className="form-control" type="date" value={form.dateDebut}
+                                    onChange={set("dateDebut")} required />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Date fin</label>
+                                <input className="form-control" type="date" value={form.dateFin}
+                                    onChange={set("dateFin")} />
+                            </div>
+
+                            {/* Règle éligibilité */}
+                            <div className="form-group form-group-full">
+                                <label className="form-label">Règle d'éligibilité</label>
+                                <textarea className="form-control" rows={2}
+                                    value={form.regleEligibilite} onChange={set("regleEligibilite")}
+                                    placeholder="ex: Réservé aux clients avec offre MOBILE, ancienneté > 6 mois..."
+                                    style={{ resize: "vertical" }}
+                                />
+                            </div>
+
+                            <div className="form-actions">
+                                <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
+                                <button type="submit" className="btn-primary" disabled={submitting}>
+                                    {submitting ? "Création..." : "Créer la promotion"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
 

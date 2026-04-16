@@ -186,79 +186,84 @@ function Offres() {
 
       {/* ── Formulaire panel ── */}
       {showForm && (
-        <div className="form-panel">
-          <h3 className="form-panel-title">
-            {editingOffre ? `Modifier — ${editingOffre.nomOffre}` : "Créer une offre"}
-          </h3>
-          <form className="form-grid" onSubmit={handleSubmit}>
-
-            {/* Nom */}
-            <div className="form-group">
-              <label className="form-label">Nom de l'offre *</label>
-              <input className="form-control" value={form.nomOffre}
-                onChange={(e) => setForm({ ...form, nomOffre: e.target.value })}
-                placeholder="ex: Offre Essentielle" required />
+        <div className="modal-overlay" onClick={closeForm}>
+          <div className="modal-box modal-form" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="form-panel-title">
+                {editingOffre ? `Modifier — ${editingOffre.nomOffre}` : "Créer une offre"}
+              </h3>
+              <button className="modal-close" onClick={closeForm}>✕</button>
             </div>
+            <form className="form-grid" onSubmit={handleSubmit}>
 
-            {/* Type */}
-            <div className="form-group">
-              <label className="form-label">Type d'offre *</label>
-              <select className="form-control" value={form.typeOffre}
-                onChange={(e) => setForm({ ...form, typeOffre: e.target.value })}>
-                {TYPE_OFFRES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
+              {/* Nom */}
+              <div className="form-group">
+                <label className="form-label">Nom de l'offre *</label>
+                <input className="form-control" value={form.nomOffre}
+                  onChange={(e) => setForm({ ...form, nomOffre: e.target.value })}
+                  placeholder="ex: Offre Essentielle" required />
+              </div>
 
-            {/* Plan tarifaire */}
-            <div className="form-group form-group-full">
-              <label className="form-label">Plan tarifaire</label>
-              <select className="form-control" value={form.planTarifaireId}
-                onChange={(e) => setForm({ ...form, planTarifaireId: e.target.value })}>
-                <option value="">Aucun plan</option>
-                {plans.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nom} — {p.prixMensuel} TND/mois
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Type */}
+              <div className="form-group">
+                <label className="form-label">Type d'offre *</label>
+                <select className="form-control" value={form.typeOffre}
+                  onChange={(e) => setForm({ ...form, typeOffre: e.target.value })}>
+                  {TYPE_OFFRES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Services (multi-select visuel) */}
-            <div className="form-group form-group-full">
-              <label className="form-label">Services inclus</label>
-              <div className="services-picker">
-                {services.length === 0 ? (
-                  <p className="picker-empty">Aucun service disponible</p>
-                ) : (
-                  services.map((s) => {
-                    const selected = form.serviceIds.includes(s.id);
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        className={`service-chip ${selected ? "service-chip-active" : ""}`}
-                        onClick={() => toggleService(s.id)}
-                      >
-                        {selected ? "✓ " : ""}{s.nomService}
-                      </button>
-                    );
-                  })
+              {/* Plan tarifaire */}
+              <div className="form-group form-group-full">
+                <label className="form-label">Plan tarifaire</label>
+                <select className="form-control" value={form.planTarifaireId}
+                  onChange={(e) => setForm({ ...form, planTarifaireId: e.target.value })}>
+                  <option value="">Aucun plan</option>
+                  {plans.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nom} — {p.prixMensuel} TND/mois
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Services (multi-select visuel) */}
+              <div className="form-group form-group-full">
+                <label className="form-label">Services inclus</label>
+                <div className="services-picker">
+                  {services.length === 0 ? (
+                    <p className="picker-empty">Aucun service disponible</p>
+                  ) : (
+                    services.map((s) => {
+                      const selected = form.serviceIds.includes(s.id);
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          className={`service-chip ${selected ? "service-chip-active" : ""}`}
+                          onClick={() => toggleService(s.id)}
+                        >
+                          {selected ? "✓ " : ""}{s.nomService}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+                {form.serviceIds.length > 0 && (
+                  <p className="picker-count">{form.serviceIds.length} service{form.serviceIds.length > 1 ? "s" : ""} sélectionné{form.serviceIds.length > 1 ? "s" : ""}</p>
                 )}
               </div>
-              {form.serviceIds.length > 0 && (
-                <p className="picker-count">{form.serviceIds.length} service{form.serviceIds.length > 1 ? "s" : ""} sélectionné{form.serviceIds.length > 1 ? "s" : ""}</p>
-              )}
-            </div>
 
-            <div className="form-actions">
-              <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-              <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting ? "Enregistrement..." : editingOffre ? "Mettre à jour" : "Créer l'offre"}
-              </button>
-            </div>
-          </form>
+              <div className="form-actions">
+                <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting ? "Enregistrement..." : editingOffre ? "Mettre à jour" : "Créer l'offre"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

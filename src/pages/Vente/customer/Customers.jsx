@@ -177,13 +177,17 @@ const Customers = () => {
         <button className="btn-primary" onClick={openCreate}>+ Nouveau client</button>
       </div>
 
-      {/* ── Formulaire panel ── */}
+      {/* ── Formulaire modal ── */}
       {showForm && (
-        <div className="form-panel">
-          <h3 className="form-panel-title">
-            {editingCustomer ? `Modifier — ${editingCustomer.nom} ${editingCustomer.prenom}` : "Ajouter un client"}
-          </h3>
-          <form className="form-grid" onSubmit={handleSubmit}>
+        <div className="modal-overlay" onClick={closeForm}>
+          <div className="modal-box modal-form" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {editingCustomer ? `Modifier — ${editingCustomer.nom} ${editingCustomer.prenom}` : "Ajouter un client"}
+              </h3>
+              <button className="modal-close" onClick={closeForm}>✕</button>
+            </div>
+            <form className="form-grid" onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">Nom *</label>
               <input className="form-control" value={form.nom} onChange={set("nom")} required />
@@ -259,7 +263,8 @@ const Customers = () => {
                 {submitting ? "Enregistrement..." : editingCustomer ? "Mettre à jour" : "Ajouter le client"}
               </button>
             </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
 
@@ -317,7 +322,7 @@ const Customers = () => {
                   const docImg = isCin ? c.cinImagePath : c.passportImagePath;
                   return (
                     <tr key={c.id}>
-                      <td className="id-cell">{c.customerId}</td>
+                      <td className="id-cell">{c.customerId && `cust_${c.customerId}`}</td>
                       <td>
                         <div className="client-cell">
                           <div className="avatar">{c.nom?.[0]?.toUpperCase() ?? "?"}</div>

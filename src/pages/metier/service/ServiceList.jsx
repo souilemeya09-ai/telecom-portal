@@ -122,10 +122,14 @@ function Services() {
 
       {/* ── Formulaire panel ── */}
       {showForm && (
-        <div className="form-panel">
-          <h3 className="form-panel-title">
-            {editingService ? `Modifier — ${editingService.nomService}` : "Ajouter un service"}
-          </h3>
+        <div className="modal-overlay" onClick={closeForm}>
+          <div className="modal-box modal-form" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {editingService ? `Modifier — ${editingService.nomService}` : "Ajouter un service"}
+              </h3>
+              <button className="modal-close" onClick={closeForm}>✕</button>
+            </div>
           <form className="form-grid" onSubmit={handleSubmit}>
             <div className="form-group form-group-full">
               <label className="form-label">Nom du service *</label>
@@ -149,6 +153,7 @@ function Services() {
               </button>
             </div>
           </form>
+          </div>
         </div>
       )}
 
