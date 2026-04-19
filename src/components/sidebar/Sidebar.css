@@ -41,3 +41,9 @@
     background: rgba(255,255,255,0.4);
     transform: translateX(4px);
 }
+
+
+.sidebar-role-badge {
+    font-weight: 500;
+    color: #ff7a00;
+}

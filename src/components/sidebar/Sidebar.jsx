@@ -46,10 +46,6 @@ function Sidebar() {
 
   return (
     <div className="sidebar">
-      <div className="sidebar-brand">
-        <span className="sidebar-brand-icon">📡</span>
-        <span className="sidebar-brand-text">TelecomApp</span>
-      </div>
 
       <div className="sidebar-role-badge">{role}</div>
 

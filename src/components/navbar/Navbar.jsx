@@ -19,7 +19,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       {/* Logo */}
-      <div className="navbar-logo">
+      <div className="navbar-logo" onClick={() => navigate("/")}>
         <img src={logo} alt="Billcom Logo" />
       </div>
 

@@ -23,6 +23,7 @@ import Promotions from "./pages/metier/promotion/Promotions";
 import PlansTarifaires from "./pages/metier/planTarifaire/PlanTarifaire";
 import SouscriptionsPromotion from "./pages/Vente/promotion/SouscriptionsPromotion";
 import ExploitPromotion from "./pages/exploit/ExploitPromotion";
+import Dashboard from "./components/dashboard/Dashboard";
 function App() {
   return (
     <BrowserRouter>
@@ -45,6 +46,9 @@ function App() {
             </ProtectedRoute>
           }
         >
+
+          <Route path="/" element={<Dashboard />} />
+
           {/* Users */}
           <Route path="users" element={<Users />} />
           <Route path="add-user" element={<AddUser />} />
