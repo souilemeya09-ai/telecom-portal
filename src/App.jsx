@@ -24,6 +24,7 @@ import PlansTarifaires from "./pages/metier/planTarifaire/PlanTarifaire";
 import SouscriptionsPromotion from "./pages/Vente/promotion/SouscriptionsPromotion";
 import ExploitPromotion from "./pages/exploit/ExploitPromotion";
 import Dashboard from "./components/dashboard/Dashboard";
+import CustomerGroups from "./pages/Vente/customer/CustomerGroups";
 function App() {
   return (
     <BrowserRouter>
@@ -60,6 +61,7 @@ function App() {
           <Route path="/services" element={<ServiceList />} />
           <Route path="/AddService" element={<CreateService />} />
           <Route path="/customers" element={<Customers />} />
+          <Route path="/groups" element={<CustomerGroups />} />
           <Route path="/offres" element={<Offres />} />
           <Route path="/create-offre" element={<CreateOffre />} />
           <Route path="/promotions" element={<Promotions />} />

@@ -1,0 +1,31 @@
+.dashboard-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #0d1117;
+}
+
+.dashboard-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - var(--nb-h) - 40px);
+    /* 40px = footer */
+}
+
+.dashboard-main {
+    flex: 1;
+    overflow-y: auto;
+    background: #0d1117;
+}
+
+@media (max-width: 768px) {
+    .dashboard-body {
+        height: auto;
+        overflow: visible
+    }
+
+    .dashboard-main {
+        overflow-y: visible
+    }
+}

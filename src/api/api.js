@@ -1,4 +1,5 @@
 import axios from "axios";
+import { refreshApi } from "./authApi.js";
 
 const BASE_URL = "http://localhost:8080/api";
 
@@ -41,7 +42,7 @@ api.interceptors.response.use(
 
     // Ignorer si c'est déjà une tentative de refresh ou une route auth
     if (
-      error.response?.status !== 401 ||
+      error.response?.status !== 403 ||
       originalRequest._retry ||
       originalRequest.url?.includes("/auth/")
     ) {
@@ -469,5 +470,94 @@ export async function getStatsExploit() {
 
 export async function getStatsDsi() {
   const res = await api.get("/stats/dsi");
+  return res.data;
+}
+
+
+
+
+// ── À ajouter dans src/api/api.js ──────────────────────────────
+
+// ══════════════════════════════════════════════════════════════
+// CUSTOMER GROUPS  — /api/customer-groups
+// ══════════════════════════════════════════════════════════════
+
+// GET /api/customer-groups
+export async function getCustomerGroups() {
+  const res = await api.get("/customer-groups");
+  return res.data;
+}
+
+// GET /api/customer-groups/:id
+export async function getCustomerGroupById(id) {
+  const res = await api.get(`/customer-groups/${id}`);
+  return res.data;
+}
+
+// POST /api/customer-groups
+// body: { name, groupType, status }
+export async function createCustomerGroup(dto) {
+  const res = await api.post("/customer-groups", dto);
+  return res.data;
+}
+
+// PUT /api/customer-groups/:id
+export async function updateCustomerGroup(id, dto) {
+  const res = await api.put(`/customer-groups/${id}`, dto);
+  return res.data;
+}
+
+// POST /api/customer-groups/:groupId/members/:customerId
+//   ?memberRole=USER&primaryMember=false
+export async function ajouterMembreGroupe(groupId, customerId, memberRole = "USER", primaryMember = false) {
+  const res = await api.post(
+    `/customer-groups/${groupId}/members/${customerId}`,
+    null,
+    { params: { memberRole, primaryMember } }
+  );
+  return res.data;
+}
+
+// DELETE /api/customer-groups/:groupId/members/:customerId
+export async function retirerMembreGroupe(groupId, customerId) {
+  const res = await api.delete(`/customer-groups/${groupId}/members/${customerId}`);
+  return res.data;
+}
+
+// ══════════════════════════════════════════════════════════════
+// PROMOTION ASSIGNMENTS  — /api/promotions
+// ══════════════════════════════════════════════════════════════
+
+// POST /api/promotions/:id/assignments
+// body: {
+//   targetType: "CUSTOMER" | "CUSTOMER_GROUP" | "CONTRACT",
+//   targetCustomerId?,
+//   targetGroupId?,
+//   targetContractId?,
+//   effectiveStartDate,
+//   effectiveEndDate?,
+//   inheritedToMembers?,
+//   assignmentMode?
+// }
+export async function assignerPromotion(promotionId, dto) {
+  const res = await api.post(`/promotions/${promotionId}/assignments`, dto);
+  return res.data;
+}
+
+// GET /api/promotions/:id/assignments
+export async function getAssignmentsByPromotion(promotionId) {
+  const res = await api.get(`/promotions/${promotionId}/assignments`);
+  return res.data;
+}
+
+// GET /api/promotions/customer/:customerId
+export async function getPromotionsByCustomer(customerId) {
+  const res = await api.get(`/promotions/customer/${customerId}`);
+  return res.data;
+}
+
+// GET /api/promotions/group/:groupId
+export async function getPromotionsByGroup(groupId) {
+  const res = await api.get(`/promotions/group/${groupId}`);
   return res.data;
 }
