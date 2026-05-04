@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
-
+import 'primereact/resources/themes/bootstrap4-dark-blue/theme.css';
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Users from "./pages/dsi/Users";
@@ -25,6 +25,7 @@ import SouscriptionsPromotion from "./pages/Vente/promotion/SouscriptionsPromoti
 import ExploitPromotion from "./pages/exploit/ExploitPromotion";
 import Dashboard from "./components/dashboard/Dashboard";
 import CustomerGroups from "./pages/Vente/customer/CustomerGroups";
+import CreateCustomer from "./pages/Vente/customer/CreateCustomer";
 function App() {
   return (
     <BrowserRouter>
@@ -61,6 +62,7 @@ function App() {
           <Route path="/services" element={<ServiceList />} />
           <Route path="/AddService" element={<CreateService />} />
           <Route path="/customers" element={<Customers />} />
+          <Route path="/create-customer" element={<CreateCustomer />} />
           <Route path="/groups" element={<CustomerGroups />} />
           <Route path="/offres" element={<Offres />} />
           <Route path="/create-offre" element={<CreateOffre />} />

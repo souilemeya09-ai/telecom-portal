@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   getOffres,
   createOffre,
@@ -7,6 +7,7 @@ import {
   getServices,
   getPlansTarifaires,
   retirerServiceOffre,
+  uploadOffresCsv,
 } from "../../../api/api";
 import "../../../styles/offres.css";
 
@@ -59,6 +60,9 @@ function Offres() {
   const [filterType, setFilterType] = useState("ALL");
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [csvError, setCsvError] = useState(null);
+  const [csvUploading, setCsvUploading] = useState(false);
+  const csvFileRef = useRef();
 
   useEffect(() => { loadData(); }, []);
 
@@ -69,6 +73,25 @@ function Offres() {
       setOffres(o); setServices(s); setPlans(p);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const handleCsvUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCsvError(null);
+    setCsvUploading(true);
+    try {
+      await uploadOffresCsv(file);
+      await loadData();
+      alert(`Import CSV réussi : ${file.name}`);
+    } catch (err) {
+      setCsvError(err.response?.data?.message || err.message || "Erreur lors de l'import CSV.");
+      console.error(err);
+    } finally {
+      setCsvUploading(false);
+      e.target.value = "";
+    }
   };
 
   // ── Sort + search + filter ────────────────────────────────
@@ -181,8 +204,20 @@ function Offres() {
             {offres.length} offre{offres.length !== 1 ? "s" : ""} disponible{offres.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button className="btn-primary" onClick={openCreate}>+ Nouvelle offre</button>
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <button className="btn-secondary" onClick={() => csvFileRef.current.click()} disabled={csvUploading}>
+            {csvUploading ? "Import en cours..." : "Importer CSV"}
+          </button>
+          <button className="btn-primary" onClick={openCreate}>+ Nouvelle offre</button>
+        </div>
+        <input ref={csvFileRef} type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={handleCsvUpload} />
       </div>
+
+      {csvError && (
+        <div className="alert alert-error" style={{ marginBottom: "1rem" }}>
+          Erreur import CSV : {csvError}
+        </div>
+      )}
 
       {/* ── Formulaire panel ── */}
       {showForm && (

@@ -163,6 +163,41 @@ export const deleteClient = async (id) => {
   return res.data;
 };
 
+export const uploadClientsCsv = async (file) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await api.post(`/clients/upload-csv`, fd);
+  return res.data;
+};
+
+export const uploadOffresCsv = async (file) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await api.post(`/offres/upload-csv`, fd);
+  return res.data;
+};
+
+export const uploadContratsCsv = async (file) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await api.post(`/contrats/upload-csv`, fd);
+  return res.data;
+};
+
+export const uploadPlansTarifairesCsv = async (file) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await api.post(`/plans-tarifaires/upload-csv`, fd);
+  return res.data;
+};
+
+export const uploadServicesCsv = async (file) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await api.post(`/services/upload-csv`, fd);
+  return res.data;
+};
+
 // ==================== OFFRES ====================
 // export const getOffres = async () => {
 //   const res = await api.get("/offres");

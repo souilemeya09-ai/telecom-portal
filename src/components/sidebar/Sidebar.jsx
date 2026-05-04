@@ -10,8 +10,21 @@ const NAV = {
         {
           icon: "👥", label: "Utilisateurs & Accès",
           children: [
-            { label: "Gestion comptes", links: [{ to: "/users", label: "Gérer Utilisateurs" }, { to: "/users/new", label: "Créer Utilisateur" }] },
-            { label: "Droits & Rôles", links: [{ to: "/roles", label: "Gérer Rôles" }, { to: "/roles/perms", label: "Permissions" }] },
+            { 
+              label: "Gestion des comptes", 
+              links: [
+                { to: "/users", label: "Consulter Utilisateurs" }, 
+                { to: "/users/new", label: "Créer Utilisateur" },
+                { to: "/users/edit", label: "Modifier Utilisateur" }
+              ] 
+            },
+            { 
+              label: "Droits & Rôles", 
+              links: [
+                { to: "/roles", label: "Consulter Rôles" }, 
+                { to: "/roles/perms", label: "Gérer Permissions" }
+              ] 
+            },
           ],
         },
       ],
@@ -22,17 +35,74 @@ const NAV = {
       section: "Commerce",
       items: [
         {
-          icon: "👤", label: "Clients",
+          icon: "👤", label: "Gestion Clients",
           children: [
-            { label: "Base clients", links: [{ to: "/customers", label: "Gérer Clients" }, { to: "/groups", label: "Groupes clients" }] },
-            { label: "Contractuel", links: [{ to: "/contrats", label: "Gérer Contrats" }, { to: "/offres", label: "Consulter Offres" }] },
+            { 
+              label: "Consulter Clients", 
+              links: [
+                { to: "/customers", label: "Liste clients" }, 
+                { to: "/groups", label: "Groupes clients" }
+              ] 
+            },
+            { 
+              label: "Ajouter Client", 
+              links: [
+                { to: "/create-customer", label: "Créer client" }
+              ] 
+            },
           ],
         },
         {
-          icon: "🎁", label: "Promotions",
+          icon: "📋", label: "Gestion Contrats",
           children: [
-            { label: "Souscriptions", links: [{ to: "/souscriptions", label: "Souscrire Promotion" }] },
-            { label: "SAV", links: [{ to: "/reclamations", label: "Gérer Réclamations" }] },
+            { 
+              label: "Consulter Contrats", 
+              links: [
+                { to: "/contrats", label: "Liste contrats" }
+              ] 
+            },
+            { 
+              label: "Créer Contrat", 
+              links: [
+                { to: "/contrats/new", label: "Nouveau contrat" }
+              ] 
+            },
+          ],
+        },
+        {
+          icon: "📦", label: "Gestion Offres",
+          children: [
+            { 
+              label: "Consulter Offres", 
+              links: [
+                { to: "/offres", label: "Liste offres" }
+              ] 
+            },
+            { 
+              label: "Créer Offre", 
+              links: [
+                { to: "/offres/new", label: "Nouvelle offre" },
+                { to: "/offres/edit", label: "Modifier offre" }
+              ] 
+            },
+          ],
+        },
+        {
+          icon: "🎁", label: "Promotions & SAV",
+          children: [
+            { 
+              label: "Promotions", 
+              links: [
+                { to: "/souscriptions", label: "Souscrire Promotion" },
+                { to: "/promotions", label: "Gérer Promotions" }
+              ] 
+            },
+            { 
+              label: "Service Après-Vente", 
+              links: [
+                { to: "/reclamations", label: "Gérer Réclamations" }
+              ] 
+            },
           ],
         },
       ],
@@ -45,8 +115,39 @@ const NAV = {
         {
           icon: "💰", label: "Offres & Plans",
           children: [
-            { label: "Tarifaire", links: [{ to: "/plans", label: "Plans Tarifaires" }, { to: "/offres", label: "Gérer Offres" }] },
-            { label: "Services", links: [{ to: "/services", label: "Configurer Services" }, { to: "/promotions", label: "Gérer Promotions" }] },
+            { 
+              label: "Plans Tarifaires", 
+              links: [
+                { to: "/plans", label: "Consulter Plans" }, 
+                { to: "/plans/new", label: "Créer Plan" },
+                { to: "/plans/edit", label: "Modifier Plan" }
+              ] 
+            },
+            { 
+              label: "Gestion Offres", 
+              links: [
+                { to: "/offres", label: "Consulter Offres" }, 
+                { to: "/offres/new", label: "Créer Offre" }
+              ] 
+            },
+          ],
+        },
+        {
+          icon: "⚙️", label: "Services & Promotions",
+          children: [
+            { 
+              label: "Configurer Services", 
+              links: [
+                { to: "/services", label: "Services" }
+              ] 
+            },
+            { 
+              label: "Gérer Promotions", 
+              links: [
+                { to: "/promotions", label: "Promotions" },
+                { to: "/promotions/new", label: "Créer Promotion" }
+              ] 
+            },
           ],
         },
       ],
@@ -57,17 +158,40 @@ const NAV = {
       section: "Promotions",
       items: [
         {
-          icon: "🔍", label: "Examiner",
+          icon: "🔍", label: "Examiner Promotions",
           children: [
-            { label: "Consultation", links: [{ to: "/exploit/promotions", label: "Examiner Promotions" }, { to: "/exploit/promotions/attente", label: "En attente" }] },
-            { label: "Décision", links: [{ to: "/exploit/valider", label: "Valider" }, { to: "/exploit/rejeter", label: "Rejeter" }] },
+            { 
+              label: "Consultation", 
+              links: [
+                { to: "/exploit/promotions", label: "Examiner Promotions" }, 
+                { to: "/exploit/promotions/attente", label: "En attente" }
+              ] 
+            },
+            { 
+              label: "Prendre Décision", 
+              links: [
+                { to: "/exploit/valider", label: "Valider" }, 
+                { to: "/exploit/rejeter", label: "Rejeter" }
+              ] 
+            },
           ],
         },
         {
-          icon: "⚡", label: "Cycle de vie",
+          icon: "⚡", label: "Cycle de Vie",
           children: [
-            { label: "Activation", links: [{ to: "/exploit/activer", label: "Activer Promotions" }, { to: "/exploit/suspendre", label: "Suspendre" }] },
-            { label: "Suivi", links: [{ to: "/exploit/historique", label: "Suivre état" }] },
+            { 
+              label: "Activation", 
+              links: [
+                { to: "/exploit/activer", label: "Activer Promotions" }, 
+                { to: "/exploit/suspendre", label: "Suspendre" }
+              ] 
+            },
+            { 
+              label: "Suivi", 
+              links: [
+                { to: "/exploit/historique", label: "Suivre État" }
+              ] 
+            },
           ],
         },
       ],
@@ -78,7 +202,18 @@ const NAV = {
         {
           icon: "📦", label: "Offres & Souscriptions",
           children: [
-            { label: "Consultation", links: [{ to: "/exploit/souscriptions", label: "Souscriptions" }, { to: "/exploit/offres", label: "Offres" }] },
+            { 
+              label: "Consulter Offres", 
+              links: [
+                { to: "/exploit/offres", label: "Offres disponibles" }
+              ] 
+            },
+            { 
+              label: "Consulter Souscriptions", 
+              links: [
+                { to: "/exploit/souscriptions", label: "Souscriptions" }
+              ] 
+            },
           ],
         },
       ],
@@ -242,7 +377,7 @@ function Sidebar({ onNavigate }) {
         onClick={() => setMobileOpen(true)}
         aria-label="Ouvrir menu"
       >
-        {/* <MenuIcon /> */}
+        <i className="pi pi-bars" style={{ fontSize: '1.2rem' }}></i>
       </button>
 
       <aside
@@ -258,7 +393,7 @@ function Sidebar({ onNavigate }) {
         <div className="sb-header">
           <div className="sb-logo">
             <div className="sb-logo-icon">
-              <i class="bi bi-layers"></i>
+              <i className="pi pi-th-large"></i>
             </div>
             <div className="sb-logo-text-wrap">
               <div className="sb-logo-text">TeleAdmin</div>
@@ -286,7 +421,7 @@ function Sidebar({ onNavigate }) {
         {!collapsed && (
           <div className="sb-search">
             <div className="search-wrap">
-              <i class="bi bi-search"></i>
+              <i className="bi bi-search"></i>
               <input
                 className="sb-input"
                 type="text"
@@ -299,29 +434,29 @@ function Sidebar({ onNavigate }) {
         )}
 
 
-          {/* Navigation */}
-          <nav className="sb-nav">
-            {sections.map((group) => (
-              <div key={group.section} className="nav-section">
-                <div className="section-label">{group.section}</div>
-                {group.items.map((item) => (
-                  <Dropdown key={item.label} item={item} filter={filter} />
-                ))}
-              </div>
-            ))}
-          </nav>
+        {/* Navigation */}
+        <nav className="sb-nav">
+          {sections.map((group) => (
+            <div key={group.section} className="nav-section">
+              <div className="section-label">{group.section}</div>
+              {group.items.map((item) => (
+                <Dropdown key={item.label} item={item} filter={filter} />
+              ))}
+            </div>
+          ))}
+        </nav>
 
-          {/* Footer */}
-          <div className="sb-footer">
-            <div className="avatar">OP</div>
-            <div className="footer-info">
-              <div className="footer-name">Opérateur Système</div>
-              <div className="footer-status">
-                <span className="online-dot" />
-                En ligne
-              </div>
+        {/* Footer */}
+        <div className="sb-footer">
+          <div className="avatar">OP</div>
+          <div className="footer-info">
+            <div className="footer-name">Opérateur Système</div>
+            <div className="footer-status">
+              <span className="online-dot" />
+              En ligne
             </div>
           </div>
+        </div>
       </aside>
     </>
   );

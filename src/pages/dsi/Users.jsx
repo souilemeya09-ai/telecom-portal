@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getUsers, deleteUser, toggleUserStatus } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import "../../styles/users.css";
@@ -12,17 +12,34 @@ const Users = () => {
   const navigate = useNavigate();
 
   // Charger les utilisateurs
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await getUsers();
       setUsers(response || []);
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchUsers();
+    let isMounted = true;
+
+    const loadUsers = async () => {
+      try {
+        const response = await getUsers();
+        if (isMounted) {
+          setUsers(response || []);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadUsers();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Supprimer utilisateur
@@ -66,6 +83,8 @@ const Users = () => {
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const activeUsers = users.filter((user) => user.enabled).length;
+  const inactiveUsers = users.length - activeUsers;
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -76,18 +95,35 @@ const Users = () => {
   };
 
   return (
-    <div className="users-container">
-      <h2 className="users-title">Liste des utilisateurs</h2>
-
-      {/* Bouton ajouter */}
-      <div className="add-button-container">
-        <button className="add-button" onClick={handleAdd}>
-          Ajouter utilisateur
+    <div className="page-wrapper">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Gestion des utilisateurs</h1>
+          <p className="page-subtitle">
+            {users.length} utilisateur{users.length !== 1 ? "s" : ""} enregistré{users.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <button className="btn-primary" onClick={handleAdd}>
+          + Nouvel utilisateur
         </button>
       </div>
 
-      {/* Recherche */}
-      <div className="search-container">
+      <div className="stats-grid users-stats">
+        <div className="stat-card stat-gray">
+          <p className="stat-label">Total</p>
+          <p className="stat-val">{users.length}</p>
+        </div>
+        <div className="stat-card stat-green">
+          <p className="stat-label">Actifs</p>
+          <p className="stat-val">{activeUsers}</p>
+        </div>
+        <div className="stat-card stat-orange">
+          <p className="stat-label">Inactifs</p>
+          <p className="stat-val">{inactiveUsers}</p>
+        </div>
+      </div>
+
+      <div className="search-bar">
         <input
           type="text"
           placeholder="Rechercher par nom, email ou rôle..."
@@ -97,83 +133,88 @@ const Users = () => {
             setCurrentPage(1);
           }}
         />
+        {searchTerm && (
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              setSearchTerm("");
+              setCurrentPage(1);
+            }}
+          >
+            Effacer
+          </button>
+        )}
       </div>
 
-      {/* Tableau */}
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nom et prénom</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      <div className="table-card">
+        {currentUsers.length > 0 ? (
+          <div className="table-scroll">
+            <table className="data-table users-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nom et prénom</th>
+                  <th>Email</th>
+                  <th>Rôle</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
 
-        <tbody>
-          {currentUsers.length > 0 ? (
-            currentUsers.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
+              <tbody>
+                {currentUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td className="mono">{user.id}</td>
+                    <td className="users-name">{user.username}</td>
+                    <td>{user.email}</td>
+                    <td>
+                      <span className="role-badge">{user.role}</span>
+                    </td>
+                    <td>
+                      <span className={user.enabled ? "status-badge status-active" : "status-badge status-inactive"}>
+                        {user.enabled ? "Actif" : "Inactif"}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons users-actions">
+                        <button
+                          className="btn-secondary"
+                          onClick={() => handleEdit(user.id)}
+                        >
+                          Modifier
+                        </button>
 
-                {/* Status */}
-                <td>
-                  <span
-                    className={user.enabled ? "status-active" : "status-inactive"}
-                  >
-                    {user.enabled ? "Actif" : "Inactif"}
-                  </span>
-                </td>
+                        <button
+                          className="btn-danger"
+                          onClick={() => handleDelete(user.id)}
+                        >
+                          Supprimer
+                        </button>
 
-                {/* Actions */}
-                <td>
-                  <div className="action-buttons">
-                    <button
-                      className="modify-btn"
-                      onClick={() => handleEdit(user.id)}
-                    >
-                      Modifier
-                    </button>
-
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(user.id)}
-                    >
-                      Supprimer
-                    </button>
-
-                    <button
-                      className={
-                        user.enabled ? "deactivate-btn" : "activate-btn"
-                      }
-                      onClick={() => handleToggle(user.id)}
-                    >
-                      {user.enabled ? "Désactiver" : "Activer"}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
+                        <button
+                          className={user.enabled ? "btn-warning" : "btn-primary"}
+                          onClick={() => handleToggle(user.id)}
+                        >
+                          {user.enabled ? "Désactiver" : "Activer"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           ) : (
-            <tr>
-              <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
-                Aucun utilisateur trouvé
-              </td>
-            </tr>
+          <div className="empty-state">
+            <p>Aucun utilisateur trouvé.</p>
+          </div>
           )}
-        </tbody>
-      </table>
+      </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="pagination">
+        <div className="users-pagination">
           <button
-            className="page-btn"
+            className="btn-secondary users-page-btn"
             onClick={handlePrevPage}
             disabled={currentPage === 1}
           >
@@ -185,7 +226,7 @@ const Users = () => {
           </span>
 
           <button
-            className="page-btn"
+            className="btn-secondary users-page-btn"
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
           >

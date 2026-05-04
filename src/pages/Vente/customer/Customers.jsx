@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import {
   getClients, createClient, updateClient, deleteClient,
+  uploadClientsCsv,
   getPromotions, assignerPromotion, getPromotionsByCustomer,
 } from "../../../api/api";
 import { getImageUrl } from "../../../utils/imageUrl";
@@ -28,6 +29,7 @@ function getValue(obj, field) {
   }
 }
 
+/* ── Sort icon — même structure que CustomerGroups ───────────── */
 function SortIcon({ field, sortField, sortOrder }) {
   if (sortField !== field) return <span className="sort-icon sort-idle">⇅</span>;
   return <span className="sort-icon sort-active">{sortOrder === "asc" ? "↑" : "↓"}</span>;
@@ -50,10 +52,11 @@ const IconPlus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor
 const IconEdit = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>;
 const IconTrash = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>;
 const IconSearch = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>;
-const IconFilter = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>;
 const IconClose = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
 
-/* ── Modal assignation promotion ─────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   MODAL : ASSIGNATION PROMOTION
+   ══════════════════════════════════════════════════════════════ */
 function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
   const [activePromos, setActivePromos] = useState([]);
   const [existingPromos, setExisting] = useState([]);
@@ -107,8 +110,9 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
         <div className="modal-header">
           <div>
             <h4 className="modal-title">Assigner une promotion</h4>
-            <p className="cl-email" style={{ marginTop: 3 }}>
-              Client : <strong style={{ color: "var(--text)" }}>{customer.nom} {customer.prenom}</strong>
+            {/* ✅ client-email au lieu de cl-email */}
+            <p className="client-email" style={{ marginTop: 3 }}>
+              Client : <strong>{customer.nom} {customer.prenom}</strong>
             </p>
           </div>
           <button className="modal-close" onClick={onClose}><IconClose /></button>
@@ -122,8 +126,9 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
             <div className="assign-existing-list">
               {existingPromos.map((p) => (
                 <div key={p.id} className="assign-existing-row">
-                  <span className="cl-name">{p.nomPromotion}</span>
-                  <span className="badge badge-active">{formatVal(p)}</span>
+                  {/* ✅ client-name au lieu de cl-name */}
+                  <span className="client-name">{p.nomPromotion}</span>
+                  <span className="badge badge-actif">{formatVal(p)}</span>
                 </div>
               ))}
             </div>
@@ -151,12 +156,12 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
                 <div className="promo-preview">
                   <div className="promo-preview-val">{formatVal(selectedPromo)}</div>
                   <div>
-                    <div className="cl-name">{selectedPromo.nomPromotion}</div>
+                    <div className="client-name">{selectedPromo.nomPromotion}</div>
                     {selectedPromo.ancienneteMinimale && (
-                      <div className="cl-email">Ancienneté min. : {selectedPromo.ancienneteMinimale} mois</div>
+                      <div className="client-email">Ancienneté min. : {selectedPromo.ancienneteMinimale} mois</div>
                     )}
                     {selectedPromo.regleEligibilite && (
-                      <div className="cl-email">{selectedPromo.regleEligibilite}</div>
+                      <div className="client-email">{selectedPromo.regleEligibilite}</div>
                     )}
                   </div>
                 </div>
@@ -188,7 +193,8 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
 
             {error && (
               <div className="form-group form-group-full">
-                <div className="field-error" style={{ padding: "8px", borderRadius: "6px", background: "rgba(239,68,68,.08)" }}>
+                <div className="field-error"
+                  style={{ padding: "8px", borderRadius: "6px", background: "rgba(239,68,68,.08)" }}>
                   {error}
                 </div>
               </div>
@@ -207,7 +213,9 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
   );
 }
 
-/* ── Modal promotions du client ──────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   MODAL : PROMOTIONS DU CLIENT
+   ══════════════════════════════════════════════════════════════ */
 function ClientPromosModal({ customer, onClose }) {
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -224,10 +232,14 @@ function ClientPromosModal({ customer, onClose }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box modal-large" onClick={(e) => e.stopPropagation()}>
+
         <div className="modal-header">
           <div>
             <h4 className="modal-title">Promotions applicables</h4>
-            <p className="cl-email" style={{ marginTop: 3 }}>{customer.nom} {customer.prenom}</p>
+            {/* ✅ client-email */}
+            <p className="client-email" style={{ marginTop: 3 }}>
+              {customer.nom} {customer.prenom}
+            </p>
           </div>
           <button className="modal-close" onClick={onClose}><IconClose /></button>
         </div>
@@ -241,17 +253,19 @@ function ClientPromosModal({ customer, onClose }) {
             {promos.map((p) => (
               <div key={p.id} className="promo-list-row">
                 <div>
-                  <div className="cl-name">{p.nomPromotion}</div>
-                  <div className="cl-email">
+                  {/* ✅ client-name + client-email */}
+                  <div className="client-name">{p.nomPromotion}</div>
+                  <div className="client-email">
                     {p.typeReduction === "POURCENTAGE" ? "Pourcentage" : "Montant fixe"}
                     {p.dateDebut && ` · ${p.dateDebut} → ${p.dateFin ?? "∞"}`}
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: "var(--accent)", fontFamily: "var(--mono)" }}>
+                  <span style={{ fontSize: 16, fontWeight: 500, fontFamily: "var(--mono)" }}>
                     {formatVal(p)}
                   </span>
-                  <span className={`badge ${p.statut === "ACTIVE" ? "badge-active" : "badge-default"}`}>
+                  {/* ✅ badge-actif au lieu de badge-active */}
+                  <span className={`badge ${p.statut === "ACTIVE" ? "badge-actif" : "badge-default"}`}>
                     {p.statut}
                   </span>
                 </div>
@@ -286,7 +300,10 @@ const Customers = () => {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [csvError, setCsvError] = useState(null);
+  const [csvUploading, setCsvUploading] = useState(false);
   const fileRef = useRef();
+  const csvFileRef = useRef();
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -297,6 +314,25 @@ const Customers = () => {
       setCustomers(c); setPromotions(p);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+  };
+
+  const handleCsvUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCsvError(null);
+    setCsvUploading(true);
+    try {
+      await uploadClientsCsv(file);
+      await fetchAll();
+      alert(`Import CSV réussi : ${file.name}`);
+    } catch (err) {
+      setCsvError(err.response?.data?.message || err.message || "Erreur lors de l'import CSV.");
+      console.error(err);
+    } finally {
+      setCsvUploading(false);
+      e.target.value = "";
+    }
   };
 
   const displayed = useMemo(() => {
@@ -314,7 +350,8 @@ const Customers = () => {
     return [...filtered].sort((a, b) => {
       const va = getValue(a, sortField), vb = getValue(b, sortField);
       const cmp = typeof va === "number"
-        ? va - vb : String(va).localeCompare(String(vb), "fr", { sensitivity: "base" });
+        ? va - vb
+        : String(va).localeCompare(String(vb), "fr", { sensitivity: "base" });
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }, [customers, search, sortField, sortOrder]);
@@ -325,6 +362,7 @@ const Customers = () => {
   };
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+
   const handleImage = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -332,7 +370,10 @@ const Customers = () => {
     setPreview(URL.createObjectURL(file));
   };
 
-  const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setPreview(null); setShowForm(true); };
+  const openCreate = () => {
+    setEditing(null); setForm(EMPTY_FORM); setPreview(null); setShowForm(true);
+  };
+
   const openEdit = (c) => {
     setEditing(c);
     setForm({
@@ -347,7 +388,10 @@ const Customers = () => {
     setPreview(img ? getImageUrl(img) : null);
     setShowForm(true);
   };
-  const closeForm = () => { setShowForm(false); setEditing(null); setForm(EMPTY_FORM); setPreview(null); };
+
+  const closeForm = () => {
+    setShowForm(false); setEditing(null); setForm(EMPTY_FORM); setPreview(null);
+  };
 
   const buildFormData = () => {
     const fd = new FormData();
@@ -382,306 +426,308 @@ const Customers = () => {
   const thProps = { sortField, sortOrder, onSort: handleSort };
 
   return (
+    <div className="page-wrapper">
 
-    // <div className="dashboard-main">
-      <div className="page-wrapper">
-
-        {/* ── En-tête ── */}
-        <div className="page-hdr">
-          <div>
-            <div className="page-title">
-              Gestion des clients
-              <span className="page-count">
-                {customers.length} client{customers.length !== 1 ? "s" : ""}
-              </span>
-            </div>
-            <div className="page-sub">Consultez, gérez et assignez des promotions à vos clients</div>
-          </div>
+      {/* ══ En-tête ══════════════════════════════════════════════ */}
+      {/* ✅ page-header (au lieu de page-hdr) */}
+      <div className="page-header">
+        <div>
+          {/* ✅ page-title + page-subtitle (au lieu de page-title + page-sub) */}
+          <h1 className="page-title">
+            Gestion des clients
+          </h1>
+          <p className="page-subtitle">
+            {customers.length} client{customers.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <button className="btn-secondary" onClick={() => csvFileRef.current.click()} disabled={csvUploading}>
+            {csvUploading ? "Import en cours..." : "Importer CSV"}
+          </button>
           <button className="btn-primary" onClick={openCreate}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" width="14" height="14">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Nouveau client
+            + Nouveau client
           </button>
         </div>
+        <input ref={csvFileRef} type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={handleCsvUpload} />
+      </div>
 
-        {/* ── KPI Stats ── */}
-        <div className="stats-row">
-          <div className="stat-card">
-            <div className="stat-label">Total clients</div>
-            <div className="stat-val">{customers.length}</div>
-            <div className="stat-trend up">↑ +18 ce mois</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">Avec contrat</div>
-            <div className="stat-val">{Math.round(customers.length * 0.82)}</div>
-            <div className="stat-trend up">82%</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">Avec promo</div>
-            <div className="stat-val">{Math.round(customers.length * 0.28)}</div>
-            <div className="stat-trend up">28%</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">Nouveaux (mois)</div>
-            <div className="stat-val">18</div>
-            <div className="stat-trend warn">En cours</div>
-          </div>
+      {/* ══ KPI Stats ════════════════════════════════════════════ */}
+      {/* ✅ stats-row + stat-card + stat-label + stat-value (au lieu de stat-val) */}
+      <div className="stats-row">
+        <div className="stat-card">
+          <span className="stat-label">Total clients</span>
+          <span className="stat-value">{customers.length}</span>
         </div>
+        <div className="stat-card" style={{ borderLeft: "3px solid #16a34a" }}>
+          <span className="stat-label">Avec contrat</span>
+          <span className="stat-value" style={{ color: "#16a34a" }}>
+            {Math.round(customers.length * 0.82)}
+          </span>
+        </div>
+        <div className="stat-card" style={{ borderLeft: "3px solid #BA7517" }}>
+          <span className="stat-label">Avec promo</span>
+          <span className="stat-value" style={{ color: "#BA7517" }}>
+            {Math.round(customers.length * 0.28)}
+          </span>
+        </div>
+      </div>
 
-        {/* ── Toolbar ── */}
-        <div className="toolbar">
-          <div className="search-wrap">
-            <span className="search-ico"><IconSearch /></span>
-            <input
-              className="search-input"
-              placeholder="Rechercher par nom, prénom, email, ville..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <button className="filter-btn">
-            <IconFilter /> Filtrer
-          </button>
+      {/* ══ Formulaire (panel inline) ════════════════════════════ */}
+      {showForm && (
+        <div className="form-panel">
+          {/* ✅ form-panel-title */}
+          <h3 className="form-panel-title">
+            {editingCustomer
+              ? `Modifier — ${editingCustomer.nom} ${editingCustomer.prenom}`
+              : "Ajouter un client"}
+          </h3>
+          <form className="form-grid" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Nom *</label>
+              <input className="form-control" value={form.nom} onChange={set("nom")} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Prénom *</label>
+              <input className="form-control" value={form.prenom} onChange={set("prenom")} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Téléphone *</label>
+              <input className="form-control" type="text" value={form.telephone} maxLength={8}
+                onChange={(e) => setForm({ ...form, telephone: e.target.value.replace(/\D/g, "") })} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Email *</label>
+              <input className="form-control" type="email" value={form.email} onChange={set("email")} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Adresse</label>
+              <input className="form-control" value={form.adresse} onChange={set("adresse")} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Ville</label>
+              <input className="form-control" value={form.ville} onChange={set("ville")} />
+            </div>
+
+            <div className="form-group form-group-full">
+              <label className="form-label">Type de document *</label>
+              <div className="doc-type-toggle">
+                <button type="button"
+                  className={`doc-toggle-btn ${isCIN ? "active" : ""}`}
+                  onClick={() => setForm((f) => ({ ...f, documentType: "1", passportNumber: "", image: null }))}>
+                  CIN
+                </button>
+                <button type="button"
+                  className={`doc-toggle-btn ${!isCIN ? "active" : ""}`}
+                  onClick={() => setForm((f) => ({ ...f, documentType: "2", cinNumber: "", image: null }))}>
+                  Passeport
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Numéro {docLabel} *</label>
+              {isCIN ? (
+                <input className="form-control" type="text" value={form.cinNumber}
+                  maxLength={8} onChange={set("cinNumber")} required />
+              ) : (
+                <input className="form-control" value={form.passportNumber}
+                  onChange={set("passportNumber")} placeholder="Ex: AB1234567" required />
+              )}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Image {docLabel}</label>
+              <div className="upload-zone" onClick={() => fileRef.current.click()}>
+                {preview
+                  ? <img src={preview} alt="preview" className="upload-preview" />
+                  : <>
+                    <span className="upload-icon">📎</span>
+                    <span>Cliquer pour uploader</span>
+                    <span className="upload-hint">JPG, PNG — max 5MB</span>
+                  </>}
+                <input ref={fileRef} type="file" accept="image/*"
+                  style={{ display: "none" }} onChange={handleImage} />
+              </div>
+              {preview && (
+                <button type="button" className="upload-clear"
+                  onClick={() => { setPreview(null); setForm((f) => ({ ...f, image: null })); fileRef.current.value = ""; }}>
+                  ✕ Retirer l'image
+                </button>
+              )}
+            </div>
+
+            <div className="form-actions">
+              <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                {submitting ? "Enregistrement..." : editingCustomer ? "Mettre à jour" : "Ajouter le client"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {csvError && (
+        <div className="alert alert-error" style={{ marginBottom: "1rem" }}>
+          Erreur import CSV : {csvError}
+        </div>
+      )}
+
+      {/* ══ Recherche ════════════════════════════════════════════ */}
+      {/* ✅ filter-search-row + search-bar (même pattern que CustomerGroups) */}
+      <div className="filter-search-row">
+        <div className="search-bar">
+          <span className="search-ico"><IconSearch /></span>
+          <input
+            type="text"
+            placeholder="Rechercher par nom, prénom, email, ville..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
           {search && (
             <button className="btn-secondary" onClick={() => setSearch("")}>Effacer</button>
           )}
         </div>
+      </div>
 
-        {/* ── Table ── */}
-        <div className="table-wrap">
-          <div className="table-card">
-            {loading ? (
-              <div className="loading-state">Chargement des clients...</div>
-            ) : displayed.length === 0 ? (
-              <div className="empty-state"><p>Aucun client trouvé.</p></div>
-            ) : (
-              <div className="tbl-scroll">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <Th label="ID" field="id"        {...thProps} />
-                      <Th label="Client" field="client"    {...thProps} />
-                      <Th label="Tél." field="telephone" {...thProps} />
-                      <Th label="Adresse" field="adresse"   {...thProps} />
-                      <Th label="Ville" field="ville"     {...thProps} />
-                      <Th label="Document" field="document"  {...thProps} />
-                      <Th label="Numéro" field="numero"    {...thProps} />
-                      <th>Image</th>
-                      <th>Actions</th>
+      {/* ══ Table ════════════════════════════════════════════════ */}
+      {/* ✅ table-card + table-scroll + data-table (même structure exacte) */}
+      <div className="table-card" style={{ marginTop: "1rem" }}>
+        {loading ? (
+          <div className="loading-state">Chargement des clients...</div>
+        ) : displayed.length === 0 ? (
+          <div className="empty-state"><p>Aucun client trouvé.</p></div>
+        ) : (
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <Th label="ID" field="id"        {...thProps} />
+                  <Th label="Client" field="client"    {...thProps} />
+                  <Th label="Tél." field="telephone" {...thProps} />
+                  <Th label="Adresse" field="adresse"   {...thProps} />
+                  <Th label="Ville" field="ville"     {...thProps} />
+                  <Th label="Document" field="document"  {...thProps} />
+                  <Th label="Numéro" field="numero"    {...thProps} />
+                  <th>Image</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayed.map((c) => {
+                  const isCin = c.documentType === 1;
+                  const docNum = isCin ? c.cinNumber : c.passportNumber;
+                  const docImg = isCin ? c.cinImagePath : c.passportImagePath;
+                  return (
+                    <tr key={c.id}>
+                      {/* ✅ id-cell */}
+                      <td className="id-cell">{c.customerId}</td>
+
+                      {/* ✅ service-name-cell + group-icon + client-name + client-email
+                           (même structure que la colonne Nom dans CustomerGroups) */}
+                      <td>
+                        <div className="service-name-cell">
+                          <div className="group-icon">
+                            {c.nom?.[0]?.toUpperCase() ?? "?"}
+                          </div>
+                          <div>
+                            <div className="client-name">{c.nom} {c.prenom}</div>
+                            <div className="client-email">{c.email}</div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* ✅ mono (au lieu de mono-cell) */}
+                      <td className="mono">{c.telephone || "—"}</td>
+                      <td>{c.adresse || "—"}</td>
+                      <td>{c.ville || "—"}</td>
+
+                      {/* ✅ badge-cin / badge-passport */}
+                      <td>
+                        <span className={`badge ${isCin ? "badge-cin" : "badge-passport"}`}>
+                          {isCin ? "CIN" : "Passeport"}
+                        </span>
+                      </td>
+
+                      <td className="mono">{docNum || "—"}</td>
+
+                      <td>
+                        {docImg
+                          ? <img src={getImageUrl(docImg)} alt="doc" className="doc-thumb" />
+                          : <span style={{ color: "var(--color-text-tertiary)" }}>—</span>}
+                      </td>
+
+                      {/* ✅ action-buttons + btn-action + btn-view / btn-edit / btn-delete
+                           (même pattern que CustomerGroups) */}
+                      <td>
+                        <div className="action-buttons">
+                          <button className="btn-action btn-view"
+                            onClick={() => setPromosModal(c)} title="Voir promotions">
+                            👁
+                          </button>
+                          <button className="btn-action"
+                            onClick={() => setAssignModal(c)} title="Assigner une promotion">
+                            ➕
+                          </button>
+                          <button className="btn-action btn-edit"
+                            onClick={() => openEdit(c)} title="Modifier">
+                            ✏️
+                          </button>
+                          <button className="btn-action btn-delete"
+                            onClick={() => setDeleteConfirm(c)} title="Supprimer">
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {displayed.map((c) => {
-                      const isCin = c.documentType === 1;
-                      const docNum = isCin ? c.cinNumber : c.passportNumber;
-                      const docImg = isCin ? c.cinImagePath : c.passportImagePath;
-                      return (
-                        <tr key={c.id}>
-                          <td className="id-cell">{c.customerId}</td>
-                          <td>
-                            <div className="client-cell">
-                              <div className="avatar">
-                                {c.nom?.[0]?.toUpperCase() ?? "?"}
-                              </div>
-                              <div>
-                                <div className="cl-name">{c.nom} {c.prenom}</div>
-                                <div className="cl-email">{c.email}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="mono-cell">{c.telephone || "—"}</td>
-                          <td>{c.adresse || "—"}</td>
-                          <td>{c.ville || "—"}</td>
-                          <td>
-                            <span className={`badge ${isCin ? "badge-cin" : "badge-passport"}`}>
-                              {isCin ? "CIN" : "Passeport"}
-                            </span>
-                          </td>
-                          <td className="mono-cell">{docNum || "—"}</td>
-                          <td>
-                            {docImg
-                              ? <img src={getImageUrl(docImg)} alt="doc" className="doc-thumb" />
-                              : <span style={{ color: "var(--muted)" }}>—</span>}
-                          </td>
-                          <td>
-                            <div className="action-buttons">
-                              <button className="btn-action promo"
-                                onClick={() => setPromosModal(c)} title="Voir promotions">
-                                <IconTag />
-                              </button>
-                              <button className="btn-action assign"
-                                onClick={() => setAssignModal(c)} title="Assigner une promotion">
-                                <IconPlus />
-                              </button>
-                              <button className="btn-action edit"
-                                onClick={() => openEdit(c)} title="Modifier">
-                                <IconEdit />
-                              </button>
-                              <button className="btn-action del"
-                                onClick={() => setDeleteConfirm(c)} title="Supprimer">
-                                <IconTrash />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </div>
-
-        {/* ── Modal formulaire ── */}
-        {showForm && (
-          <div className="modal-overlay" onClick={closeForm}>
-            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <div>
-                  <h3 className="modal-title">
-                    {editingCustomer
-                      ? `Modifier — ${editingCustomer.nom} ${editingCustomer.prenom}`
-                      : "Ajouter un client"}
-                  </h3>
-                  <div className="cl-email" style={{ marginTop: 3 }}>
-                    {editingCustomer ? "Modifiez les informations du client" : "Remplissez les informations du nouveau client"}
-                  </div>
-                </div>
-                <button className="modal-close" onClick={closeForm}><IconClose /></button>
-              </div>
-              <form onSubmit={handleSubmit}>
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label className="form-label">Nom *</label>
-                    <input className="form-control" value={form.nom} onChange={set("nom")} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Prénom *</label>
-                    <input className="form-control" value={form.prenom} onChange={set("prenom")} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Téléphone *</label>
-                    <input className="form-control" type="text" value={form.telephone} maxLength={8}
-                      onChange={(e) => setForm({ ...form, telephone: e.target.value.replace(/\D/g, "") })} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Email *</label>
-                    <input className="form-control" type="email" value={form.email} onChange={set("email")} required />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Adresse</label>
-                    <input className="form-control" value={form.adresse} onChange={set("adresse")} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Ville</label>
-                    <input className="form-control" value={form.ville} onChange={set("ville")} />
-                  </div>
-
-                  <div className="form-group form-group-full">
-                    <label className="form-label">Type de document *</label>
-                    <div className="doc-type-toggle">
-                      <button type="button"
-                        className={`doc-toggle-btn ${isCIN ? "active" : ""}`}
-                        onClick={() => setForm((f) => ({ ...f, documentType: "1", passportNumber: "", image: null }))}>
-                        CIN
-                      </button>
-                      <button type="button"
-                        className={`doc-toggle-btn ${!isCIN ? "active" : ""}`}
-                        onClick={() => setForm((f) => ({ ...f, documentType: "2", cinNumber: "", image: null }))}>
-                        Passeport
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Numéro {docLabel} *</label>
-                    {isCIN ? (
-                      <input className="form-control" type="text" value={form.cinNumber}
-                        maxLength={8} onChange={set("cinNumber")} required />
-                    ) : (
-                      <input className="form-control" value={form.passportNumber}
-                        onChange={set("passportNumber")} placeholder="Ex: AB1234567" required />
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Image {docLabel}</label>
-                    <div className="upload-zone" onClick={() => fileRef.current.click()}>
-                      {preview
-                        ? <img src={preview} alt="preview" className="upload-preview" />
-                        : <>
-                          <span className="upload-icon">📎</span>
-                          <span>Cliquer pour uploader</span>
-                          <span className="upload-hint">JPG, PNG — max 5MB</span>
-                        </>
-                      }
-                      <input ref={fileRef} type="file" accept="image/*"
-                        style={{ display: "none" }} onChange={handleImage} />
-                    </div>
-                    {preview && (
-                      <button type="button" className="upload-clear"
-                        onClick={() => { setPreview(null); setForm((f) => ({ ...f, image: null })); fileRef.current.value = ""; }}>
-                        ✕ Retirer l'image
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="form-actions">
-                    <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-                    <button type="submit" className="btn-primary" disabled={submitting}>
-                      {submitting ? "Enregistrement..." : editingCustomer ? "Mettre à jour" : "Ajouter le client"}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* ── Modal suppression ── */}
-        {deleteConfirm && (
-          <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
-            <div className="modal-box" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h4 className="modal-title">Confirmer la suppression</h4>
-                <button className="modal-close" onClick={() => setDeleteConfirm(null)}><IconClose /></button>
-              </div>
-              <p className="modal-text">
-                Supprimer <strong style={{ color: "var(--text)" }}>
-                  {deleteConfirm.nom} {deleteConfirm.prenom}
-                </strong> ? Cette action est irréversible.
-              </p>
-              <div className="modal-actions">
-                <button className="btn-secondary" onClick={() => setDeleteConfirm(null)}>Annuler</button>
-                <button className="btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>
-                  Supprimer définitivement
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Modal assignation promotion ── */}
-        {assignModal && (
-          <AssignPromotionModal
-            customer={assignModal}
-            promotions={promotions}
-            onClose={() => setAssignModal(null)}
-            onAssign={async (id, dto) => assignerPromotion(id, dto)}
-          />
-        )}
-
-        {/* ── Modal promotions du client ── */}
-        {promosModal && (
-          <ClientPromosModal
-            customer={promosModal}
-            onClose={() => setPromosModal(null)}
-          />
         )}
       </div>
 
+      {/* ══ Modal suppression ════════════════════════════════════ */}
+      {deleteConfirm && (
+        <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
+          <div className="modal-box" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h4 className="modal-title">Confirmer la suppression</h4>
+              <button className="modal-close" onClick={() => setDeleteConfirm(null)}><IconClose /></button>
+            </div>
+            {/* ✅ modal-text */}
+            <p className="modal-text">
+              Supprimer <strong>{deleteConfirm.nom} {deleteConfirm.prenom}</strong> ?
+              Cette action est irréversible.
+            </p>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setDeleteConfirm(null)}>Annuler</button>
+              <button className="btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>
+                Supprimer définitivement
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ Modal assignation promotion ══════════════════════════ */}
+      {assignModal && (
+        <AssignPromotionModal
+          customer={assignModal}
+          promotions={promotions}
+          onClose={() => setAssignModal(null)}
+          onAssign={async (id, dto) => assignerPromotion(id, dto)}
+        />
+      )}
+
+      {/* ══ Modal promotions du client ═══════════════════════════ */}
+      {promosModal && (
+        <ClientPromosModal
+          customer={promosModal}
+          onClose={() => setPromosModal(null)}
+        />
+      )}
+    </div>
   );
 };
 

@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./navbar/Navbar";
 import Sidebar from "./sidebar/Sidebar";
 import Footer from "./Footer/Footer";
+import "./DashboardLayout.css";
 
 const BREADCRUMB_MAP = {
   "/users": ["DSI", "Utilisateurs"],
@@ -20,17 +21,17 @@ const DashboardLayout = () => {
   const breadcrumb = BREADCRUMB_MAP[pathname] ?? [];
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="dashboard-shell">
 
       <Navbar />
 
-      <div style={{ display: "flex", flex: 1 }}>
+      <div className="dashboard-body">
 
         <Sidebar />
 
-        <div style={{ flex: 1 }}>
+        <main className="dashboard-main">
           <Outlet />
-        </div>
+        </main>
 
       </div>
       <Footer />

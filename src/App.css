@@ -98,9 +98,12 @@
 .page-wrapper {
   font-family: var(--font);
   background: var(--bg);
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
-  padding: 2rem 1.5rem;
+  padding: clamp(1rem, 2vw, 2rem) clamp(1rem, 2.5vw, 1.5rem);
   color: var(--text-primary);
+  overflow-x: hidden;
 }
 
 .page-header {
@@ -309,8 +312,8 @@
   transition: background var(--transition), border-color var(--transition);
 }
 
-.btn-view svg {
-  stroke: var(--text-muted);
+.btn-view {
+  color: var(--text-primary);
 }
 
 .btn-add svg {
@@ -373,6 +376,7 @@
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
+  width: 50%;
 }
 
 .search-bar input {
@@ -800,6 +804,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
   max-width: 600px;
   width: 90%;
+  padding: 10px;
   max-height: 90vh;
   overflow-y: auto;
   animation: slideUp .25s ease-out;
@@ -1015,7 +1020,7 @@
   }
 
   .modal-box {
-    width: 96%;
+    width: 95%;
   }
 
   .data-table {
@@ -1025,5 +1030,11 @@
   .data-table th,
   .data-table td {
     padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-wrapper {
+    padding: 0.875rem;
   }
 }
