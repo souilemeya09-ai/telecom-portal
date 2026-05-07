@@ -4,6 +4,8 @@ import {
   deleteContrat, resilierContrat, getClients, getOffres,
   uploadContratsCsv,
 } from "../../../api/api";
+import Pagination from "../../../components/Pagination";
+import "./contrat.css"
 
 const EMPTY_FORM = {
   clientId: "", offreId: "",
@@ -74,18 +76,31 @@ function Contrats() {
   const [dateErrors, setDateErrors] = useState({});
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [clientSearch, setClientSearch] = useState("");
+  const itemsPerPage = 10;
   const [search, setSearch] = useState("");
   const [csvError, setCsvError] = useState(null);
   const [csvUploading, setCsvUploading] = useState(false);
   const csvFileRef = useRef();
+
+  const [clientDropdownOpen, setClientDropdownOpen] = useState(false);
+  const [offreSearch, setOffreSearch] = useState("");
+  const [offreDropdownOpen, setOffreDropdownOpen] = useState(false);
+  const clientDropdownRef = useRef();
+  const offreDropdownRef = useRef();
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [c, cl, o] = await Promise.all([getContrats(), getClients(), getOffres()]);
-      setContrats(c); setClients(cl); setOffers(o);
+      const [c, cl, o] = await Promise.all([
+        getContrats({ page: 0, size: 1000 }),
+        getClients({ page: 0, size: 1000 }),
+        getOffres({ page: 0, size: 1000 })
+      ]);
+      setContrats(c.content || []); setClients(cl.content || []); setOffers(o.content || []);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -110,6 +125,24 @@ function Contrats() {
   };
 
   // ── Sort + search ─────────────────────────────────────────
+  const filteredClients = useMemo(() => {
+    const term = clientSearch.trim().toLowerCase();
+    if (!term) return clients;
+    return clients.filter((c) =>
+      `${c.nom} ${c.prenom}`.toLowerCase().includes(term) ||
+      c.email?.toLowerCase().includes(term) ||
+      String(c.id).includes(term)
+    );
+  }, [clients, clientSearch]);
+
+  const filteredOffres = useMemo(() => {
+    const term = offreSearch.trim().toLowerCase();
+    if (!term) return offers;
+    return offers.filter((o) =>
+      (o.nomOffre || o.nom || "").toLowerCase().includes(term)
+    );
+  }, [offers, offreSearch]);
+
   const displayed = useMemo(() => {
     const term = search.toLowerCase();
     const filtered = term
@@ -130,6 +163,14 @@ function Contrats() {
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }, [contrats, sortField, sortOrder, search]);
+
+
+  const pageCount = Math.ceil(displayed.length / itemsPerPage);
+  const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortField, sortOrder]);
 
   const handleSort = (field) => {
     if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -165,6 +206,7 @@ function Contrats() {
     setEditing(null);
     setForm({ ...EMPTY_FORM, directoryNumber: genererNumero() });
     setDateErrors({});
+    setClientSearch("");
     setShowForm(true);
   };
 
@@ -178,6 +220,7 @@ function Contrats() {
       directoryNumber: c.directoryNumber || "",
     });
     setDateErrors({});
+    setClientSearch("");
     setShowForm(true);
     setDetail(null);
   };
@@ -185,6 +228,7 @@ function Contrats() {
   const closeForm = () => {
     setShowForm(false); setEditing(null);
     setForm(EMPTY_FORM); setDateErrors({});
+    setClientSearch("");
   };
 
   const hasDateErrors = Object.keys(dateErrors).length > 0;
@@ -272,22 +316,95 @@ function Contrats() {
             </div>
             <form className="form-grid" onSubmit={handleSubmit}>
 
-              <div className="form-group">
+              <div className="form-group" ref={clientDropdownRef} style={{ position: "relative" }}>
                 <label className="form-label">Client *</label>
-                <select className="form-control" value={form.clientId}
-                  onChange={(e) => updateForm({ clientId: e.target.value })} required>
-                  <option value="">Sélectionner un client</option>
-                  {clients.map((c) => <option key={c.id} value={c.id}>{c.nom} {c.prenom}</option>)}
-                </select>
+                <input
+                  className="form-control"
+                  type="text"
+                  placeholder="Rechercher un client..."
+                  value={
+                    form.clientId
+                      ? (() => {
+                        const c = clients.find((c) => String(c.id) === String(form.clientId));
+                        return c ? `${c.nom} ${c.prenom}` : clientSearch;
+                      })()
+                      : clientSearch
+                  }
+                  onChange={(e) => {
+                    setClientSearch(e.target.value);
+                    updateForm({ clientId: "" });
+                    setClientDropdownOpen(true);
+                  }}
+                  onFocus={() => setClientDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setClientDropdownOpen(false), 150)}
+                  required
+                  autoComplete="off"
+                />
+                {clientDropdownOpen && filteredClients.length > 0 && (
+                  <ul className="combobox-dropdown">
+                    {filteredClients.slice(0, 8).map((c) => (
+                      <li
+                        key={c.id}
+                        className={`combobox-option ${String(form.clientId) === String(c.id) ? "combobox-option-selected" : ""}`}
+                        onMouseDown={() => {
+                          updateForm({ clientId: c.id });
+                          setClientSearch(`${c.nom} ${c.prenom}`);
+                          setClientDropdownOpen(false);
+                        }}
+                      >
+                        <span className="combobox-avatar">{c.nom?.[0]?.toUpperCase()}</span>
+                        <span>
+                          <span className="combobox-main">{c.nom} {c.prenom}</span>
+                          <span className="combobox-sub">{c.email}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
-              <div className="form-group">
+              <div className="form-group" ref={offreDropdownRef} style={{ position: "relative" }}>
                 <label className="form-label">Offre *</label>
-                <select className="form-control" value={form.offreId}
-                  onChange={(e) => updateForm({ offreId: e.target.value })} required>
-                  <option value="">Sélectionner une offre</option>
-                  {offers.map((o) => <option key={o.id} value={o.id}>{o.nomOffre || o.nom || "Sans nom"}</option>)}
-                </select>
+                <input
+                  className="form-control"
+                  type="text"
+                  placeholder="Rechercher une offre..."
+                  value={
+                    form.offreId
+                      ? (() => {
+                        const o = offers.find((o) => String(o.id) === String(form.offreId));
+                        return o ? (o.nomOffre || o.nom || "Sans nom") : offreSearch;
+                      })()
+                      : offreSearch
+                  }
+                  onChange={(e) => {
+                    setOffreSearch(e.target.value);
+                    updateForm({ offreId: "" });
+                    setOffreDropdownOpen(true);
+                  }}
+                  onFocus={() => setOffreDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setOffreDropdownOpen(false), 150)}
+                  required
+                  autoComplete="off"
+                />
+                {offreDropdownOpen && filteredOffres.length > 0 && (
+                  <ul className="combobox-dropdown">
+                    {filteredOffres.slice(0, 8).map((o) => (
+                      <li
+                        key={o.id}
+                        className={`combobox-option ${String(form.offreId) === String(o.id) ? "combobox-option-selected" : ""}`}
+                        onMouseDown={() => {
+                          updateForm({ offreId: o.id });
+                          setOffreSearch(o.nomOffre || o.nom || "Sans nom");
+                          setOffreDropdownOpen(false);
+                        }}
+                      >
+                        <span className="combobox-main">{o.nomOffre || o.nom || "Sans nom"}</span>
+                        {o.prixMensuel && <span className="combobox-sub">{o.prixMensuel} TND/mois</span>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               {/* ── Date début ── */}
@@ -461,7 +578,7 @@ function Contrats() {
                 </tr>
               </thead>
               <tbody>
-                {displayed.map((c) => (
+                {pageItems.map((c) => (
                   <tr key={c.id}>
                     <td className="id-cell">{c.contractId && `cont_${c.contractId}`}</td>
                     <td>
@@ -491,6 +608,7 @@ function Contrats() {
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
       </div>
     </div>
   );

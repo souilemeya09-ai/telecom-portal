@@ -133,8 +133,8 @@ export const toggleUserStatus = async (id) => {
 
 // ==================== CLIENTS ====================
 
-export const getClients = async () => {
-  const res = await api.get("/clients");
+export const getClients = async (params = {}) => {
+  const res = await api.get("/clients", { params });
   return res.data;
 };
 
@@ -211,8 +211,8 @@ export const uploadServicesCsv = async (file) => {
 
 // ==================== CONTRATS ====================
 
-export const getContrats = async () => {
-  const res = await api.get("/contrats");
+export const getContrats = async (params = {}) => {
+  const res = await api.get("/contrats", { params });
   return res.data;
 };
 
@@ -327,8 +327,8 @@ export async function deleteReclamation(id) {
 // ── À ajouter dans src/api/api.js ──────────────────────────────
 
 // GET /api/promotions
-export async function getPromotions() {
-  const res = await api.get("/promotions");
+export async function getPromotions(params = {}) {
+  const res = await api.get("/promotions", { params });
   return res.data;
 }
 
@@ -382,8 +382,8 @@ export async function suspendrePromotion(id) {
 // ── À ajouter dans src/api/api.js ──────────────────────────────
 
 // ── Services ─────────────────────────────────────────────────
-export async function getServices() {
-  const res = await api.get("/services");
+export async function getServices(params = {}) {
+  const res = await api.get("/services", { params });
   return res.data;
 }
 export async function createService(dto) {
@@ -400,8 +400,8 @@ export async function deleteService(id) {
 }
 
 // ── Offres ───────────────────────────────────────────────────
-export async function getOffres() {
-  const res = await api.get("/offres");
+export async function getOffres(params = {}) {
+  const res = await api.get("/offres", { params });
   return res.data;
 }
 export async function getOffreById(id) {
@@ -436,8 +436,8 @@ export async function retirerServiceOffre(offreId, serviceId) {
 // ── À ajouter dans src/api/api.js ──────────────────────────────
 
 // GET /api/plans-tarifaires
-export async function getPlansTarifaires() {
-  const res = await api.get("/plans-tarifaires");
+export async function getPlansTarifaires(params = {}) {
+  const res = await api.get("/plans-tarifaires", { params });
   return res.data;
 }
 

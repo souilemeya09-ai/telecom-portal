@@ -4,6 +4,7 @@ import {
   uploadClientsCsv,
   getPromotions, assignerPromotion, getPromotionsByCustomer,
 } from "../../../api/api";
+import Pagination from "../../../components/Pagination";
 import { getImageUrl } from "../../../utils/imageUrl";
 import "../../../styles/Page.css";
 
@@ -300,6 +301,8 @@ const Customers = () => {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [csvError, setCsvError] = useState(null);
   const [csvUploading, setCsvUploading] = useState(false);
   const fileRef = useRef();
@@ -310,8 +313,11 @@ const Customers = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [c, p] = await Promise.all([getClients(), getPromotions()]);
-      setCustomers(c); setPromotions(p);
+      const [c, p] = await Promise.all([
+        getClients({ page: 0, size: customers.length || 1000 }),
+        getPromotions({ page: 0, size: customers.length || 1000 })
+      ]);
+      setCustomers(c.content || []); setPromotions(p.content || []);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -355,6 +361,13 @@ const Customers = () => {
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }, [customers, search, sortField, sortOrder]);
+
+  const pageCount = Math.ceil(displayed.length / itemsPerPage);
+  const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortField, sortOrder]);
 
   const handleSort = (field) => {
     if (sortField === field) setSortOrder((o) => o === "asc" ? "desc" : "asc");
@@ -474,98 +487,109 @@ const Customers = () => {
 
       {/* ══ Formulaire (panel inline) ════════════════════════════ */}
       {showForm && (
-        <div className="form-panel">
-          {/* ✅ form-panel-title */}
-          <h3 className="form-panel-title">
-            {editingCustomer
-              ? `Modifier — ${editingCustomer.nom} ${editingCustomer.prenom}`
-              : "Ajouter un client"}
-          </h3>
-          <form className="form-grid" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Nom *</label>
-              <input className="form-control" value={form.nom} onChange={set("nom")} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Prénom *</label>
-              <input className="form-control" value={form.prenom} onChange={set("prenom")} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Téléphone *</label>
-              <input className="form-control" type="text" value={form.telephone} maxLength={8}
-                onChange={(e) => setForm({ ...form, telephone: e.target.value.replace(/\D/g, "") })} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Email *</label>
-              <input className="form-control" type="email" value={form.email} onChange={set("email")} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Adresse</label>
-              <input className="form-control" value={form.adresse} onChange={set("adresse")} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Ville</label>
-              <input className="form-control" value={form.ville} onChange={set("ville")} />
-            </div>
-
-            <div className="form-group form-group-full">
-              <label className="form-label">Type de document *</label>
-              <div className="doc-type-toggle">
-                <button type="button"
-                  className={`doc-toggle-btn ${isCIN ? "active" : ""}`}
-                  onClick={() => setForm((f) => ({ ...f, documentType: "1", passportNumber: "", image: null }))}>
-                  CIN
-                </button>
-                <button type="button"
-                  className={`doc-toggle-btn ${!isCIN ? "active" : ""}`}
-                  onClick={() => setForm((f) => ({ ...f, documentType: "2", cinNumber: "", image: null }))}>
-                  Passeport
-                </button>
+        <div className="modal-overlay" onClick={closeForm}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div>
+                <h3 className="modal-title">
+                  {editingCustomer
+                    ? `Modifier — ${editingCustomer.nom} ${editingCustomer.prenom}`
+                    : "Ajouter un client"}
+                </h3>
+                <div className="cl-email" style={{ marginTop: 3 }}>
+                  {editingCustomer ? "Modifiez les informations du client" : "Remplissez les informations du nouveau client"}
+                </div>
               </div>
+              <button className="modal-close" onClick={closeForm}><IconClose /></button>
             </div>
+            <form onSubmit={handleSubmit}>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label className="form-label">Nom *</label>
+                  <input className="form-control" value={form.nom} onChange={set("nom")} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Prénom *</label>
+                  <input className="form-control" value={form.prenom} onChange={set("prenom")} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Téléphone *</label>
+                  <input className="form-control" type="text" value={form.telephone} maxLength={8}
+                    onChange={(e) => setForm({ ...form, telephone: e.target.value.replace(/\D/g, "") })} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email *</label>
+                  <input className="form-control" type="email" value={form.email} onChange={set("email")} required />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Adresse</label>
+                  <input className="form-control" value={form.adresse} onChange={set("adresse")} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Ville</label>
+                  <input className="form-control" value={form.ville} onChange={set("ville")} />
+                </div>
 
-            <div className="form-group">
-              <label className="form-label">Numéro {docLabel} *</label>
-              {isCIN ? (
-                <input className="form-control" type="text" value={form.cinNumber}
-                  maxLength={8} onChange={set("cinNumber")} required />
-              ) : (
-                <input className="form-control" value={form.passportNumber}
-                  onChange={set("passportNumber")} placeholder="Ex: AB1234567" required />
-              )}
-            </div>
+                <div className="form-group form-group-full">
+                  <label className="form-label">Type de document *</label>
+                  <div className="doc-type-toggle">
+                    <button type="button"
+                      className={`doc-toggle-btn ${isCIN ? "active" : ""}`}
+                      onClick={() => setForm((f) => ({ ...f, documentType: "1", passportNumber: "", image: null }))}>
+                      CIN
+                    </button>
+                    <button type="button"
+                      className={`doc-toggle-btn ${!isCIN ? "active" : ""}`}
+                      onClick={() => setForm((f) => ({ ...f, documentType: "2", cinNumber: "", image: null }))}>
+                      Passeport
+                    </button>
+                  </div>
+                </div>
 
-            <div className="form-group">
-              <label className="form-label">Image {docLabel}</label>
-              <div className="upload-zone" onClick={() => fileRef.current.click()}>
-                {preview
-                  ? <img src={preview} alt="preview" className="upload-preview" />
-                  : <>
-                    <span className="upload-icon">📎</span>
-                    <span>Cliquer pour uploader</span>
-                    <span className="upload-hint">JPG, PNG — max 5MB</span>
-                  </>}
-                <input ref={fileRef} type="file" accept="image/*"
-                  style={{ display: "none" }} onChange={handleImage} />
+                <div className="form-group">
+                  <label className="form-label">Numéro {docLabel} *</label>
+                  {isCIN ? (
+                    <input className="form-control" type="text" value={form.cinNumber}
+                      maxLength={8} onChange={set("cinNumber")} required />
+                  ) : (
+                    <input className="form-control" value={form.passportNumber}
+                      onChange={set("passportNumber")} placeholder="Ex: AB1234567" required />
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Image {docLabel}</label>
+                  <div className="upload-zone" onClick={() => fileRef.current.click()}>
+                    {preview
+                      ? <img src={preview} alt="preview" className="upload-preview" />
+                      : <>
+                        <span className="upload-icon">📎</span>
+                        <span>Cliquer pour uploader</span>
+                        <span className="upload-hint">JPG, PNG — max 5MB</span>
+                      </>
+                    }
+                    <input ref={fileRef} type="file" accept="image/*"
+                      style={{ display: "none" }} onChange={handleImage} />
+                  </div>
+                  {preview && (
+                    <button type="button" className="upload-clear"
+                      onClick={() => { setPreview(null); setForm((f) => ({ ...f, image: null })); fileRef.current.value = ""; }}>
+                      ✕ Retirer l'image
+                    </button>
+                  )}
+                </div>
+
+                <div className="form-actions">
+                  <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
+                  <button type="submit" className="btn-primary" disabled={submitting}>
+                    {submitting ? "Enregistrement..." : editingCustomer ? "Mettre à jour" : "Ajouter le client"}
+                  </button>
+                </div>
               </div>
-              {preview && (
-                <button type="button" className="upload-clear"
-                  onClick={() => { setPreview(null); setForm((f) => ({ ...f, image: null })); fileRef.current.value = ""; }}>
-                  ✕ Retirer l'image
-                </button>
-              )}
-            </div>
-
-            <div className="form-actions">
-              <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-              <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting ? "Enregistrement..." : editingCustomer ? "Mettre à jour" : "Ajouter le client"}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
-
       {csvError && (
         <div className="alert alert-error" style={{ marginBottom: "1rem" }}>
           Erreur import CSV : {csvError}
@@ -613,7 +637,7 @@ const Customers = () => {
                 </tr>
               </thead>
               <tbody>
-                {displayed.map((c) => {
+                {pageItems.map((c) => {
                   const isCin = c.documentType === 1;
                   const docNum = isCin ? c.cinNumber : c.passportNumber;
                   const docImg = isCin ? c.cinImagePath : c.passportImagePath;
@@ -685,6 +709,7 @@ const Customers = () => {
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
       </div>
 
       {/* ══ Modal suppression ════════════════════════════════════ */}

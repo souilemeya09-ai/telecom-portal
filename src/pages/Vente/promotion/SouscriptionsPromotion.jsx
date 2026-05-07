@@ -315,10 +315,13 @@ function SouscriptionsPromotion() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [c, p] = await Promise.all([getContrats(), getPromotions()]);
+      const [c, p] = await Promise.all([
+        getContrats({ page: 0, size: contrats.length || 1000 }),
+        getPromotions({ page: 0, size: promotions.length || 1000 })
+      ]);
       // Garder seulement les contrats actifs
-      setContrats(c.filter((c) => c.statut === "ACTIF"));
-      setPromotions(p);
+      setContrats((c.content || []).filter((c) => c.statut === "ACTIF"));
+      setPromotions(p.content || []);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };

@@ -7,6 +7,7 @@ import {
   changerStatutReclamation,
   getClients,
 } from "../../../api/api";
+import Pagination from "../../../components/Pagination";
 import "./reclamations.css";
 
 const EMPTY_FORM = {
@@ -33,6 +34,8 @@ function Reclamations() {
   const [detailRec, setDetailRec] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [filterStatut, setFilterStatut] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [form, setForm] = useState(EMPTY_FORM);
 
   useEffect(() => { loadData(); }, []);
@@ -42,7 +45,7 @@ function Reclamations() {
     try {
       const [r, c] = await Promise.all([getReclamations(), getClients()]);
       setReclamations(r);
-      setClients(c);
+      setClients(c.content || []);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -105,6 +108,13 @@ function Reclamations() {
   const displayed = filterStatut === "ALL"
     ? reclamations
     : reclamations.filter((r) => r.statut === filterStatut);
+
+  const pageCount = Math.ceil(displayed.length / itemsPerPage);
+  const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatut]);
 
   /* ── Stats ── */
   const stats = {
@@ -348,7 +358,7 @@ function Reclamations() {
                 </tr>
               </thead>
               <tbody>
-                {displayed.map((r) => {
+                {pageItems.map((r) => {
                   const si = statutInfo(r.statut);
                   return (
                     <tr key={r.id}>
@@ -382,6 +392,7 @@ function Reclamations() {
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
       </div>
     </div>
   );

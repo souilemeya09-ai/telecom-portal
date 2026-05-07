@@ -22,7 +22,7 @@
   background: var(--sb-bg);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100%;
   border-right: 1px solid var(--sb-border);
   transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;

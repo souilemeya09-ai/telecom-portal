@@ -6,6 +6,7 @@ import {
   deletePlanTarifaire,
   uploadPlansTarifairesCsv,
 } from "../../../api/api";
+import Pagination from "../../../components/Pagination";
 import "../../../styles/plans.css";
 
 const EMPTY_FORM = { nom: "", prixMensuel: "", description: "" };
@@ -48,6 +49,8 @@ function PlansTarifaires() {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [csvError, setCsvError] = useState(null);
   const [csvUploading, setCsvUploading] = useState(false);
   const csvFileRef = useRef();
@@ -56,7 +59,10 @@ function PlansTarifaires() {
 
   const loadData = async () => {
     setLoading(true);
-    try { setPlans(await getPlansTarifaires()); }
+    try {
+      const response = await getPlansTarifaires({ page: 0, size: 1000 });
+      setPlans(response.content || []);
+    }
     catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -110,6 +116,13 @@ function PlansTarifaires() {
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }, [plans, search, sortField, sortOrder]);
+
+  const pageCount = Math.ceil(displayed.length / itemsPerPage);
+  const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortField, sortOrder]);
 
   const handleSort = (field) => {
     if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -322,7 +335,7 @@ function PlansTarifaires() {
                 </tr>
               </thead>
               <tbody>
-                {displayed.map((p) => (
+                {pageItems.map((p) => (
                   <tr key={p.id}>
                     <td className="id-cell">{p.id}</td>
                     <td>
@@ -355,6 +368,7 @@ function PlansTarifaires() {
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
       </div>
     </div>
   );

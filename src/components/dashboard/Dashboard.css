@@ -3,7 +3,7 @@
   font-family: var(--font);
   padding: 2rem 2.5rem;
   background: var(--bg);
-  min-height: 100vh;
+  min-height: 100%;
   color: var(--text-primary);
 }
 

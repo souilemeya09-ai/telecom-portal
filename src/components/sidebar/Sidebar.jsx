@@ -119,15 +119,15 @@ const NAV = {
               label: "Plans Tarifaires", 
               links: [
                 { to: "/plans", label: "Consulter Plans" }, 
-                { to: "/plans/new", label: "Créer Plan" },
-                { to: "/plans/edit", label: "Modifier Plan" }
+                // { to: "/plans/new", label: "Créer Plan" },
+                // { to: "/plans/edit", label: "Modifier Plan" }
               ] 
             },
             { 
               label: "Gestion Offres", 
               links: [
                 { to: "/offres", label: "Consulter Offres" }, 
-                { to: "/offres/new", label: "Créer Offre" }
+                // { to: "/offres/new", label: "Créer Offre" }
               ] 
             },
           ],
@@ -145,7 +145,7 @@ const NAV = {
               label: "Gérer Promotions", 
               links: [
                 { to: "/promotions", label: "Promotions" },
-                { to: "/promotions/new", label: "Créer Promotion" }
+                // { to: "/promotions/new", label: "Créer Promotion" }
               ] 
             },
           ],

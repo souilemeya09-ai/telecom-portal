@@ -9,6 +9,7 @@ import {
   retirerServiceOffre,
   uploadOffresCsv,
 } from "../../../api/api";
+import Pagination from "../../../components/Pagination";
 import "../../../styles/offres.css";
 
 const TYPE_OFFRES = ["MOBILE", "FIXE", "INTERNET", "TV", "BUNDLE"];
@@ -60,6 +61,8 @@ function Offres() {
   const [filterType, setFilterType] = useState("ALL");
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [csvError, setCsvError] = useState(null);
   const [csvUploading, setCsvUploading] = useState(false);
   const csvFileRef = useRef();
@@ -69,8 +72,12 @@ function Offres() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [o, s, p] = await Promise.all([getOffres(), getServices(), getPlansTarifaires()]);
-      setOffres(o); setServices(s); setPlans(p);
+      const [o, s, p] = await Promise.all([
+        getOffres({ page: 0, size: offres.length || 1000 }),
+        getServices({ page: 0, size: services.length || 1000 }),
+        getPlansTarifaires({ page: 0, size: plans.length || 1000 }),
+      ]);
+      setOffres(o.content || []); setServices(s.content || []); setPlans(p.content || []);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -117,6 +124,13 @@ function Offres() {
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }, [offres, filterType, search, sortField, sortOrder]);
+
+  const pageCount = Math.ceil(displayed.length / itemsPerPage);
+  const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType, search, sortField, sortOrder]);
 
   const handleSort = (field) => {
     if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -193,6 +207,8 @@ function Offres() {
   const resolveServices = (ids) =>
     (ids || []).map((id) => services.find((s) => s.id === id)).filter(Boolean);
 
+  const role = localStorage.getItem("role");
+
   return (
     <div className="page-wrapper">
 
@@ -204,13 +220,17 @@ function Offres() {
             {offres.length} offre{offres.length !== 1 ? "s" : ""} disponible{offres.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-          <button className="btn-secondary" onClick={() => csvFileRef.current.click()} disabled={csvUploading}>
-            {csvUploading ? "Import en cours..." : "Importer CSV"}
-          </button>
-          <button className="btn-primary" onClick={openCreate}>+ Nouvelle offre</button>
-        </div>
-        <input ref={csvFileRef} type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={handleCsvUpload} />
+        {role === "METIER" && (
+          <>
+            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+              <button className="btn-secondary" onClick={() => csvFileRef.current.click()} disabled={csvUploading}>
+                {csvUploading ? "Import en cours..." : "Importer CSV"}
+              </button>
+              <button className="btn-primary" onClick={openCreate}>+ Nouvelle offre</button>
+            </div>
+            <input ref={csvFileRef} type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={handleCsvUpload} />
+          </>
+        )}
       </div>
 
       {csvError && (
@@ -371,9 +391,13 @@ function Offres() {
             </div>
 
             <div className="modal-actions">
-              <button className="btn-danger" onClick={() => setDeleteConfirm(detailOffre)}>Supprimer</button>
               <button className="btn-secondary" onClick={() => setDetail(null)}>Fermer</button>
-              <button className="btn-primary" onClick={() => openEdit(detailOffre)}>✏️ Modifier</button>
+              {role === "METIER" && (
+                <>
+                  <button className="btn-danger" onClick={() => setDeleteConfirm(detailOffre)}>Supprimer</button>
+                  <button className="btn-primary" onClick={() => openEdit(detailOffre)}>✏️ Modifier</button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -436,7 +460,7 @@ function Offres() {
                 </tr>
               </thead>
               <tbody>
-                {displayed.map((o) => {
+                {pageItems.map((o) => {
                   const plan = plans.find((p) => p.id === o.planTarifaireId);
                   const nbServices = (o.serviceIds || []).length;
                   return (
@@ -463,8 +487,12 @@ function Offres() {
                       <td>
                         <div className="action-buttons">
                           <button className="btn-action btn-view" onClick={() => setDetail(o)} title="Voir">👁</button>
-                          <button className="btn-action btn-edit" onClick={() => openEdit(o)} title="Modifier">✏️</button>
-                          <button className="btn-action btn-delete" onClick={() => setDeleteConfirm(o)} title="Supprimer">🗑️</button>
+                          {role === "METIER" && (
+                            <button className="btn-action btn-edit" onClick={() => openEdit(o)} title="Modifier">✏️</button>
+                          )}
+                          {role === "METIER" && (
+                            <button className="btn-action btn-delete" onClick={() => setDeleteConfirm(o)} title="Supprimer">🗑️</button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -474,6 +502,7 @@ function Offres() {
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
       </div>
     </div>
   );

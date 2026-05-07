@@ -10,6 +10,7 @@ import {
   assignerPromotion,
   getPromotions,
 } from "../../../api/api";
+import Pagination from "../../../components/Pagination";
 import "../../../styles/customers.css";
 
 // ── Config ────────────────────────────────────────────────────
@@ -23,6 +24,8 @@ const TYPE_COLORS = { ENTERPRISE: "type-enterprise", FAMILY: "type-family", SME:
 const ROLE_COLORS = { OWNER: "role-owner", BILLING: "role-billing", USER: "role-user", DECISION_MAKER: "role-dm" };
 
 const EMPTY_FORM = { name: "", groupType: "FAMILY", status: "ACTIVE" };
+
+const itemsPerPage = 10;
 
 // ── Sort helper ───────────────────────────────────────────────
 function getValue(obj, field) {
@@ -217,7 +220,7 @@ function GroupDetailPanel({ group, clients, onAddMember, onRemoveMember, onClose
             ⚠️ {error}
             <button
               onClick={() => setError("")}
-              style={{ marginLeft: 8, background: "none"}}
+              style={{ marginLeft: 8, background: "none" }}
             >✕</button>
           </div>
         )}
@@ -425,8 +428,15 @@ function AssignPromotionModal({ group, promotions, onClose, onAssign }) {
     assignmentMode: "MANUAL",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [assignedPromos, setAssignedPromos] = useState([]);
+
+  useEffect(() => {
+    getPromotionsByGroup(group.id).then(setAssignedPromos).catch(console.error);
+  }, [group.id]);
 
   const activePromos = promotions.filter((p) => p.statut === "ACTIVE");
+  const appliedPromos = activePromos.filter((p) => assignedPromos.some((ap) => ap.id === p.id));
+  const promosToShow = assignedPromos.length > 0 ? appliedPromos : activePromos;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -466,7 +476,7 @@ function AssignPromotionModal({ group, promotions, onClose, onAssign }) {
               required
             >
               <option value="">— Sélectionner une promotion —</option>
-              {activePromos.map((p) => (
+              {promosToShow.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.nomPromotion} —{" "}
                   {p.typeReduction === "POURCENTAGE"
@@ -535,9 +545,10 @@ function CustomerGroups() {
   const [filterType, setFilterType] = useState("ALL");
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => { loadData(); }, []);
-
+  
   const loadData = async () => {
     setLoading(true);
     try {
@@ -547,8 +558,8 @@ function CustomerGroups() {
         getPromotions(),
       ]);
       setGroups(g);
-      setClients(c);
-      setPromotions(p);
+      setClients(c.content || []);
+      setPromotions(p.content || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -578,6 +589,14 @@ function CustomerGroups() {
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }, [groups, search, filterType, sortField, sortOrder]);
+  const itemsPerPage = 10;
+
+  const pageCount = Math.ceil(displayed.length / itemsPerPage);
+  const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType, search, sortField, sortOrder]);
 
   const handleSort = (field) => {
     if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -806,7 +825,7 @@ function CustomerGroups() {
                 </tr>
               </thead>
               <tbody>
-                {displayed.map((g) => {
+                {pageItems.map((g) => {
                   const activeCount = (g.memberCount && g.memberCount > 0) ? g.memberCount : (g.members ?? []).filter((m) => m.status === "ACTIVE").length;
                   return (
                     <tr key={g.id}>
@@ -883,6 +902,7 @@ function CustomerGroups() {
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
       </div>
 
       {/* ── Panel détail groupe ── */}

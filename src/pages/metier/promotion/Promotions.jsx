@@ -7,6 +7,7 @@ import {
     activerPromotion,
     suspendrePromotion,
 } from "../../../api/api";
+import Pagination from "../../../components/Pagination";
 import "../../../styles/promotions.css";
 
 // ── Config statuts ───────────────────────────────────────────
@@ -79,6 +80,9 @@ function Promotions() {
     const [filterStatut, setFilterStatut] = useState("ALL");
     const [sortField, setSortField] = useState("id");
     const [sortOrder, setSortOrder] = useState("asc");
+    const itemsPerPage = 10;
+    const [currentPage, setCurrentPage] = useState(1);
+
 
     // ✅ Extraire l'ID du user connecté depuis le JWT
     const currentUserId = useMemo(() => {
@@ -106,7 +110,10 @@ function Promotions() {
 
     const loadData = async () => {
         setLoading(true);
-        try { setPromotions(await getPromotions()); }
+        try {
+            const response = await getPromotions({ page: 0, size: promotions.length || 1000 });
+            setPromotions(response.content || []);
+        }
         catch (e) { console.error(e); }
         finally { setLoading(false); }
     };
@@ -136,6 +143,13 @@ function Promotions() {
             return sortOrder === "asc" ? cmp : -cmp;
         });
     }, [promotions, filterStatut, search, sortField, sortOrder]);
+
+    const pageCount = Math.ceil(displayed.length / itemsPerPage);
+    const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterStatut, search, sortField, sortOrder]);
 
     const handleSort = (field) => {
         if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
@@ -218,6 +232,8 @@ function Promotions() {
 
     const thProps = { sortField, sortOrder, onSort: handleSort };
 
+    const role = localStorage.getItem("role");
+
     // ────────────────────────────────────────────────────────────
     return (
         <div className="page-wrapper">
@@ -228,7 +244,9 @@ function Promotions() {
                     <h1 className="page-title">Promotions</h1>
                     <p className="page-subtitle">{promotions.length} promotion{promotions.length !== 1 ? "s" : ""}</p>
                 </div>
-                <button className="btn-primary" onClick={openCreate}>+ Nouvelle promotion</button>
+               {role === "METIER" && (
+                    <button className="btn-primary" onClick={openCreate}>+ Nouvelle promotion</button>
+                )}
             </div>
 
             {/* ── Stats ── */}
@@ -503,7 +521,7 @@ function Promotions() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {displayed.map((p) => {
+                                {pageItems.map((p) => {
                                     const si = statutInfo(p.statut);
                                     const actions = getActions(p);
                                     return (
@@ -556,6 +574,7 @@ function Promotions() {
                         </table>
                     </div>
                 )}
+                <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
             </div>
         </div>
     );

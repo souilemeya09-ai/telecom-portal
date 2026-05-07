@@ -6,16 +6,17 @@ import {
   deleteService,
   uploadServicesCsv,
 } from "../../../api/api";
+import Pagination from "../../../components/Pagination";
 import "../../../styles/offres.css";
 
 const EMPTY_FORM = { nomService: "", description: "" };
 
 function getValue(obj, field) {
   switch (field) {
-    case "id":          return obj.id;
-    case "nomService":  return obj.nomService  ?? "";
+    case "id": return obj.id;
+    case "nomService": return obj.nomService ?? "";
     case "description": return obj.description ?? "";
-    default:            return "";
+    default: return "";
   }
 }
 
@@ -36,26 +37,31 @@ function Th({ label, field, sortField, sortOrder, onSort }) {
 }
 
 function Services() {
-  const [services, setServices]           = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [submitting, setSubmitting]       = useState(false);
-  const [showForm, setShowForm]           = useState(false);
-  const [editingService, setEditing]      = useState(null);
-  const [detailService, setDetail]        = useState(null);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingService, setEditing] = useState(null);
+  const [detailService, setDetail] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const [form, setForm]                   = useState(EMPTY_FORM);
-  const [search, setSearch]               = useState("");
-  const [sortField, setSortField]         = useState("id");
-  const [sortOrder, setSortOrder]         = useState("asc");
-  const [csvError, setCsvError]           = useState(null);
-  const [csvUploading, setCsvUploading]   = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState("id");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [csvError, setCsvError] = useState(null);
+  const [csvUploading, setCsvUploading] = useState(false);
   const csvFileRef = useRef();
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
-    try { setServices(await getServices()); }
+    try {
+      const response = await getServices({ page: 0, size: services.length || 1000 });
+      setServices(response.content || []);
+    }
     catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -83,9 +89,9 @@ function Services() {
     const term = search.toLowerCase();
     const filtered = term
       ? services.filter((s) =>
-          s.nomService?.toLowerCase().includes(term) ||
-          s.description?.toLowerCase().includes(term)
-        )
+        s.nomService?.toLowerCase().includes(term) ||
+        s.description?.toLowerCase().includes(term)
+      )
       : services;
 
     return [...filtered].sort((a, b) => {
@@ -98,13 +104,20 @@ function Services() {
     });
   }, [services, search, sortField, sortOrder]);
 
+  const pageCount = Math.ceil(displayed.length / itemsPerPage);
+  const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortField, sortOrder]);
+
   const handleSort = (field) => {
     if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
     else { setSortField(field); setSortOrder("asc"); }
   };
 
   const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); };
-  const openEdit   = (s) => {
+  const openEdit = (s) => {
     setEditing(s);
     setForm({ nomService: s.nomService || "", description: s.description || "" });
     setShowForm(true); setDetail(null);
@@ -116,7 +129,7 @@ function Services() {
     try {
       const payload = { nomService: form.nomService, description: form.description };
       if (editingService) await updateService(editingService.id, payload);
-      else                await createService(payload);
+      else await createService(payload);
       closeForm(); loadData();
     } catch (err) { console.error(err); }
     finally { setSubmitting(false); }
@@ -165,29 +178,29 @@ function Services() {
               </h3>
               <button className="modal-close" onClick={closeForm}>✕</button>
             </div>
-          <form className="form-grid" onSubmit={handleSubmit}>
-            <div className="form-group form-group-full">
-              <label className="form-label">Nom du service *</label>
-              <input className="form-control" value={form.nomService}
-                onChange={(e) => setForm({ ...form, nomService: e.target.value })}
-                placeholder="ex: Appels illimités, Data 20Go..." required />
-            </div>
-            <div className="form-group form-group-full">
-              <label className="form-label">Description</label>
-              <textarea className="form-control" rows={3}
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Décrire le service..."
-                style={{ resize: "vertical" }}
-              />
-            </div>
-            <div className="form-actions">
-              <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-              <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting ? "Enregistrement..." : editingService ? "Mettre à jour" : "Créer le service"}
-              </button>
-            </div>
-          </form>
+            <form className="form-grid" onSubmit={handleSubmit}>
+              <div className="form-group form-group-full">
+                <label className="form-label">Nom du service *</label>
+                <input className="form-control" value={form.nomService}
+                  onChange={(e) => setForm({ ...form, nomService: e.target.value })}
+                  placeholder="ex: Appels illimités, Data 20Go..." required />
+              </div>
+              <div className="form-group form-group-full">
+                <label className="form-label">Description</label>
+                <textarea className="form-control" rows={3}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Décrire le service..."
+                  style={{ resize: "vertical" }}
+                />
+              </div>
+              <div className="form-actions">
+                <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting ? "Enregistrement..." : editingService ? "Mettre à jour" : "Créer le service"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -220,9 +233,9 @@ function Services() {
               </div>
             </div>
             <div className="modal-actions">
-              <button className="btn-danger"    onClick={() => setDeleteConfirm(detailService)}>Supprimer</button>
+              <button className="btn-danger" onClick={() => setDeleteConfirm(detailService)}>Supprimer</button>
               <button className="btn-secondary" onClick={() => setDetail(null)}>Fermer</button>
-              <button className="btn-primary"   onClick={() => openEdit(detailService)}>✏️ Modifier</button>
+              <button className="btn-primary" onClick={() => openEdit(detailService)}>✏️ Modifier</button>
             </div>
           </div>
         </div>
@@ -238,7 +251,7 @@ function Services() {
             </p>
             <div className="modal-actions">
               <button className="btn-secondary" onClick={() => setDeleteConfirm(null)}>Annuler</button>
-              <button className="btn-danger"    onClick={() => handleDelete(deleteConfirm.id)}>Supprimer</button>
+              <button className="btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>Supprimer</button>
             </div>
           </div>
         </div>
@@ -262,14 +275,14 @@ function Services() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <Th label="#"           field="id"          {...thProps} />
-                  <Th label="Nom"         field="nomService"  {...thProps} />
+                  <Th label="#" field="id"          {...thProps} />
+                  <Th label="Nom" field="nomService"  {...thProps} />
                   <Th label="Description" field="description" {...thProps} />
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {displayed.map((s) => (
+                {pageItems.map((s) => (
                   <tr key={s.id}>
                     <td className="id-cell">{s.id}</td>
                     <td>
@@ -285,9 +298,9 @@ function Services() {
                     </td>
                     <td>
                       <div className="action-buttons">
-                        <button className="btn-action btn-view"   onClick={() => setDetail(s)}        title="Voir">👁</button>
-                        <button className="btn-action btn-edit"   onClick={() => openEdit(s)}          title="Modifier">✏️</button>
-                        <button className="btn-action btn-delete" onClick={() => setDeleteConfirm(s)}  title="Supprimer">🗑️</button>
+                        <button className="btn-action btn-view" onClick={() => setDetail(s)} title="Voir">👁</button>
+                        <button className="btn-action btn-edit" onClick={() => openEdit(s)} title="Modifier">✏️</button>
+                        <button className="btn-action btn-delete" onClick={() => setDeleteConfirm(s)} title="Supprimer">🗑️</button>
                       </div>
                     </td>
                   </tr>
@@ -296,6 +309,7 @@ function Services() {
             </table>
           </div>
         )}
+        <Pagination currentPage={currentPage} totalPages={pageCount} onPageChange={setCurrentPage} />
       </div>
     </div>
   );
