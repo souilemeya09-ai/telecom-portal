@@ -1,14 +1,15 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import {
   getContrats, createContrat, updateContrat,
   deleteContrat, resilierContrat, getClients, getOffres,
   uploadContratsCsv,
+  getCustomerGroups, getCustomerGroupById,
 } from "../../../api/api";
 import Pagination from "../../../components/Pagination";
 import "./contrat.css"
 
 const EMPTY_FORM = {
-  clientId: "", offreId: "",
+  clientId: "", customerGroupId: "", offreId: "",
   dateDebut: "", dateFin: "", directoryNumber: "",
 };
 
@@ -65,15 +66,18 @@ function Th({ label, field, sortField, sortOrder, onSort }) {
 function Contrats() {
   const [contrats, setContrats] = useState([]);
   const [clients, setClients] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingContrat, setEditing] = useState(null);
   const [detailContrat, setDetail] = useState(null);
+  const [detailGroup, setDetailGroup] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [dateErrors, setDateErrors] = useState({});
+  const [holderError, setHolderError] = useState("");
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -90,18 +94,28 @@ function Contrats() {
   const clientDropdownRef = useRef();
   const offreDropdownRef = useRef();
 
+
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [c, cl, o] = await Promise.all([
+
+      const [c, cl, cg, o] = await Promise.all([
         getContrats({ page: 0, size: 1000 }),
         getClients({ page: 0, size: 1000 }),
+        getCustomerGroups(),
         getOffres({ page: 0, size: 1000 })
       ]);
-      setContrats(c.content || []); setClients(cl.content || []); setOffers(o.content || []);
-    } catch (err) { console.error(err); }
+
+      setContrats(c.content || []);
+      setClients(cl.content || []);
+      setGroups(Array.isArray(cg) ? cg : cg.content || []);
+      setOffers(o.content || []);
+
+    } catch (err) {
+      console.error(err);
+    }
     finally { setLoading(false); }
   };
 
@@ -143,26 +157,35 @@ function Contrats() {
     );
   }, [offers, offreSearch]);
 
+  const getContractValue = useCallback((obj, field) => {
+    if (field === "customerGroupId") {
+      const group = obj.customerGroup || groups.find((g) => String(g.id) === String(obj.customerGroupId));
+      return group?.name ?? "";
+    }
+    return getValue(obj, field);
+  }, [groups]);
+
   const displayed = useMemo(() => {
     const term = search.toLowerCase();
     const filtered = term
       ? contrats.filter((c) =>
         `${c.client?.nom} ${c.client?.prenom}`.toLowerCase().includes(term) ||
+        c.customerGroup?.name?.toLowerCase().includes(term) ||
         c.offre?.nom?.toLowerCase().includes(term) ||
         c.statut?.toLowerCase().includes(term) ||
-        (c.directoryNumber ?? "").toLowerCase().includes(term)
+        String(c.directoryNumber ?? "").toLowerCase().includes(term)
       )
       : contrats;
 
     return [...filtered].sort((a, b) => {
-      const va = getValue(a, sortField);
-      const vb = getValue(b, sortField);
+      const va = getContractValue(a, sortField);
+      const vb = getContractValue(b, sortField);
       const cmp = typeof va === "number"
         ? va - vb
         : String(va).localeCompare(String(vb), "fr", { sensitivity: "base" });
       return sortOrder === "asc" ? cmp : -cmp;
     });
-  }, [contrats, sortField, sortOrder, search]);
+  }, [contrats, getContractValue, sortField, sortOrder, search]);
 
 
   const pageCount = Math.ceil(displayed.length / itemsPerPage);
@@ -196,6 +219,9 @@ function Contrats() {
   const updateForm = (patch) => {
     const next = { ...form, ...patch };
     setForm(next);
+    if (patch.clientId !== undefined || patch.customerGroupId !== undefined) {
+      setHolderError("");
+    }
     if (patch.dateDebut !== undefined || patch.dateFin !== undefined) {
       setDateErrors(validateDates(next.dateDebut, next.dateFin));
     }
@@ -206,6 +232,7 @@ function Contrats() {
     setEditing(null);
     setForm({ ...EMPTY_FORM, directoryNumber: genererNumero() });
     setDateErrors({});
+    setHolderError("");
     setClientSearch("");
     setShowForm(true);
   };
@@ -214,12 +241,14 @@ function Contrats() {
     setEditing(c);
     setForm({
       clientId: c.clientId || c.client?.id || "",
+      customerGroupId: c.customerGroupId || c.customerGroup?.id || "",
       offreId: c.offreId || c.offre?.id || "",
       dateDebut: c.dateDebut || "",
       dateFin: c.dateFin || "",
       directoryNumber: c.directoryNumber || "",
     });
     setDateErrors({});
+    setHolderError("");
     setClientSearch("");
     setShowForm(true);
     setDetail(null);
@@ -227,7 +256,7 @@ function Contrats() {
 
   const closeForm = () => {
     setShowForm(false); setEditing(null);
-    setForm(EMPTY_FORM); setDateErrors({});
+    setForm(EMPTY_FORM); setDateErrors({}); setHolderError("");
     setClientSearch("");
   };
 
@@ -243,15 +272,30 @@ function Contrats() {
       return;
     }
 
+    const hasClient = Boolean(form.clientId);
+    const hasGroup = Boolean(form.customerGroupId);
+
+    if (!hasClient && !hasGroup) {
+      setHolderError("Sélectionnez un client ou un groupe customer.");
+      return;
+    }
+
+    if (hasClient && hasGroup) {
+      setHolderError("Sélectionnez soit un client soit un groupe customer, pas les deux.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
-        clientId: Number(form.clientId),
         offreId: Number(form.offreId),
         dateDebut: form.dateDebut,
         dateFin: form.dateFin || null,
         directoryNumber: form.directoryNumber ? String(form.directoryNumber) : null,
       };
+      if (hasClient) payload.clientId = Number(form.clientId);
+      if (hasGroup) payload.customerGroupId = Number(form.customerGroupId);
+
       if (editingContrat) await updateContrat(editingContrat.id, payload);
       else await createContrat(payload);
       closeForm(); loadData();
@@ -265,8 +309,23 @@ function Contrats() {
   };
 
   const handleResilier = async (id) => {
-    try { await resilierContrat(id); setDetail(null); loadData(); }
+    try { await resilierContrat(id); setDetail(null); setDetailGroup(null); loadData(); }
     catch (err) { console.error(err); }
+  };
+
+  const openDetail = async (c) => {
+    setDetail(c);
+    if (c.customerGroupId) {
+      try {
+        const group = await getCustomerGroupById(c.customerGroupId);
+        setDetailGroup(group);
+      } catch (err) {
+        console.error("Erreur chargement groupe:", err);
+        setDetailGroup(null);
+      }
+    } else {
+      setDetailGroup(null);
+    }
   };
 
   const statutClass = (s) => {
@@ -317,7 +376,7 @@ function Contrats() {
             <form className="form-grid" onSubmit={handleSubmit}>
 
               <div className="form-group" ref={clientDropdownRef} style={{ position: "relative" }}>
-                <label className="form-label">Client *</label>
+                <label className="form-label">Client</label>
                 <input
                   className="form-control"
                   type="text"
@@ -337,7 +396,6 @@ function Contrats() {
                   }}
                   onFocus={() => setClientDropdownOpen(true)}
                   onBlur={() => setTimeout(() => setClientDropdownOpen(false), 150)}
-                  required
                   autoComplete="off"
                 />
                 {clientDropdownOpen && filteredClients.length > 0 && (
@@ -347,7 +405,7 @@ function Contrats() {
                         key={c.id}
                         className={`combobox-option ${String(form.clientId) === String(c.id) ? "combobox-option-selected" : ""}`}
                         onMouseDown={() => {
-                          updateForm({ clientId: c.id });
+                          updateForm({ clientId: c.id, customerGroupId: "" });
                           setClientSearch(`${c.nom} ${c.prenom}`);
                           setClientDropdownOpen(false);
                         }}
@@ -360,6 +418,21 @@ function Contrats() {
                       </li>
                     ))}
                   </ul>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Customer group</label>
+                <select className="form-control" value={form.customerGroupId}
+                  onChange={(e) => {
+                    updateForm({ customerGroupId: e.target.value, clientId: "" });
+                    if (e.target.value) setClientSearch("");
+                  }}>
+                  <option value="">Sélectionner un groupe customer</option>
+                  {groups.map((cg) => <option key={cg.id} value={cg.id}>{cg.name}</option>)}
+                </select>
+                {holderError && (
+                  <span className="field-error">{holderError}</span>
                 )}
               </div>
 
@@ -472,31 +545,64 @@ function Contrats() {
 
       {/* ── Modal Détail ── */}
       {detailContrat && (
-        <div className="modal-overlay" onClick={() => setDetail(null)}>
+        <div className="modal-overlay" onClick={() => { setDetail(null); setDetailGroup(null); }}>
           <div className="modal-box modal-large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <h4 className="modal-title">Contrat #{detailContrat.id}</h4>
                 <span className={statutClass(detailContrat.statut)}>{detailContrat.statut}</span>
               </div>
-              <button className="modal-close" onClick={() => setDetail(null)}>✕</button>
+              <button className="modal-close" onClick={() => { setDetail(null); setDetailGroup(null); }}>✕</button>
             </div>
             <div className="detail-grid">
-              <div className="detail-section">
-                <p className="detail-section-title">Client</p>
-                {detailContrat.client ? (
-                  <>
-                    <div className="client-cell" style={{ marginBottom: 8 }}>
-                      <div className="avatar">{detailContrat.client.nom?.[0]?.toUpperCase()}</div>
-                      <div>
-                        <div className="client-name">{detailContrat.client.nom} {detailContrat.client.prenom}</div>
-                        <div className="client-email">{detailContrat.client.email}</div>
+              {detailContrat.customerGroupId ? (
+                <div className="detail-section">
+                  <p className="detail-section-title">Groupe Customer</p>
+                  {detailGroup ? (
+                    <>
+                      <div className="client-cell" style={{ marginBottom: 8 }}>
+                        <div className="avatar">{detailGroup.name?.[0]?.toUpperCase()}</div>
+                        <div>
+                          <div className="client-name">{detailGroup.name}</div>
+                          <div className="client-email">{detailGroup.groupType} · {detailGroup.status}</div>
+                        </div>
                       </div>
-                    </div>
-                    <DetailRow label="Téléphone" value={detailContrat.client.telephone} />
-                  </>
-                ) : <p className="detail-empty">—</p>}
-              </div>
+                      <DetailRow label="Code" value={detailGroup.groupCode} mono />
+                      <DetailRow label="Membres" value={`${detailGroup.memberCount || 0} membre${detailGroup.memberCount !== 1 ? "s" : ""}`} />
+                      {detailGroup.members && detailGroup.members.length > 0 && (
+                        <div style={{ marginTop: 8 }}>
+                          <p style={{ fontWeight: 500, marginBottom: 4 }}>Liste des membres :</p>
+                          <ul style={{ listStyle: "none", padding: 0 }}>
+                            {detailGroup.members.map((member) => (
+                              <li key={member.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                                <div className="avatar" style={{ width: 24, height: 24, fontSize: 12 }}>{member.nom?.[0]?.toUpperCase()}</div>
+                                <span>{member.nom} {member.prenom}</span>
+                                <span className="client-email">({member.email})</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
+                  ) : <p className="detail-empty">Chargement du groupe...</p>}
+                </div>
+              ) : (
+                <div className="detail-section">
+                  <p className="detail-section-title">Client</p>
+                  {detailContrat.client ? (
+                    <>
+                      <div className="client-cell" style={{ marginBottom: 8 }}>
+                        <div className="avatar">{detailContrat.client.nom?.[0]?.toUpperCase()}</div>
+                        <div>
+                          <div className="client-name">{detailContrat.client.nom} {detailContrat.client.prenom}</div>
+                          <div className="client-email">{detailContrat.client.email}</div>
+                        </div>
+                      </div>
+                      <DetailRow label="Téléphone" value={detailContrat.client.telephone} />
+                    </>
+                  ) : <p className="detail-empty">—</p>}
+                </div>
+              )}
               <div className="detail-section">
                 <p className="detail-section-title">Offre</p>
                 {detailContrat.offre ? (
@@ -524,7 +630,7 @@ function Contrats() {
                   Résilier
                 </button>
               )}
-              <button className="btn-secondary" onClick={() => setDetail(null)}>Fermer</button>
+              <button className="btn-secondary" onClick={() => { setDetail(null); setDetailGroup(null); }}>Fermer</button>
               <button className="btn-primary" onClick={() => openEdit(detailContrat)}>✏️ Modifier</button>
             </div>
           </div>
@@ -549,6 +655,7 @@ function Contrats() {
         </div>
       )}
 
+
       {/* ── Search bar ── */}
       <div className="search-bar">
         <input type="text" placeholder="Rechercher client, offre, statut, numéro..."
@@ -569,6 +676,7 @@ function Contrats() {
                 <tr>
                   <Th label="#" field="id"              {...thProps} />
                   <Th label="Client" field="client"          {...thProps} />
+                  <Th label="Groupe customer" field="customerGroupId"    {...thProps} />
                   <Th label="Offre" field="offre"           {...thProps} />
                   <Th label="Date début" field="dateDebut"       {...thProps} />
                   <Th label="Date fin" field="dateFin"         {...thProps} />
@@ -590,6 +698,17 @@ function Contrats() {
                         </div>
                       </div>
                     </td>
+                    <td>
+                      {(() => {
+                        const group = c.customerGroup || groups.find((g) => String(g.id) === String(c.customerGroupId));
+                        return group ? (
+                          <div className="group-cell">
+                            <div className="client-name">{group.name}</div>
+                            <div className="client-email">{group.groupType} · {group.status}</div>
+                          </div>
+                        ) : "—";
+                      })()}
+                    </td>
                     <td className="offre-cell">{c.offre?.nom ?? "—"}</td>
                     <td>{c.dateDebut}</td>
                     <td>{c.dateFin || "—"}</td>
@@ -597,7 +716,7 @@ function Contrats() {
                     <td className="mono">{c.directoryNumber || "—"}</td>
                     <td>
                       <div className="action-buttons">
-                        <button className="btn-action btn-view" onClick={() => setDetail(c)} title="Voir">👁</button>
+                        <button className="btn-action btn-view" onClick={() => openDetail(c)} title="Voir">👁</button>
                         <button className="btn-action btn-edit" onClick={() => openEdit(c)} title="Modifier">✏️</button>
                         {/* <button className="btn-action btn-delete" onClick={() => setDeleteConfirm(c)} title="Supprimer">🗑️</button> */}
                       </div>
