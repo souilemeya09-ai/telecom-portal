@@ -61,12 +61,12 @@ const NAV = {
                 { to: "/contrats", label: "Liste contrats" }
               ] 
             },
-            { 
-              label: "Créer Contrat", 
-              links: [
-                { to: "/contrats/new", label: "Nouveau contrat" }
-              ] 
-            },
+            // { 
+            //   label: "Créer Contrat", 
+            //   links: [
+            //     { to: "/contrats/new", label: "Nouveau contrat" }
+            //   ] 
+            // },
           ],
         },
         {
@@ -78,13 +78,13 @@ const NAV = {
                 { to: "/offres", label: "Liste offres" }
               ] 
             },
-            { 
-              label: "Créer Offre", 
-              links: [
-                { to: "/offres/new", label: "Nouvelle offre" },
-                { to: "/offres/edit", label: "Modifier offre" }
-              ] 
-            },
+            // { 
+            //   label: "Créer Offre", 
+            //   links: [
+            //     { to: "/offres/new", label: "Nouvelle offre" },
+            //     { to: "/offres/edit", label: "Modifier offre" }
+            //   ] 
+            // },
           ],
         },
         {

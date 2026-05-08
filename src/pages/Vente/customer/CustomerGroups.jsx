@@ -273,7 +273,7 @@ function GroupDetailPanel({ group, clients, onAddMember, onRemoveMember, onClose
         {tab === "add" && (
           <div className="group-tab-content">
             {/* Form avancé */}
-            <form className="add-member-form form-grid" onSubmit={handleAdd}>
+            {/* <form className="add-member-form form-grid" onSubmit={handleAdd}>
               <div className="form-group">
                 <label className="form-label">Client *</label>
                 <select
@@ -317,7 +317,7 @@ function GroupDetailPanel({ group, clients, onAddMember, onRemoveMember, onClose
                   {submitting ? "Ajout..." : "✓ Ajouter"}
                 </button>
               </div>
-            </form>
+            </form> */}
 
             <div style={{ borderTop: "1px solid var(--color-border-tertiary)", margin: "1rem 0", opacity: 0.5 }} />
 
@@ -548,7 +548,7 @@ function CustomerGroups() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => { loadData(); }, []);
-  
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -717,56 +717,58 @@ function CustomerGroups() {
 
       {/* ── Formulaire panel ── */}
       {showForm && (
-        <div className="form-panel">
-          <h3 className="form-panel-title">
-            {editingGroup ? `Modifier — ${editingGroup.name}` : "Créer un groupe client"}
-          </h3>
-          <form className="form-grid" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Nom du groupe *</label>
-              <input
-                className="form-control"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="ex: Famille Ben Ali, STEG Enterprise..."
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Type de groupe *</label>
-              <select
-                className="form-control"
-                value={form.groupType}
-                onChange={(e) => setForm({ ...form, groupType: e.target.value })}
-              >
-                {GROUP_TYPES.map((t) => (
-                  <option key={t} value={t}>{TYPE_LABELS[t]}</option>
-                ))}
-              </select>
-            </div>
-            {editingGroup && (
+        <div className="modal-overlay">
+          <div className="modal-box" onClick={closeForm} style={{ maxWidth: 500 }}>
+            <h3 className="form-panel-title">
+              {editingGroup ? `Modifier — ${editingGroup.name}` : "Créer un groupe client"}
+            </h3>
+            <form className="form-grid" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label className="form-label">Statut</label>
+                <label className="form-label">Nom du groupe *</label>
+                <input
+                  className="form-control"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="ex: Famille Ben Ali, STEG Enterprise..."
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Type de groupe *</label>
                 <select
                   className="form-control"
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  value={form.groupType}
+                  onChange={(e) => setForm({ ...form, groupType: e.target.value })}
                 >
-                  {GROUP_STATUS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                  {GROUP_TYPES.map((t) => (
+                    <option key={t} value={t}>{TYPE_LABELS[t]}</option>
                   ))}
                 </select>
               </div>
-            )}
-            <div className="form-actions">
-              <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-              <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting
-                  ? "Enregistrement..."
-                  : editingGroup ? "Mettre à jour" : "Créer le groupe"}
-              </button>
-            </div>
-          </form>
+              {editingGroup && (
+                <div className="form-group">
+                  <label className="form-label">Statut</label>
+                  <select
+                    className="form-control"
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  >
+                    {GROUP_STATUS.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="form-actions">
+                <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
+                <button type="submit" className="btn-primary" disabled={submitting}>
+                  {submitting
+                    ? "Enregistrement..."
+                    : editingGroup ? "Mettre à jour" : "Créer le groupe"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

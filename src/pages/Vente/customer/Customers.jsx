@@ -3,6 +3,7 @@ import {
   getClients, createClient, updateClient, deleteClient,
   uploadClientsCsv,
   getPromotions, assignerPromotion, getPromotionsByCustomer,
+  getCustomerGroups,
 } from "../../../api/api";
 import Pagination from "../../../components/Pagination";
 import { getImageUrl } from "../../../utils/imageUrl";
@@ -13,7 +14,7 @@ const EMPTY_FORM = {
   adresse: "", ville: "",
   documentType: "1",
   cinNumber: "", passportNumber: "",
-  image: null,
+  image: null, customerGroupId: "",
 };
 
 /* ── Helpers tri ─────────────────────────────────────────────── */
@@ -143,8 +144,10 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
               <select className="form-control" value={form.promotionId}
                 onChange={(e) => setForm({ ...form, promotionId: e.target.value })} required>
                 <option value="">Sélectionner une promotion</option>
-                {activePromos.map((p) => (
-                  <option key={p.id} value={p.id} disabled={alreadyAssignedIds.has(p.id)}>
+                {existingPromos.map((p) => (
+                  <option key={p.id} value={p.id}
+                  //  disabled={alreadyAssignedIds.has(p.id)}
+                  >
                     {alreadyAssignedIds.has(p.id) ? "✓ " : ""}{p.nomPromotion} — {formatVal(p)}
                     {alreadyAssignedIds.has(p.id) ? " (déjà assignée)" : ""}
                   </option>
@@ -307,17 +310,32 @@ const Customers = () => {
   const [csvUploading, setCsvUploading] = useState(false);
   const fileRef = useRef();
   const csvFileRef = useRef();
+  const [customerGroups, setCustomerGroups] = useState([]);
 
   useEffect(() => { fetchAll(); }, []);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const groups = await getCustomerGroups();
+        setCustomerGroups(groups);
+      } catch (err) {
+        console.error("Erreur lors du chargement des groupes clients :", err);
+      }
+    };
+    fetchGroups();
+  }, []);
 
   const fetchAll = async () => {
     setLoading(true);
     try {
       const [c, p] = await Promise.all([
         getClients({ page: 0, size: customers.length || 1000 }),
-        getPromotions({ page: 0, size: customers.length || 1000 })
+        getPromotions({ page: 0, size: customers.length || 1000 }),
       ]);
-      setCustomers(c.content || []); setPromotions(p.content || []);
+      setCustomers(c.content || []);
+      setPromotions(p.content || []);
+
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -376,12 +394,12 @@ const Customers = () => {
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setForm((f) => ({ ...f, image: file }));
-    setPreview(URL.createObjectURL(file));
-  };
+  // const handleImage = (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
+  //   setForm((f) => ({ ...f, image: file }));
+  //   setPreview(URL.createObjectURL(file));
+  // };
 
   const openCreate = () => {
     setEditing(null); setForm(EMPTY_FORM); setPreview(null); setShowForm(true);
@@ -396,6 +414,7 @@ const Customers = () => {
       documentType: String(c.documentType || "1"),
       cinNumber: c.cinNumber || "", passportNumber: c.passportNumber || "",
       image: null,
+      customerGroupId: c.customerGroupId || "",
     });
     const img = c.documentType === 1 ? c.cinImagePath : c.passportImagePath;
     setPreview(img ? getImageUrl(img) : null);
@@ -412,6 +431,7 @@ const Customers = () => {
     fd.append("telephone", form.telephone); fd.append("email", form.email);
     fd.append("adresse", form.adresse); fd.append("ville", form.ville);
     fd.append("documentType", form.documentType);
+    fd.append("customerGroupId", form.customerGroupId);
     if (form.documentType === "1" && form.cinNumber) fd.append("cinNumber", form.cinNumber);
     if (form.documentType === "2" && form.passportNumber) fd.append("passportNumber", form.passportNumber);
     if (form.image) fd.append("image", form.image);
@@ -558,6 +578,18 @@ const Customers = () => {
                 </div>
 
                 <div className="form-group">
+                  <label className="form-label">groupe client (optionnel)</label>
+                  <select className="form-control" name="" id="" onChange={set("customerGroupId")} >
+                    <option value="">Sélectionner un groupe client</option>
+                    {customerGroups.map((group) => (
+                      <option key={group.id} value={group.id}>
+                        {group.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* <div className="form-group">
                   <label className="form-label">Image {docLabel}</label>
                   <div className="upload-zone" onClick={() => fileRef.current.click()}>
                     {preview
@@ -577,7 +609,7 @@ const Customers = () => {
                       ✕ Retirer l'image
                     </button>
                   )}
-                </div>
+                </div> */}
 
                 <div className="form-actions">
                   <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
@@ -627,6 +659,7 @@ const Customers = () => {
                 <tr>
                   <Th label="ID" field="id"        {...thProps} />
                   <Th label="Client" field="client"    {...thProps} />
+                  <Th label="Groupe" field="customerGroupId" {...thProps} />
                   <Th label="Tél." field="telephone" {...thProps} />
                   <Th label="Adresse" field="adresse"   {...thProps} />
                   <Th label="Ville" field="ville"     {...thProps} />
@@ -656,6 +689,24 @@ const Customers = () => {
                           <div>
                             <div className="client-name">{c.nom} {c.prenom}</div>
                             <div className="client-email">{c.email}</div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td>
+                        <div className="service-name-cell">
+                          <div>
+                            {(() => {
+                              const group = customerGroups.find((g) => String(g.id) === String(c.customerGroupId));
+                              return group ? (
+                                <>
+                                  <div className="client-name">{group.name}</div>
+                                  <div className="client-email">{group.groupType} · {group.status}</div>
+                                </>
+                              ) : (
+                                <div className="client-name">—</div>
+                              );
+                            })()}
                           </div>
                         </div>
                       </td>

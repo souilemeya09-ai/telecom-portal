@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { createClient } from "../../../api/api";
+import { useState, useRef, useEffect } from "react";
+import { createClient, getCustomerGroups } from "../../../api/api";
 
 /* ══════════════════════════════════════════
    TYPES
@@ -15,6 +15,7 @@ const EMPTY_FORM = {
     cinNumber: "",
     passportNumber: "",
     image: null,
+    customerGroupId: null,
 };
 
 /* ══════════════════════════════════════════
@@ -79,6 +80,19 @@ const CreateCustomer = ({ onSuccess, onCancel, asModal = false }) => {
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState(false);
     const fileRef = useRef();
+    const [customerGroups, setCustomerGroups] = useState([]);
+
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                const groups = await getCustomerGroups();
+                setCustomerGroups(groups);
+            } catch (err) {
+                console.error("Erreur lors du chargement des groupes clients :", err);
+            }
+        };
+        fetchGroups();
+    }, []);
 
     const isCIN = form.documentType === "1";
 
@@ -130,6 +144,7 @@ const CreateCustomer = ({ onSuccess, onCancel, asModal = false }) => {
             fd.append("email", form.email);
             fd.append("adresse", form.adresse);
             fd.append("ville", form.ville);
+            fd.append("customerGroupId", form.customerGroupId);
             fd.append("documentType", form.documentType);
             if (isCIN) fd.append("cinNumber", form.cinNumber);
             else fd.append("passportNumber", form.passportNumber);
@@ -310,7 +325,7 @@ const CreateCustomer = ({ onSuccess, onCancel, asModal = false }) => {
                         </Field>
 
                         {/* Upload */}
-                        <Field label={`Image ${isCIN ? "CIN" : "Passeport"}`}>
+                        {/* <Field label={`Image ${isCIN ? "CIN" : "Passeport"}`}>
                             <div
                                 style={{ ...s.uploadZone, ...(preview ? s.uploadZoneHasImage : {}) }}
                                 onClick={() => fileRef.current.click()}
@@ -337,6 +352,20 @@ const CreateCustomer = ({ onSuccess, onCancel, asModal = false }) => {
                                     ✕ Retirer
                                 </button>
                             )}
+                        </Field> */}
+
+                        <Field
+                            label={`groupe client (optionnel)`}
+                            icon={<IconCard />}
+                        >
+                            <select className="form-control" name="" id="" onChange={set("customerGroupId")} >
+                                <option value="">Sélectionner un groupe client</option>
+                                {customerGroups.map((group) => (
+                                    <option key={group.id} value={group.id}>
+                                        {group.name}
+                                    </option>
+                                ))}
+                            </select>
                         </Field>
                     </div>
 
