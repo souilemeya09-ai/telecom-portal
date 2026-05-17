@@ -3,7 +3,7 @@ import {
   getContrats, createContrat, updateContrat,
   deleteContrat, resilierContrat, getClients, getOffres,
   uploadContratsCsv,
-  getCustomerGroups, getCustomerGroupById,
+  getCustomerGroups, getCustomerGroupById, getDirectoryNumbers,
 } from "../../../api/api";
 import Pagination from "../../../components/Pagination";
 import "./contrat.css"
@@ -68,6 +68,7 @@ function Contrats() {
   const [clients, setClients] = useState([]);
   const [groups, setGroups] = useState([]);
   const [offers, setOffers] = useState([]);
+  const [directoryNumbers, setDirectoryNumbers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -78,6 +79,7 @@ function Contrats() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [dateErrors, setDateErrors] = useState({});
   const [holderError, setHolderError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -101,17 +103,19 @@ function Contrats() {
     setLoading(true);
     try {
 
-      const [c, cl, cg, o] = await Promise.all([
+      const [c, cl, cg, o, dn] = await Promise.all([
         getContrats({ page: 0, size: 1000 }),
         getClients({ page: 0, size: 1000 }),
         getCustomerGroups(),
-        getOffres({ page: 0, size: 1000 })
+        getOffres({ page: 0, size: 1000 }),
+        getDirectoryNumbers({ status: "LIBRE", page: 0, size: 1000 })
       ]);
 
       setContrats(c.content || []);
       setClients(cl.content || []);
       setGroups(Array.isArray(cg) ? cg : cg.content || []);
       setOffers(o.content || []);
+      setDirectoryNumbers(dn.content || []);
 
     } catch (err) {
       console.error(err);
@@ -144,7 +148,7 @@ function Contrats() {
     if (!term) return clients;
     return clients.filter((c) =>
       `${c.nom} ${c.prenom}`.toLowerCase().includes(term) ||
-      c.email?.toLowerCase().includes(term) ||
+      c.email?.toLowerCase().includes(term) || c.cin?.toLowerCase().includes(term) ||
       String(c.id).includes(term)
     );
   }, [clients, clientSearch]);
@@ -200,14 +204,6 @@ function Contrats() {
     else { setSortField(field); setSortOrder("asc"); }
   };
 
-  // ── Numéro helpers ────────────────────────────────────────
-  function genererNumero() {
-    const prefixes = ["20", "21", "22", "23", "25", "50", "52", "53", "55", "58", "90", "92", "94", "97", "98"];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const suffix = Math.floor(1000000 + Math.random() * 9000000);
-    return `216${prefix}${suffix}`;
-  }
-
   function formatNumero(num) {
     const s = String(num);
     if (s.length === 11 && s.startsWith("216"))
@@ -215,10 +211,18 @@ function Contrats() {
     return s;
   }
 
+  const availableDirectoryNumbers = useMemo(() => {
+    const currentNumber = editingContrat?.directoryNumber ? String(editingContrat.directoryNumber) : "";
+    return directoryNumbers
+      .filter((dn) => String(dn.numero) !== currentNumber)
+      .sort((a, b) => Number(a.numero) - Number(b.numero));
+  }, [directoryNumbers, editingContrat]);
+
   // ── Mise à jour form avec validation dates en temps réel ──
   const updateForm = (patch) => {
     const next = { ...form, ...patch };
     setForm(next);
+    setSubmitError("");
     if (patch.clientId !== undefined || patch.customerGroupId !== undefined) {
       setHolderError("");
     }
@@ -230,9 +234,10 @@ function Contrats() {
   // ── Formulaire ────────────────────────────────────────────
   const openCreate = () => {
     setEditing(null);
-    setForm({ ...EMPTY_FORM, directoryNumber: genererNumero() });
+    setForm(EMPTY_FORM);
     setDateErrors({});
     setHolderError("");
+    setSubmitError("");
     setClientSearch("");
     setShowForm(true);
   };
@@ -249,6 +254,7 @@ function Contrats() {
     });
     setDateErrors({});
     setHolderError("");
+    setSubmitError("");
     setClientSearch("");
     setShowForm(true);
     setDetail(null);
@@ -256,7 +262,7 @@ function Contrats() {
 
   const closeForm = () => {
     setShowForm(false); setEditing(null);
-    setForm(EMPTY_FORM); setDateErrors({}); setHolderError("");
+    setForm(EMPTY_FORM); setDateErrors({}); setHolderError(""); setSubmitError("");
     setClientSearch("");
   };
 
@@ -291,15 +297,29 @@ function Contrats() {
         offreId: Number(form.offreId),
         dateDebut: form.dateDebut,
         dateFin: form.dateFin || null,
-        directoryNumber: form.directoryNumber ? String(form.directoryNumber) : null,
       };
       if (hasClient) payload.clientId = Number(form.clientId);
       if (hasGroup) payload.customerGroupId = Number(form.customerGroupId);
 
+      const requestedDirectoryNumber = form.directoryNumber ? String(form.directoryNumber).trim() : "";
+      if (editingContrat) {
+        const currentDirectoryNumber = editingContrat.directoryNumber
+          ? String(editingContrat.directoryNumber)
+          : "";
+        if (requestedDirectoryNumber && requestedDirectoryNumber !== currentDirectoryNumber) {
+          payload.directoryNumber = requestedDirectoryNumber;
+        }
+      } else if (requestedDirectoryNumber) {
+        payload.directoryNumber = requestedDirectoryNumber;
+      }
+
       if (editingContrat) await updateContrat(editingContrat.id, payload);
       else await createContrat(payload);
       closeForm(); loadData();
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      setSubmitError(err.response?.data?.message || err.response?.data || err.message || "Erreur lors de l'enregistrement.");
+    }
     finally { setSubmitting(false); }
   };
 
@@ -374,6 +394,11 @@ function Contrats() {
               <button className="modal-close" onClick={closeForm}>✕</button>
             </div>
             <form className="form-grid" onSubmit={handleSubmit}>
+              {submitError && (
+                <div className="alert alert-error form-group-full">
+                  {submitError}
+                </div>
+              )}
 
               <div className="form-group" ref={clientDropdownRef} style={{ position: "relative" }}>
                 <label className="form-label">Client</label>
@@ -514,21 +539,42 @@ function Contrats() {
               {/* ── Directory Number ── */}
               <div className="form-group form-group-full">
                 <label className="form-label">Directory Number</label>
-                <div className="input-with-action">
-                  <input
-                    className="form-control"
-                    type="text"
-                    placeholder="Sera généré automatiquement si vide"
-                    value={form.directoryNumber}
-                    onChange={(e) => updateForm({ directoryNumber: e.target.value })}
-                  />
-                  <button type="button" className="btn-generate"
-                    onClick={() => updateForm({ directoryNumber: genererNumero() })}>
-                    🔄 Générer
-                  </button>
-                </div>
+                <select
+                  className="form-control"
+                  value={form.directoryNumber}
+                  onChange={(e) => updateForm({ directoryNumber: e.target.value })}
+                >
+                  <option value="">
+                    {editingContrat ? "Conserver le numéro actuel" : "Affectation automatique par le backend"}
+                  </option>
+                  {editingContrat?.directoryNumber && (
+                    <option value={editingContrat.directoryNumber}>
+                      Numéro actuel · {formatNumero(editingContrat.directoryNumber)}
+                    </option>
+                  )}
+                  {availableDirectoryNumbers.map((dn) => (
+                    <option key={dn.id} value={dn.numero}>
+                      {formatNumero(dn.numero)}
+                    </option>
+                  ))}
+                </select>
                 {form.directoryNumber && (
                   <span className="input-hint">📞 {formatNumero(form.directoryNumber)}</span>
+                )}
+                {!form.directoryNumber && !editingContrat && (
+                  <span className="input-hint">
+                    Sélectionnez un numéro LIBRE importé, ou laissez vide pour la génération backend.
+                  </span>
+                )}
+                {!form.directoryNumber && editingContrat && (
+                  <span className="input-hint">
+                    Le numéro actif du contrat reste inchangé.
+                  </span>
+                )}
+                {availableDirectoryNumbers.length === 0 && !editingContrat && (
+                  <span className="input-hint">
+                    Aucun numéro LIBRE disponible dans le stock importé.
+                  </span>
                 )}
               </div>
 

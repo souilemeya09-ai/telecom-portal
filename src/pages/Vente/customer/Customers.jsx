@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import {
   getClients, createClient, updateClient, deleteClient,
   uploadClientsCsv,
@@ -6,6 +6,7 @@ import {
   getCustomerGroups,
 } from "../../../api/api";
 import Pagination from "../../../components/Pagination";
+import { useAuth } from "../../../context/AuthContext";
 import { getImageUrl } from "../../../utils/imageUrl";
 import "../../../styles/Page.css";
 
@@ -59,7 +60,7 @@ const IconClose = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 /* ══════════════════════════════════════════════════════════════
    MODAL : ASSIGNATION PROMOTION
    ══════════════════════════════════════════════════════════════ */
-function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
+function AssignPromotionModal({ customer, promotions, onClose, onAssign, assignedById }) {
   const [activePromos, setActivePromos] = useState([]);
   const [existingPromos, setExisting] = useState([]);
   const [loadingExisting, setLoadingExist] = useState(true);
@@ -68,6 +69,7 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
     effectiveStartDate: new Date().toISOString().split("T")[0],
     effectiveEndDate: "",
     assignmentMode: "MANUAL",
+    assignedById: assignedById || "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -78,6 +80,10 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
       .then(setExisting).catch(console.error)
       .finally(() => setLoadingExist(false));
   }, [customer.id, promotions]);
+
+  useEffect(() => {
+    setForm((current) => ({ ...current, assignedById: assignedById || "" }));
+  }, [assignedById]);
 
   const alreadyAssignedIds = new Set(existingPromos.map((p) => p.id));
   const formatVal = (p) => p?.typeReduction === "POURCENTAGE"
@@ -96,6 +102,7 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
         effectiveEndDate: form.effectiveEndDate || null,
         inheritedToMembers: false,
         assignmentMode: form.assignmentMode,
+        assignedById: Number(form.assignedById),
       });
       onClose();
     } catch (err) {
@@ -206,7 +213,7 @@ function AssignPromotionModal({ customer, promotions, onClose, onAssign }) {
 
             <div className="form-actions">
               <button type="button" className="btn-secondary" onClick={onClose}>Annuler</button>
-              <button type="submit" className="btn-primary" disabled={submitting || !form.promotionId}>
+              <button type="submit" className="btn-primary" disabled={submitting || !form.promotionId || !form.assignedById}>
                 {submitting ? "Assignation..." : "Assigner la promotion"}
               </button>
             </div>
@@ -290,13 +297,13 @@ function ClientPromosModal({ customer, onClose }) {
    COMPOSANT PRINCIPAL
    ══════════════════════════════════════════════════════════════ */
 const Customers = () => {
+  const { user } = useAuth();
   const [customers, setCustomers] = useState([]);
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingCustomer, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [assignModal, setAssignModal] = useState(null);
@@ -308,11 +315,8 @@ const Customers = () => {
   const itemsPerPage = 10;
   const [csvError, setCsvError] = useState(null);
   const [csvUploading, setCsvUploading] = useState(false);
-  const fileRef = useRef();
   const csvFileRef = useRef();
   const [customerGroups, setCustomerGroups] = useState([]);
-
-  useEffect(() => { fetchAll(); }, []);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -326,19 +330,21 @@ const Customers = () => {
     fetchGroups();
   }, []);
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const [c, p] = await Promise.all([
-        getClients({ page: 0, size: customers.length || 1000 }),
-        getPromotions({ page: 0, size: customers.length || 1000 }),
+        getClients({ page: 0, size: 1000 }),
+        getPromotions({ page: 0, size: 1000 }),
       ]);
       setCustomers(c.content || []);
       setPromotions(p.content || []);
 
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
-  };
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
   const handleCsvUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -402,7 +408,7 @@ const Customers = () => {
   // };
 
   const openCreate = () => {
-    setEditing(null); setForm(EMPTY_FORM); setPreview(null); setShowForm(true);
+    setEditing(null); setForm(EMPTY_FORM); setShowForm(true);
   };
 
   const openEdit = (c) => {
@@ -416,13 +422,11 @@ const Customers = () => {
       image: null,
       customerGroupId: c.customerGroupId || "",
     });
-    const img = c.documentType === 1 ? c.cinImagePath : c.passportImagePath;
-    setPreview(img ? getImageUrl(img) : null);
     setShowForm(true);
   };
 
   const closeForm = () => {
-    setShowForm(false); setEditing(null); setForm(EMPTY_FORM); setPreview(null);
+    setShowForm(false); setEditing(null); setForm(EMPTY_FORM);
   };
 
   const buildFormData = () => {
@@ -793,6 +797,7 @@ const Customers = () => {
           promotions={promotions}
           onClose={() => setAssignModal(null)}
           onAssign={async (id, dto) => assignerPromotion(id, dto)}
+          assignedById={user?.id || localStorage.getItem("userId")}
         />
       )}
 

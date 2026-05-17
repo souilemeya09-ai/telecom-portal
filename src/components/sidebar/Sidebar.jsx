@@ -1,5 +1,5 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useState, useCallback, useRef, useEffect } from "react";
 import "./Sidebar.css";
 
 const NAV = {
@@ -8,23 +8,14 @@ const NAV = {
       section: "Administration",
       items: [
         {
-          icon: "👥", label: "Utilisateurs & Accès",
-          children: [
-            { 
-              label: "Gestion des comptes", 
-              links: [
-                { to: "/users", label: "Consulter Utilisateurs" }, 
-                { to: "/users/new", label: "Créer Utilisateur" },
-                { to: "/users/edit", label: "Modifier Utilisateur" }
-              ] 
-            },
-            { 
-              label: "Droits & Rôles", 
-              links: [
-                { to: "/roles", label: "Consulter Rôles" }, 
-                { to: "/roles/perms", label: "Gérer Permissions" }
-              ] 
-            },
+          icon: "👥",
+          label: "Utilisateurs & Accès",
+          links: [
+            { to: "/users", label: "Consulter Utilisateurs" },
+            { to: "/users/new", label: "Ajouter Utilisateur" },
+            { to: "/users/edit", label: "Modifier Utilisateur" },
+            { to: "/roles", label: "Consulter Rôles" },
+            { to: "/roles/perms", label: "Gérer Permissions" },
           ],
         },
       ],
@@ -35,74 +26,49 @@ const NAV = {
       section: "Commerce",
       items: [
         {
-          icon: "👤", label: "Gestion Clients",
-          children: [
-            { 
-              label: "Consulter Clients", 
-              links: [
-                { to: "/customers", label: "Liste clients" }, 
-                { to: "/groups", label: "Groupes clients" }
-              ] 
-            },
-            { 
-              label: "Ajouter Client", 
-              links: [
-                { to: "/create-customer", label: "Créer client" }
-              ] 
-            },
+          icon: "👤",
+          label: "Gestion Clients",
+          links: [
+            { to: "/customers", label: "Consulter Clients" },
+            { to: "/create-customer", label: "Ajouter Client" },
           ],
         },
         {
-          icon: "📋", label: "Gestion Contrats",
-          children: [
-            { 
-              label: "Consulter Contrats", 
-              links: [
-                { to: "/contrats", label: "Liste contrats" }
-              ] 
-            },
-            // { 
-            //   label: "Créer Contrat", 
-            //   links: [
-            //     { to: "/contrats/new", label: "Nouveau contrat" }
-            //   ] 
-            // },
+          icon: "👥",
+          label: "Gestion Groupes",
+          links: [
+            { to: "/groups", label: "Consulter Groupes" },
+            { to: "/groups/new", label: "Ajouter Groupe" },
           ],
         },
         {
-          icon: "📦", label: "Gestion Offres",
-          children: [
-            { 
-              label: "Consulter Offres", 
-              links: [
-                { to: "/offres", label: "Liste offres" }
-              ] 
-            },
-            // { 
-            //   label: "Créer Offre", 
-            //   links: [
-            //     { to: "/offres/new", label: "Nouvelle offre" },
-            //     { to: "/offres/edit", label: "Modifier offre" }
-            //   ] 
-            // },
+          icon: "📋",
+          label: "Gestion Contrats",
+          links: [
+            { to: "/contrats", label: "Consulter Contrats" },
           ],
         },
         {
-          icon: "🎁", label: "Promotions & SAV",
-          children: [
-            { 
-              label: "Promotions", 
-              links: [
-                { to: "/souscriptions", label: "Souscrire Promotion" },
-                { to: "/promotions", label: "Gérer Promotions" }
-              ] 
-            },
-            { 
-              label: "Service Après-Vente", 
-              links: [
-                { to: "/reclamations", label: "Gérer Réclamations" }
-              ] 
-            },
+          icon: "📦",
+          label: "Gestion Offres",
+          links: [
+            { to: "/offres", label: "Consulter Offres" },
+          ],
+        },
+        {
+          icon: "🎁",
+          label: "Promotions & SAV",
+          links: [
+            { to: "/souscriptions", label: "Souscrire Promotion" },
+            { to: "/promotions", label: "Gérer Promotions" }
+          ],
+        },
+
+        {
+          icon: "📞",
+          label: "Reclamations",
+          links: [
+            { to: "/reclamations", label: "Gérer Réclamations" },
           ],
         },
       ],
@@ -113,41 +79,27 @@ const NAV = {
       section: "Catalogue",
       items: [
         {
-          icon: "💰", label: "Offres & Plans",
-          children: [
-            { 
-              label: "Plans Tarifaires", 
-              links: [
-                { to: "/plans", label: "Consulter Plans" }, 
-                // { to: "/plans/new", label: "Créer Plan" },
-                // { to: "/plans/edit", label: "Modifier Plan" }
-              ] 
-            },
-            { 
-              label: "Gestion Offres", 
-              links: [
-                { to: "/offres", label: "Consulter Offres" }, 
-                // { to: "/offres/new", label: "Créer Offre" }
-              ] 
-            },
+          icon: "💰",
+          label: "Offres & Plans",
+          links: [
+            { to: "/plans", label: "Consulter Plans" },
+            { to: "/offres", label: "Consulter Offres" },
           ],
         },
         {
-          icon: "⚙️", label: "Services & Promotions",
-          children: [
-            { 
-              label: "Configurer Services", 
-              links: [
-                { to: "/services", label: "Services" }
-              ] 
-            },
-            { 
-              label: "Gérer Promotions", 
-              links: [
-                { to: "/promotions", label: "Promotions" },
-                // { to: "/promotions/new", label: "Créer Promotion" }
-              ] 
-            },
+          icon: "⚙️",
+          label: "Services & Promotions",
+          links: [
+            { to: "/services", label: "Consulter Services" },
+            { to: "/promotions", label: "Consulter Promotions" },
+          ],
+        },
+        {
+          icon: "☎️",
+          label: "Directory Numbers",
+          links: [
+            { to: "/directory-numbers", label: "Consulter Numéros" },
+            { to: "/directory-numbers?import=csv", label: "Importer Numéros CSV" },
           ],
         },
       ],
@@ -158,40 +110,22 @@ const NAV = {
       section: "Promotions",
       items: [
         {
-          icon: "🔍", label: "Examiner Promotions",
-          children: [
-            { 
-              label: "Consultation", 
-              links: [
-                { to: "/exploit/promotions", label: "Examiner Promotions" }, 
-                { to: "/exploit/promotions/attente", label: "En attente" }
-              ] 
-            },
-            { 
-              label: "Prendre Décision", 
-              links: [
-                { to: "/exploit/valider", label: "Valider" }, 
-                { to: "/exploit/rejeter", label: "Rejeter" }
-              ] 
-            },
+          icon: "🔍",
+          label: "Examiner Promotions",
+          links: [
+            { to: "/exploit/promotions", label: "Consulter Promotions" },
+            { to: "/exploit/promotions/attente", label: "Promotions en attente" },
+            { to: "/exploit/valider", label: "Valider" },
+            { to: "/exploit/rejeter", label: "Rejeter" },
           ],
         },
         {
-          icon: "⚡", label: "Cycle de Vie",
-          children: [
-            { 
-              label: "Activation", 
-              links: [
-                { to: "/exploit/activer", label: "Activer Promotions" }, 
-                { to: "/exploit/suspendre", label: "Suspendre" }
-              ] 
-            },
-            { 
-              label: "Suivi", 
-              links: [
-                { to: "/exploit/historique", label: "Suivre État" }
-              ] 
-            },
+          icon: "⚡",
+          label: "Cycle de Vie",
+          links: [
+            { to: "/exploit/activer", label: "Activer Promotions" },
+            { to: "/exploit/suspendre", label: "Suspendre" },
+            { to: "/exploit/historique", label: "Historique" },
           ],
         },
       ],
@@ -200,20 +134,11 @@ const NAV = {
       section: "Catalogue",
       items: [
         {
-          icon: "📦", label: "Offres & Souscriptions",
-          children: [
-            { 
-              label: "Consulter Offres", 
-              links: [
-                { to: "/exploit/offres", label: "Offres disponibles" }
-              ] 
-            },
-            { 
-              label: "Consulter Souscriptions", 
-              links: [
-                { to: "/exploit/souscriptions", label: "Souscriptions" }
-              ] 
-            },
+          icon: "📦",
+          label: "Offres & Souscriptions",
+          links: [
+            { to: "/exploit/offres", label: "Offres disponibles" },
+            { to: "/exploit/souscriptions", label: "Souscriptions" },
           ],
         },
       ],
@@ -221,10 +146,8 @@ const NAV = {
   ],
 };
 
-// ── Animated panel (height 0 ↔ auto) ───────────────────────────────────────
 function AnimatedPanel({ open, children }) {
   const ref = useRef(null);
-  const [height, setHeight] = useState(open ? "auto" : "0px");
 
   useEffect(() => {
     const el = ref.current;
@@ -263,28 +186,27 @@ function AnimatedPanel({ open, children }) {
   );
 }
 
-// ── Level-2 group dropdown ──────────────────────────────────────────────────
-function SubDropdown({ group, filter }) {
+
+function NavItem({ item, filter }) {
   const location = useLocation();
-  const hasActive = group.links.some((l) => location.pathname === l.to);
   const filteredLinks = filter
-    ? group.links.filter((l) => l.label.toLowerCase().includes(filter.toLowerCase()))
-    : group.links;
+    ? item.links.filter((l) => l.label.toLowerCase().includes(filter.toLowerCase()))
+    : item.links;
+  const hasActive = item.links.some((l) => location.pathname === l.to);
   const [open, setOpen] = useState(hasActive);
 
   if (filter && filteredLinks.length === 0) return null;
 
   return (
-    <div className="dd2-block">
+    <div className="nav-item">
       <button
-        className={`dd2-btn${open ? " open" : ""}`}
+        type="button"
+        className={`nav-item-header${open ? " open" : ""}${hasActive ? " has-active" : ""}`}
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="dd2-label">
-          {group.label}
-          <span className="dd2-count">{filteredLinks.length}</span>
-        </span>
-        <ChevronIcon className="dd2-arrow" />
+        <span className="dd1-icon">{item.icon}</span>
+        <span className="sb-label">{item.label}</span>
+        <ChevronIcon className={`arrow-icon${open ? " rotate-90" : ""}`} />
       </button>
       <AnimatedPanel open={open || !!filter}>
         <div className="link-list">
@@ -304,46 +226,6 @@ function SubDropdown({ group, filter }) {
   );
 }
 
-// ── Level-1 section dropdown ────────────────────────────────────────────────
-function Dropdown({ item, filter }) {
-  const location = useLocation();
-  const hasActive = item.children
-    .flatMap((g) => g.links)
-    .some((l) => location.pathname === l.to);
-  const [open, setOpen] = useState(hasActive);
-
-  const filteredChildren = item.children
-    .map((g) => ({
-      ...g,
-      links: filter
-        ? g.links.filter((l) => l.label.toLowerCase().includes(filter.toLowerCase()))
-        : g.links,
-    }))
-    .filter((g) => !filter || g.links.length > 0);
-
-  if (filter && filteredChildren.length === 0) return null;
-
-  return (
-    <div className="dd1-wrap">
-      <button
-        className={`dd1-btn${open ? " open" : ""}${hasActive ? " has-active" : ""}`}
-        onClick={() => setOpen((o) => !o)}
-      >
-        <span className="dd1-icon">{item.icon}</span>
-        <span className="sb-label">{item.label}</span>
-        <ChevronIcon className="arrow-icon" />
-      </button>
-      <AnimatedPanel open={open || !!filter}>
-        <div style={{ padding: "4px 0" }}>
-          {filteredChildren.map((g) => (
-            <SubDropdown key={g.label} group={g} filter={filter} />
-          ))}
-        </div>
-      </AnimatedPanel>
-    </div>
-  );
-}
-
 // ── Chevron SVG ─────────────────────────────────────────────────────────────
 function ChevronIcon({ className }) {
   return (
@@ -355,7 +237,7 @@ function ChevronIcon({ className }) {
 }
 
 // ── Main Sidebar ────────────────────────────────────────────────────────────
-function Sidebar({ onNavigate }) {
+function Sidebar() {
   const role = localStorage.getItem("role") ?? "EXPLOIT";
   const sections = NAV[role] ?? [];
   const [collapsed, setCollapsed] = useState(false);
@@ -440,7 +322,7 @@ function Sidebar({ onNavigate }) {
             <div key={group.section} className="nav-section">
               <div className="section-label">{group.section}</div>
               {group.items.map((item) => (
-                <Dropdown key={item.label} item={item} filter={filter} />
+                <NavItem key={item.label} item={item} filter={filter} />
               ))}
             </div>
           ))}

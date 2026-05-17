@@ -12,6 +12,13 @@ export async function refreshApi(refreshToken) {
   return res.data; // { accessToken, refreshToken }
 }
 
+export async function fetchMeApi(accessToken) {
+  const res = await axios.get(`${BASE_URL}/users/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return res.data;
+}
+
 export async function logoutApi(refreshToken) {
   await axios.post(`${BASE_URL}/auth/logout`, { refreshToken });
 }

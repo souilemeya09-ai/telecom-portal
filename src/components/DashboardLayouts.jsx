@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Navbar from "./navbar/Navbar";
 import Sidebar from "./sidebar/Sidebar";
 import Footer from "./Footer/Footer";
@@ -13,13 +13,11 @@ const BREADCRUMB_MAP = {
   "/souscriptions": ["Vente", "Souscriptions"],
   "/plans": ["Métier", "Plans tarifaires"],
   "/promotions": ["Métier", "Promotions"],
+  "/directory-numbers": ["Métier", "Directory Numbers"],
   "/exploit/promotions": ["Exploit", "Promotions"],
 };
 
 const DashboardLayout = () => {
-  const { pathname } = useLocation();
-  const breadcrumb = BREADCRUMB_MAP[pathname] ?? [];
-
   return (
     <div className="dashboard-shell">
 

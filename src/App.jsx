@@ -26,6 +26,8 @@ import ExploitPromotion from "./pages/exploit/ExploitPromotion";
 import Dashboard from "./components/dashboard/Dashboard";
 import CustomerGroups from "./pages/Vente/customer/CustomerGroups";
 import CreateCustomer from "./pages/Vente/customer/CreateCustomer";
+import CustomerGroupForm from "./components/CustomerGroupForm";
+import DirectoryNumbers from "./pages/metier/directoryNumber/DirectoryNumbers";
 function App() {
   return (
     <BrowserRouter>
@@ -64,12 +66,14 @@ function App() {
           <Route path="/customers" element={<Customers />} />
           <Route path="/create-customer" element={<CreateCustomer />} />
           <Route path="/groups" element={<CustomerGroups />} />
+          <Route path="/groups/new" element={<CustomerGroupForm />} />
           <Route path="/offres" element={<Offres />} />
           <Route path="/create-offre" element={<CreateOffre />} />
           <Route path="/promotions" element={<Promotions />} />
           <Route path="/souscriptions" element={<SouscriptionsPromotion />} />
           <Route path="/reclamations" element={<Reclamations />} />
           <Route path="/plans" element={<PlansTarifaires />} />
+          <Route path="/directory-numbers" element={<DirectoryNumbers />} />
 
           <Route path="/exploit/promotions" element={<ExploitPromotion />} />
           <Route path="/exploit/promotions/attente" element={<ExploitPromotion />} />

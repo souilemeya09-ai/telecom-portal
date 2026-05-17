@@ -241,6 +241,43 @@
   margin-bottom: 2px
 }
 
+.nav-item {
+  margin-bottom: 10px;
+}
+
+.nav-item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 10px;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--sb-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.nav-item-header:hover,
+.nav-item-header.open,
+.nav-item-header.has-active {
+  background: var(--sb-hover);
+  color: var(--sb-text);
+}
+
+.arrow-icon {
+  margin-left: auto;
+  transition: transform .18s;
+  color: var(--sb-muted);
+}
+
+.arrow-icon.rotate-90 {
+  transform: rotate(90deg);
+}
+
 .dd1-btn {
   width: 100%;
   display: flex;

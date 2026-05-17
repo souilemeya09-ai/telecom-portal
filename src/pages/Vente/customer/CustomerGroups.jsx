@@ -11,12 +11,13 @@ import {
   getPromotions,
 } from "../../../api/api";
 import Pagination from "../../../components/Pagination";
+import CustomerGroupForm from "../../../components/CustomerGroupForm";
+import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/customers.css";
 
 // ── Config ────────────────────────────────────────────────────
 const GROUP_TYPES = ["ENTERPRISE", "FAMILY", "SME", "OTHER"];
 const GROUP_STATUS = ["ACTIVE", "INACTIVE"];
-const MEMBER_ROLES = ["OWNER", "BILLING", "USER", "DECISION_MAKER"];
 
 const TYPE_LABELS = { ENTERPRISE: "Entreprise", FAMILY: "Famille", SME: "PME", OTHER: "Autre" };
 const ROLE_LABELS = { OWNER: "Propriétaire", BILLING: "Facturation", USER: "Utilisateur", DECISION_MAKER: "Décideur" };
@@ -24,8 +25,6 @@ const TYPE_COLORS = { ENTERPRISE: "type-enterprise", FAMILY: "type-family", SME:
 const ROLE_COLORS = { OWNER: "role-owner", BILLING: "role-billing", USER: "role-user", DECISION_MAKER: "role-dm" };
 
 const EMPTY_FORM = { name: "", groupType: "FAMILY", status: "ACTIVE" };
-
-const itemsPerPage = 10;
 
 // ── Sort helper ───────────────────────────────────────────────
 function getValue(obj, field) {
@@ -85,7 +84,6 @@ function Avatar({ name, size = 36, muted = false }) {
 
 // ── Panel membres d'un groupe ─────────────────────────────────
 function GroupDetailPanel({ group, clients, onAddMember, onRemoveMember, onClose }) {
-  const [addForm, setAddForm] = useState({ customerId: "", memberRole: "USER", primaryMember: false });
   const [submitting, setSubmitting] = useState(false);
   const [promos, setPromos] = useState([]);
   const [tab, setTab] = useState("members");
@@ -117,28 +115,6 @@ function GroupDetailPanel({ group, clients, onAddMember, onRemoveMember, onClose
       getPromotionsByGroup(group.id).then(setPromos).catch(console.error);
     }
   }, [tab, group.id]);
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!addForm.customerId) return;
-    setError("");
-    setSubmitting(true);
-    try {
-      await onAddMember(
-        group.id,
-        Number(addForm.customerId),
-        addForm.memberRole,
-        addForm.primaryMember
-      );
-      setAddForm({ customerId: "", memberRole: "USER", primaryMember: false });
-      setSearch("");
-    } catch (err) {
-      console.log(err);
-      setError(err.response?.data || err.message || "Erreur lors de l'ajout");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   // Quick-add: click on a client card directly
   const handleQuickAdd = async (clientId) => {
@@ -197,14 +173,14 @@ function GroupDetailPanel({ group, clients, onAddMember, onRemoveMember, onClose
           >
             🏷️ Promotions
           </button>
-          {inactiveMembers.length > 0 && (
+          {/* {inactiveMembers.length > 0 && (
             <button
               className={`group-tab ${tab === "history" ? "group-tab-active" : ""}`}
               onClick={() => setTab("history")}
             >
               📋 Historique ({inactiveMembers.length})
             </button>
-          )}
+          )} */}
         </div>
 
         {/* Error banner */}
@@ -417,15 +393,15 @@ function GroupDetailPanel({ group, clients, onAddMember, onRemoveMember, onClose
     </div>
   );
 }
-
 // ── Modal assigner une promotion ──────────────────────────────
-function AssignPromotionModal({ group, promotions, onClose, onAssign }) {
+function AssignPromotionModal({ group, promotions, onClose, onAssign, assignedById }) {
   const [form, setForm] = useState({
     promotionId: "",
     effectiveStartDate: new Date().toISOString().split("T")[0],
     effectiveEndDate: "",
     inheritedToMembers: true,
     assignmentMode: "MANUAL",
+    assignedById: assignedById || "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [assignedPromos, setAssignedPromos] = useState([]);
@@ -433,6 +409,10 @@ function AssignPromotionModal({ group, promotions, onClose, onAssign }) {
   useEffect(() => {
     getPromotionsByGroup(group.id).then(setAssignedPromos).catch(console.error);
   }, [group.id]);
+
+  useEffect(() => {
+    setForm((current) => ({ ...current, assignedById: assignedById || "" }));
+  }, [assignedById]);
 
   const activePromos = promotions.filter((p) => p.statut === "ACTIVE");
   const appliedPromos = activePromos.filter((p) => assignedPromos.some((ap) => ap.id === p.id));
@@ -449,6 +429,7 @@ function AssignPromotionModal({ group, promotions, onClose, onAssign }) {
         effectiveEndDate: form.effectiveEndDate || null,
         inheritedToMembers: form.inheritedToMembers,
         assignmentMode: form.assignmentMode,
+        assignedById: Number(form.assignedById),
       });
       onClose();
     } finally {
@@ -517,7 +498,7 @@ function AssignPromotionModal({ group, promotions, onClose, onAssign }) {
           </div>
           <div className="form-actions">
             <button type="button" className="btn-secondary" onClick={onClose}>Annuler</button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
+            <button type="submit" className="btn-primary" disabled={submitting || !form.assignedById}>
               {submitting ? "Assignation..." : "Assigner"}
             </button>
           </div>
@@ -531,6 +512,7 @@ function AssignPromotionModal({ group, promotions, onClose, onAssign }) {
 // COMPOSANT PRINCIPAL
 // ════════════════════════════════════════════════════════════════
 function CustomerGroups() {
+  const { user } = useAuth();
   const [groups, setGroups] = useState([]);
   const [clients, setClients] = useState([]);
   const [promotions, setPromotions] = useState([]);
@@ -618,7 +600,6 @@ function CustomerGroups() {
   }), [groups]);
 
   // ── Formulaire ────────────────────────────────────────────
-  const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); };
   const openEdit = (g) => {
     setEditing(g);
     setForm({ name: g.name, groupType: g.groupType, status: g.status });
@@ -694,7 +675,7 @@ function CustomerGroups() {
             {groups.length} groupe{groups.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button className="btn-primary" onClick={openCreate}>+ Nouveau groupe</button>
+        {/* <button className="btn-primary" onClick={openCreate}>+ Nouveau groupe</button> */}
       </div>
 
       {/* ── Stats ── */}
@@ -715,61 +696,18 @@ function CustomerGroups() {
         </div>
       </div>
 
-      {/* ── Formulaire panel ── */}
       {showForm && (
-        <div className="modal-overlay">
-          <div className="modal-box" onClick={closeForm} style={{ maxWidth: 500 }}>
-            <h3 className="form-panel-title">
-              {editingGroup ? `Modifier — ${editingGroup.name}` : "Créer un groupe client"}
-            </h3>
-            <form className="form-grid" onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label className="form-label">Nom du groupe *</label>
-                <input
-                  className="form-control"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="ex: Famille Ben Ali, STEG Enterprise..."
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Type de groupe *</label>
-                <select
-                  className="form-control"
-                  value={form.groupType}
-                  onChange={(e) => setForm({ ...form, groupType: e.target.value })}
-                >
-                  {GROUP_TYPES.map((t) => (
-                    <option key={t} value={t}>{TYPE_LABELS[t]}</option>
-                  ))}
-                </select>
-              </div>
-              {editingGroup && (
-                <div className="form-group">
-                  <label className="form-label">Statut</label>
-                  <select
-                    className="form-control"
-                    value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  >
-                    {GROUP_STATUS.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-                <button type="submit" className="btn-primary" disabled={submitting}>
-                  {submitting
-                    ? "Enregistrement..."
-                    : editingGroup ? "Mettre à jour" : "Créer le groupe"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CustomerGroupForm
+          form={form}
+          setForm={setForm}
+          editingGroup={editingGroup}
+          submitting={submitting}
+          onSubmit={handleSubmit}
+          onCancel={closeForm}
+          groupTypes={GROUP_TYPES}
+          groupStatus={GROUP_STATUS}
+          typeLabels={TYPE_LABELS}
+        />
       )}
 
       {/* ── Filtre type + search ── */}
@@ -925,6 +863,7 @@ function CustomerGroups() {
           promotions={promotions}
           onClose={() => setAssignModal(null)}
           onAssign={handleAssignPromotion}
+          assignedById={user?.id || localStorage.getItem("userId")}
         />
       )}
     </div>

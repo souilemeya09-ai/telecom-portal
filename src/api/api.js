@@ -184,6 +184,13 @@ export const uploadContratsCsv = async (file) => {
   return res.data;
 };
 
+export const uploadDirectoryNumbersCsv = async (file) => {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await api.post(`/directory-numbers/upload-csv`, fd);
+  return res.data;
+};
+
 export const uploadPlansTarifairesCsv = async (file) => {
   const fd = new FormData();
   fd.append("file", file);
@@ -251,6 +258,13 @@ export async function deleteContrat(id) {
 
 export const addOffreToContrat = async (contratId, offreId) => {
   const res = await api.put(`/contrats/${contratId}/add-offre/${offreId}`);
+  return res.data;
+};
+
+// ==================== DIRECTORY NUMBERS ====================
+
+export const getDirectoryNumbers = async (params = {}) => {
+  const res = await api.get("/directory-numbers", { params });
   return res.data;
 };
 
@@ -582,6 +596,26 @@ export async function assignerPromotion(promotionId, dto) {
 // GET /api/promotions/:id/assignments
 export async function getAssignmentsByPromotion(promotionId) {
   const res = await api.get(`/promotions/${promotionId}/assignments`);
+  return res.data;
+}
+
+// PUT /api/promotions/:id/assignments/:assignmentId/valider?validateurId=1
+export async function validerPromotionAssignment(promotionId, assignmentId, validateurId) {
+  const res = await api.put(
+    `/promotions/${promotionId}/assignments/${assignmentId}/valider`,
+    null,
+    { params: { validateurId } }
+  );
+  return res.data;
+}
+
+// PUT /api/promotions/:id/assignments/:assignmentId/rejeter?validateurId=1
+export async function rejeterPromotionAssignment(promotionId, assignmentId, validateurId) {
+  const res = await api.put(
+    `/promotions/${promotionId}/assignments/${assignmentId}/rejeter`,
+    null,
+    { params: { validateurId } }
+  );
   return res.data;
 }
 
