@@ -18,6 +18,22 @@ const NAV = {
             { to: "/roles/perms", label: "Gérer Permissions" },
           ],
         },
+        {
+          icon: "📝",
+          label: "Reclamations & Rapports",
+          links: [
+            { to: "/reclamations", label: "Gérer Réclamations" },
+          ],
+        },
+        {
+          icon: "⚙️",
+          label: "Paramètres Système",
+          links: [
+            { to: "/settings/general", label: "Généraux" },
+            { to: "/settings/security", label: "Sécurité" },
+            { to: "/settings/notifications", label: "Notifications" },
+          ],
+        },
       ],
     },
   ],
