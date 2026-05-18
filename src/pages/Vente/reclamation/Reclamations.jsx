@@ -2,18 +2,23 @@ import { useEffect, useState } from "react";
 import {
   getReclamations,
   createReclamation,
-  updateReclamation,
   deleteReclamation,
+  repondreReclamation,
   changerStatutReclamation,
   getClients,
+  getCustomerGroups,
+  updateReclamation,
 } from "../../../api/api";
 import Pagination from "../../../components/Pagination";
 import "./reclamations.css";
 
 const EMPTY_FORM = {
   clientId: "",
+  EMPTY_FORM: "",
   description: "",
   commentaireVendeur: "",
+  commentaireDsi: "",
+  statut: "EN_COURS",
 };
 
 const STATUTS = [
@@ -27,6 +32,8 @@ const statutInfo = (s) => STATUTS.find((x) => x.value === s) || { label: s, cls:
 function Reclamations() {
   const [reclamations, setReclamations] = useState([]);
   const [clients, setClients] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [clientSearchMode, setClientSearchMode] = useState("client");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -34,9 +41,12 @@ function Reclamations() {
   const [detailRec, setDetailRec] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [filterStatut, setFilterStatut] = useState("ALL");
+  const [clientSearch, setClientSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [form, setForm] = useState(EMPTY_FORM);
+  const [reponseForm, setReponseForm] = useState({ commentaireDsi: "", statut: "EN_COURS" });
+  const [submittingReponse, setSubmittingReponse] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -46,9 +56,17 @@ function Reclamations() {
       const [r, c] = await Promise.all([getReclamations(), getClients()]);
       setReclamations(r);
       setClients(c.content || []);
+      loadGroups()
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
+
+  const loadGroups = async () => {
+    try {
+      const g = await getCustomerGroups();
+      setGroups(g);
+    } catch (e) { console.error(e); }
+  }
 
   /* ── Formulaire ── */
   const openCreate = () => {
@@ -60,8 +78,11 @@ function Reclamations() {
 
   const openEdit = (rec) => {
     setEditingRec(rec);
+    const isGroupe = !!rec.groupId || !!rec.groupe;
+    setClientSearchMode(isGroupe ? "groupe" : "client");
     setForm({
       clientId: rec.clientId || rec.client?.id || "",
+      groupId: rec.groupId || rec.groupe?.id || "",
       description: rec.description || "",
       commentaireVendeur: rec.commentaireVendeur || "",
     });
@@ -69,14 +90,37 @@ function Reclamations() {
     setDetailRec(null);
   };
 
-  const closeForm = () => { setShowForm(false); setEditingRec(null); setForm(EMPTY_FORM); };
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingRec(null);
+    setForm(EMPTY_FORM);
+    setClientSearch("");
+    setClientSearchMode("client");
+  };
+
+  const handleReponse = async (id) => {
+    if (!reponseForm.commentaireDsi.trim()) return;
+    setSubmittingReponse(true);
+    try {
+      await repondreReclamation(id, reponseForm);
+      setDetailRec((prev) => prev?.id === id
+        ? { ...prev, commentaireDsi: reponseForm.commentaireDsi, statut: reponseForm.statut }
+        : prev
+      );
+      setReponseForm({ commentaireDsi: "", statut: "EN_COURS" });
+      loadData();
+    } catch (e) { console.error(e); }
+    finally { setSubmittingReponse(false); }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       const payload = {
-        clientId: Number(form.clientId),
+        ...(clientSearchMode === "client"
+          ? { clientId: Number(form.clientId) }
+          : { groupId: Number(form.groupId) }),
         description: form.description,
         commentaireVendeur: form.commentaireVendeur || null,
       };
@@ -127,6 +171,7 @@ function Reclamations() {
   const formatDate = (d) =>
     d ? new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
 
+  const role = localStorage.getItem("role");
   /* ─────────────────────────── RENDER ─────────────────────────── */
   return (
     <div className="page-wrapper">
@@ -137,7 +182,11 @@ function Reclamations() {
           <h1 className="page-title">Réclamations</h1>
           <p className="page-subtitle">{reclamations.length} réclamation{reclamations.length !== 1 ? "s" : ""}</p>
         </div>
-        <button className="btn-primary" onClick={openCreate}>+ Nouvelle réclamation</button>
+        {
+          role === "VENTE" && (
+            <button className="btn-primary" onClick={openCreate}>+ Nouvelle réclamation</button>
+          )
+        }
       </div>
 
       {/* ── Metric cards ── */}
@@ -161,59 +210,208 @@ function Reclamations() {
       </div>
 
       {/* ── Formulaire panel ── */}
-      {showForm && (
-        <div className="modal-overlay" onClick={closeForm}>
-          <div className="modal-box modal-form" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="form-panel-title">
-                {editingRec ? `Modifier réclamation #${editingRec.id}` : "Nouvelle réclamation"}
-              </h3>
-              <button className="modal-close" onClick={closeForm}>✕</button>
-            </div>
-            <form className="form-grid" onSubmit={handleSubmit}>
+      {showForm &&
+        (
+          (editingRec && role === "VENTE") ||
 
-              <div className="form-group">
-                <label className="form-label">Client *</label>
-                <select className="form-control" value={form.clientId}
-                  onChange={(e) => setForm({ ...form, clientId: e.target.value })} required>
-                  <option value="">Sélectionner un client</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>{c.nom} {c.prenom}</option>
-                  ))}
-                </select>
-              </div>
+          (!editingRec && role === "VENTE")
+        ) && (
+          <div className="modal-overlay" onClick={closeForm}>
+            <div
+              className="modal-box modal-form"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <h3 className="form-panel-title">
+                  {editingRec
+                    ? `Modifier réclamation #${editingRec.id}`
+                    : "Nouvelle réclamation"}
+                </h3>
 
-              <div className="form-group form-group-full">
-                <label className="form-label">Description *</label>
-                <textarea className="form-control" rows={4}
-                  placeholder="Décrire la réclamation du client..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  required style={{ resize: "vertical" }}
-                />
-              </div>
-
-              <div className="form-group form-group-full">
-                <label className="form-label">Commentaire vendeur</label>
-                <textarea className="form-control" rows={2}
-                  placeholder="Notes internes, actions prises..."
-                  value={form.commentaireVendeur}
-                  onChange={(e) => setForm({ ...form, commentaireVendeur: e.target.value })}
-                  style={{ resize: "vertical" }}
-                />
-              </div>
-
-              <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
-                <button type="submit" className="btn-primary" disabled={submitting}>
-                  {submitting ? "Enregistrement..." : editingRec ? "Mettre à jour" : "Créer la réclamation"}
+                <button className="modal-close" onClick={closeForm}>
+                  ✕
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
+              <form className="form-grid" onSubmit={handleSubmit}>
+                <div className="form-group">
+                  <label className="form-label">Client / Groupe</label>
+
+                  {editingRec ? (
+                    /* ── Mode lecture seule en modification ── */
+                    <div className="client-readonly">
+                      {clientSearchMode === "groupe" ? (
+                        <>
+                          <span className="client-readonly-icon">👥</span>
+                          <div className="client-info">
+                            <div className="client-name">
+                              {editingRec.groupe?.name || editingRec.groupe?.nom || "Groupe #" + (editingRec.groupId || editingRec.groupe?.id)}
+                            </div>
+                            <div className="client-meta">Groupe de clients</div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="avatar">
+                            {editingRec.client?.nom?.[0]?.toUpperCase() ?? "?"}
+                          </div>
+                          <div className="client-info">
+                            <div className="client-name">
+                              {editingRec.client?.nom} {editingRec.client?.prenom}
+                            </div>
+                            <div className="client-meta">
+                              {editingRec.client?.email || editingRec.client?.cin || "—"}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    /* ── Mode création : toggle + recherche + liste ── */
+                    <>
+                      <div className="search-mode-toggle">
+                        <button
+                          type="button"
+                          className={`toggle-btn ${clientSearchMode === "client" ? "toggle-active" : ""}`}
+                          onClick={() => { setClientSearchMode("client"); setClientSearch(""); setForm({ ...form, clientId: "", groupId: "" }); }}
+                        >
+                          👤 Par client
+                        </button>
+                        <button
+                          type="button"
+                          className={`toggle-btn ${clientSearchMode === "groupe" ? "toggle-active" : ""}`}
+                          onClick={() => { setClientSearchMode("groupe"); setClientSearch(""); setForm({ ...form, clientId: "", groupId: "" }); }}
+                        >
+                          👥 Par groupe
+                        </button>
+                      </div>
+
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder={clientSearchMode === "client"
+                          ? "🔎 Nom, prénom, email ou CIN..."
+                          : "🔎 Nom du groupe..."}
+                        value={clientSearch}
+                        onChange={(e) => { setClientSearch(e.target.value); setForm({ ...form, clientId: "" }); }}
+                        style={{ marginBottom: 6 }}
+                      />
+
+                      <div className="client-list">
+                        {clientSearchMode === "client"
+                          ? clients
+                            .filter((c) => {
+                              const q = clientSearch.toLowerCase().trim();
+                              return !q || [c.nom, c.prenom, c.email, c.cin].some((v) => v?.toLowerCase().includes(q));
+                            })
+                            .map((c) => (
+                              <label
+                                key={c.id}
+                                className={`client-item ${form.clientId === c.id ? "active" : ""}`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="client"
+                                  value={c.id}
+                                  checked={form.clientId === c.id}
+                                  onChange={() => setForm({ ...form, clientId: c.id })}
+                                />
+                                <div className="client-info">
+                                  <div className="client-name">{c.nom} {c.prenom}</div>
+                                  <div className="client-meta">{c.email || c.cin || "—"}</div>
+                                </div>
+                              </label>
+                            ))
+                          : groups
+                            .filter((g) => {
+                              const q = clientSearch.toLowerCase().trim();
+                              return !q || g.name?.toLowerCase().includes(q);
+                            })
+                            .map((g) => (
+                              <label
+                                key={g.id}
+                                className={`client-item ${form.groupId === g.id ? "active" : ""}`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="groupe"
+                                  value={g.id}
+                                  checked={form.groupId === g.id}
+                                  onChange={() => setForm({ ...form, groupId: g.id, clientId: "" })}
+                                />
+                                <div className="client-info">
+                                  <div className="client-name">👥 {g.name}</div>
+                                  <div className="client-meta">{g.memberCount || 0} clients</div>
+                                </div>
+                              </label>
+                            ))
+                        }
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="form-group form-group-full">
+                  <label className="form-label">Description *</label>
+
+                  <textarea
+                    className="form-control"
+                    rows={4}
+                    placeholder="Décrire la réclamation du client..."
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                    required
+                    style={{ resize: "vertical" }}
+                  />
+                </div>
+
+                <div className="form-group form-group-full">
+                  <label className="form-label">
+                    Commentaire vendeur
+                  </label>
+
+                  <textarea
+                    className="form-control"
+                    rows={2}
+                    placeholder="Notes internes, actions prises..."
+                    value={form.commentaireVendeur}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        commentaireVendeur: e.target.value,
+                      })
+                    }
+                    style={{ resize: "vertical" }}
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={closeForm}
+                  >
+                    Annuler
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    disabled={submitting || (!form.clientId && !form.groupId)}
+                  >
+                    {submitting
+                      ? "Enregistrement..."
+                      : editingRec
+                        ? "Mettre à jour"
+                        : "Créer la réclamation"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       {/* ── Modal Détail ── */}
       {detailRec && (
         <div className="modal-overlay" onClick={() => setDetailRec(null)}>
@@ -277,28 +475,77 @@ function Reclamations() {
                 </div>
               )}
 
-              {/* Changer statut */}
-              <div className="detail-section detail-section-full">
-                <p className="detail-section-title">Changer le statut</p>
-                <div className="statut-actions">
-                  {STATUTS.map((s) => (
-                    <button
-                      key={s.value}
-                      className={`statut-btn ${detailRec.statut === s.value ? "statut-btn-active" : ""}`}
-                      onClick={() => handleStatut(detailRec.id, s.value)}
-                      disabled={detailRec.statut === s.value}
+              {
+                role === "DSI" && (
+                  <div className="detail-section detail-section-full">
+                    <p className="detail-section-title">Changer le statut</p>
+                    <div className="statut-actions">
+                      {STATUTS.map((s) => (
+                        <button
+                          key={s.value}
+                          className={`statut-btn ${detailRec.statut === s.value ? "statut-btn-active" : ""}`}
+                          onClick={() => handleStatut(detailRec.id, s.value)}
+                          disabled={detailRec.statut === s.value}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              }
+
+              {/* ── Panneau réponse DSI ── */}
+              {role === "DSI" && (
+                <div className="detail-section detail-section-full">
+                  <p className="detail-section-title">Réponse DSI</p>
+
+                  {detailRec.commentaireDsi && (
+                    <p className="rec-description rec-comment" style={{ marginBottom: 12 }}>
+                      <strong>Réponse envoyée :</strong> {detailRec.commentaireDsi}
+                    </p>
+                  )}
+
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    placeholder="Rédiger la réponse au client..."
+                    value={reponseForm.commentaireDsi}
+                    onChange={(e) => setReponseForm({ ...reponseForm, commentaireDsi: e.target.value })}
+                    style={{ resize: "vertical", marginBottom: 10 }}
+                  />
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                    <select
+                      className="form-control"
+                      style={{ width: "auto" }}
+                      value={reponseForm.statut}
+                      onChange={(e) => setReponseForm({ ...reponseForm, statut: e.target.value })}
                     >
-                      {s.label}
+                      {STATUTS.map((s) => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </select>
+
+                    <button
+                      className="btn-primary"
+                      onClick={() => handleReponse(detailRec.id)}
+                      disabled={submittingReponse || !reponseForm.commentaireDsi.trim()}
+                    >
+                      {submittingReponse ? "Envoi..." : "📨 Envoyer la réponse"}
                     </button>
-                  ))}
+                  </div>
+
+                  <p style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 8 }}>
+                    Un email sera envoyé automatiquement au client.
+                  </p>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="modal-actions">
               <button className="btn-danger" onClick={() => setDeleteConfirm(detailRec)}>Supprimer</button>
               <button className="btn-secondary" onClick={() => setDetailRec(null)}>Fermer</button>
-              <button className="btn-primary" onClick={() => openEdit(detailRec)}>✏️ Modifier</button>
             </div>
           </div>
         </div>
@@ -381,7 +628,11 @@ function Reclamations() {
                       <td>
                         <div className="action-buttons">
                           <button className="btn-action btn-view" onClick={() => setDetailRec(r)} title="Voir">👁</button>
-                          <button className="btn-action btn-edit" onClick={() => openEdit(r)} title="Modifier">✏️</button>
+                          {
+                            role === "VENTE" && (
+                              <button className="btn-action btn-edit" onClick={() => openEdit(r)} title="Modifier">✏️</button>
+                            )
+                          }
                           <button className="btn-action btn-delete" onClick={() => setDeleteConfirm(r)} title="Supprimer">🗑️</button>
                         </div>
                       </td>

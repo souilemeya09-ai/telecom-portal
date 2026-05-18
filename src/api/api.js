@@ -329,6 +329,15 @@ export async function changerStatutReclamation(id, statut) {
   return res.data;
 }
 
+export const repondreReclamation = async (id, payload) => {
+  const res = await api.patch(
+    `/reclamations/${id}/reponse`,
+    payload
+  );
+
+  return res.data;
+};
+
 // DELETE /api/reclamations/:id
 export async function deleteReclamation(id) {
   const res = await api.delete(`${BASE_URL}/reclamations/${id}`, {
@@ -487,13 +496,13 @@ export async function souscrirePromotion(contratId, promotionId) {
   );
   return res.data;
 }
- 
+
 // GET /api/souscriptions/contrat/:contratId
 export async function getSouscriptionsByContrat(contratId) {
   const res = await api.get(`/souscriptions/contrat/${contratId}`);
   return res.data;
 }
- 
+
 // GET /api/souscriptions/promotion/:promotionId
 export async function getSouscriptionsByPromotion(promotionId) {
   const res = await api.get(`/souscriptions/promotion/${promotionId}`);

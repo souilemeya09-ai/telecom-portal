@@ -172,7 +172,7 @@ const CreateCustomer = ({ onSuccess, onCancel, asModal = false }) => {
     if (success) {
         return (
             <div style={asModal ? s.modalOverlay : {}}>
-                <div style={{ ...s.card, ...(asModal ? s.modalBox : {}), ...s.successCard }}>
+                <div style={{ ...s.card, ...(asModal ? s.modalBox : {}), ...s.successCard, Shadow: "0 4px 24px rgba(0,0,0,.12)", display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', marginTop: '30vh', marginLeft: '19vh' }}>
                     <div style={s.successIcon}><IconCheck /></div>
                     <div style={s.successTitle}>Client créé avec succès !</div>
                     <div style={s.successSub}>
