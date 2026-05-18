@@ -563,7 +563,7 @@ function Contrats() {
                 )}
                 {!form.directoryNumber && !editingContrat && (
                   <span className="input-hint">
-                    Sélectionnez un numéro LIBRE importé, ou laissez vide pour la génération backend.
+                    Sélectionnez un numéro LIBRE.
                   </span>
                 )}
                 {!form.directoryNumber && editingContrat && (

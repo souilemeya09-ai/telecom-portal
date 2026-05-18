@@ -549,10 +549,10 @@ const Customers = () => {
                   <label className="form-label">Adresse</label>
                   <input className="form-control" value={form.adresse} onChange={set("adresse")} />
                 </div>
-                <div className="form-group">
+                {/* <div className="form-group">
                   <label className="form-label">Ville</label>
                   <input className="form-control" value={form.ville} onChange={set("ville")} />
-                </div>
+                </div> */}
 
                 <div className="form-group form-group-full">
                   <label className="form-label">Type de document *</label>
@@ -666,7 +666,7 @@ const Customers = () => {
                   <Th label="Groupe" field="customerGroupId" {...thProps} />
                   <Th label="Tél." field="telephone" {...thProps} />
                   <Th label="Adresse" field="adresse"   {...thProps} />
-                  <Th label="Ville" field="ville"     {...thProps} />
+                  {/* <Th label="Ville" field="ville"     {...thProps} /> */}
                   <Th label="Document" field="document"  {...thProps} />
                   <Th label="Numéro" field="numero"    {...thProps} />
                   <th>Image</th>
@@ -718,7 +718,7 @@ const Customers = () => {
                       {/* ✅ mono (au lieu de mono-cell) */}
                       <td className="mono">{c.telephone || "—"}</td>
                       <td>{c.adresse || "—"}</td>
-                      <td>{c.ville || "—"}</td>
+                      {/* <td>{c.ville || "—"}</td> */}
 
                       {/* ✅ badge-cin / badge-passport */}
                       <td>
