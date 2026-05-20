@@ -96,13 +96,16 @@ function Contrats() {
   const clientDropdownRef = useRef();
   const offreDropdownRef = useRef();
 
+  // ── Directory Number combobox ─────────────────────────────
+  const [dnSearch, setDnSearch] = useState("");
+  const [dnDropdownOpen, setDnDropdownOpen] = useState(false);
+  const dnDropdownRef = useRef();
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
     try {
-
       const [c, cl, cg, o, dn] = await Promise.all([
         getContrats({ page: 0, size: 1000 }),
         getClients({ page: 0, size: 1000 }),
@@ -191,7 +194,6 @@ function Contrats() {
     });
   }, [contrats, getContractValue, sortField, sortOrder, search]);
 
-
   const pageCount = Math.ceil(displayed.length / itemsPerPage);
   const pageItems = displayed.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
@@ -218,6 +220,22 @@ function Contrats() {
       .sort((a, b) => Number(a.numero) - Number(b.numero));
   }, [directoryNumbers, editingContrat]);
 
+  // ── Filtered Directory Numbers for combobox ───────────────
+  const filteredDirectoryNumbers = useMemo(() => {
+    const all = editingContrat?.directoryNumber
+      ? [
+          { id: "current", numero: editingContrat.directoryNumber, _current: true },
+          ...availableDirectoryNumbers,
+        ]
+      : availableDirectoryNumbers;
+    const term = dnSearch.trim().replace(/\s/g, "");
+    if (!term) return all;
+    return all.filter((dn) =>
+      String(dn.numero).includes(term) ||
+      formatNumero(dn.numero).replace(/\s/g, "").includes(term)
+    );
+  }, [availableDirectoryNumbers, editingContrat, dnSearch]);
+
   // ── Mise à jour form avec validation dates en temps réel ──
   const updateForm = (patch) => {
     const next = { ...form, ...patch };
@@ -239,6 +257,7 @@ function Contrats() {
     setHolderError("");
     setSubmitError("");
     setClientSearch("");
+    setDnSearch("");
     setShowForm(true);
   };
 
@@ -256,6 +275,7 @@ function Contrats() {
     setHolderError("");
     setSubmitError("");
     setClientSearch("");
+    setDnSearch("");
     setShowForm(true);
     setDetail(null);
   };
@@ -263,7 +283,7 @@ function Contrats() {
   const closeForm = () => {
     setShowForm(false); setEditing(null);
     setForm(EMPTY_FORM); setDateErrors({}); setHolderError(""); setSubmitError("");
-    setClientSearch("");
+    setClientSearch(""); setDnSearch("");
   };
 
   const hasDateErrors = Object.keys(dateErrors).length > 0;
@@ -271,7 +291,6 @@ function Contrats() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation finale avant envoi
     const errors = validateDates(form.dateDebut, form.dateFin);
     if (Object.keys(errors).length > 0) {
       setDateErrors(errors);
@@ -400,18 +419,20 @@ function Contrats() {
                 </div>
               )}
 
+              {/* ── Client combobox ── */}
               <div className="form-group" ref={clientDropdownRef} style={{ position: "relative" }}>
                 <label className="form-label">Client</label>
                 <input
                   className="form-control"
                   type="text"
-                  placeholder="Rechercher un client..."
+                  placeholder={form.customerGroupId ? "Désactivé — groupe sélectionné" : "Rechercher un client..."}
+                  disabled={Boolean(form.customerGroupId)}
                   value={
                     form.clientId
                       ? (() => {
-                        const c = clients.find((c) => String(c.id) === String(form.clientId));
-                        return c ? `${c.nom} ${c.prenom}` : clientSearch;
-                      })()
+                          const c = clients.find((c) => String(c.id) === String(form.clientId));
+                          return c ? `${c.nom} ${c.prenom}` : clientSearch;
+                        })()
                       : clientSearch
                   }
                   onChange={(e) => {
@@ -419,8 +440,11 @@ function Contrats() {
                     updateForm({ clientId: "" });
                     setClientDropdownOpen(true);
                   }}
-                  onFocus={() => setClientDropdownOpen(true)}
-                  onBlur={() => setTimeout(() => setClientDropdownOpen(false), 150)}
+                  onFocus={() => !form.customerGroupId && setClientDropdownOpen(true)}
+                  onBlur={() => {
+                    setTimeout(() => setClientDropdownOpen(false), 150);
+                    if (!form.clientId) setClientSearch("");
+                  }}
                   autoComplete="off"
                 />
                 {clientDropdownOpen && filteredClients.length > 0 && (
@@ -431,7 +455,7 @@ function Contrats() {
                         className={`combobox-option ${String(form.clientId) === String(c.id) ? "combobox-option-selected" : ""}`}
                         onMouseDown={() => {
                           updateForm({ clientId: c.id, customerGroupId: "" });
-                          setClientSearch(`${c.nom} ${c.prenom}`);
+                          setClientSearch("");
                           setClientDropdownOpen(false);
                         }}
                       >
@@ -446,14 +470,21 @@ function Contrats() {
                 )}
               </div>
 
+              {/* ── Customer group ── */}
               <div className="form-group">
                 <label className="form-label">Customer group</label>
-                <select className="form-control" value={form.customerGroupId}
+                <select
+                  className="form-control"
+                  value={form.customerGroupId}
+                  disabled={Boolean(form.clientId)}
                   onChange={(e) => {
                     updateForm({ customerGroupId: e.target.value, clientId: "" });
                     if (e.target.value) setClientSearch("");
-                  }}>
-                  <option value="">Sélectionner un groupe customer</option>
+                  }}
+                >
+                  <option value="">
+                    {form.clientId ? "Désactivé — client sélectionné" : "Sélectionner un groupe customer"}
+                  </option>
                   {groups.map((cg) => <option key={cg.id} value={cg.id}>{cg.name}</option>)}
                 </select>
                 {holderError && (
@@ -461,6 +492,7 @@ function Contrats() {
                 )}
               </div>
 
+              {/* ── Offre combobox ── */}
               <div className="form-group" ref={offreDropdownRef} style={{ position: "relative" }}>
                 <label className="form-label">Offre *</label>
                 <input
@@ -470,9 +502,9 @@ function Contrats() {
                   value={
                     form.offreId
                       ? (() => {
-                        const o = offers.find((o) => String(o.id) === String(form.offreId));
-                        return o ? (o.nomOffre || o.nom || "Sans nom") : offreSearch;
-                      })()
+                          const o = offers.find((o) => String(o.id) === String(form.offreId));
+                          return o ? (o.nomOffre || o.nom || "Sans nom") : offreSearch;
+                        })()
                       : offreSearch
                   }
                   onChange={(e) => {
@@ -481,7 +513,10 @@ function Contrats() {
                     setOffreDropdownOpen(true);
                   }}
                   onFocus={() => setOffreDropdownOpen(true)}
-                  onBlur={() => setTimeout(() => setOffreDropdownOpen(false), 150)}
+                  onBlur={() => {
+                    setTimeout(() => setOffreDropdownOpen(false), 150);
+                    if (!form.offreId) setOffreSearch("");
+                  }}
                   required
                   autoComplete="off"
                 />
@@ -493,7 +528,7 @@ function Contrats() {
                         className={`combobox-option ${String(form.offreId) === String(o.id) ? "combobox-option-selected" : ""}`}
                         onMouseDown={() => {
                           updateForm({ offreId: o.id });
-                          setOffreSearch(o.nomOffre || o.nom || "Sans nom");
+                          setOffreSearch("");
                           setOffreDropdownOpen(false);
                         }}
                       >
@@ -512,7 +547,7 @@ function Contrats() {
                   className={`form-control ${dateErrors.dateDebut ? "input-error" : ""}`}
                   type="date"
                   value={form.dateDebut}
-                  min={today()}                              // ✅ interdit les dates passées dans le picker
+                  min={today()}
                   onChange={(e) => updateForm({ dateDebut: e.target.value })}
                   required
                 />
@@ -528,7 +563,7 @@ function Contrats() {
                   className={`form-control ${dateErrors.dateFin ? "input-error" : ""}`}
                   type="date"
                   value={form.dateFin}
-                  min={form.dateDebut || today()}            // ✅ doit être après dateDebut
+                  min={form.dateDebut || today()}
                   onChange={(e) => updateForm({ dateFin: e.target.value })}
                 />
                 {dateErrors.dateFin && (
@@ -536,34 +571,75 @@ function Contrats() {
                 )}
               </div>
 
-              {/* ── Directory Number ── */}
-              <div className="form-group form-group-full">
+              {/* ── Directory Number combobox ── */}
+              <div className="form-group form-group-full" ref={dnDropdownRef} style={{ position: "relative" }}>
                 <label className="form-label">Directory Number</label>
-                <select
+                <input
                   className="form-control"
-                  value={form.directoryNumber}
-                  onChange={(e) => updateForm({ directoryNumber: e.target.value })}
-                >
-                  <option value="">
-                    {editingContrat ? "Conserver le numéro actuel" : "Affectation automatique par le backend"}
-                  </option>
-                  {editingContrat?.directoryNumber && (
-                    <option value={editingContrat.directoryNumber}>
-                      Numéro actuel · {formatNumero(editingContrat.directoryNumber)}
-                    </option>
-                  )}
-                  {availableDirectoryNumbers.map((dn) => (
-                    <option key={dn.id} value={dn.numero}>
-                      {formatNumero(dn.numero)}
-                    </option>
-                  ))}
-                </select>
+                  type="text"
+                  placeholder={
+                    editingContrat
+                      ? `Actuel : ${formatNumero(editingContrat.directoryNumber || "")} — rechercher pour changer`
+                      : "Rechercher un numéro LIBRE..."
+                  }
+                  value={
+                    form.directoryNumber
+                      ? formatNumero(form.directoryNumber)
+                      : dnSearch
+                  }
+                  onChange={(e) => {
+                    setDnSearch(e.target.value);
+                    updateForm({ directoryNumber: "" });
+                    setDnDropdownOpen(true);
+                  }}
+                  onFocus={() => setDnDropdownOpen(true)}
+                  onBlur={() => setTimeout(() => setDnDropdownOpen(false), 150)}
+                  autoComplete="off"
+                />
+                {dnDropdownOpen && (
+                  <ul className="combobox-dropdown" style={{height:'100%', paddingBottom:'20px'}}>
+                    {/* Option "aucun" pour création */}
+                    {!editingContrat && (
+                      <li
+                        className={`combobox-option ${!form.directoryNumber ? "combobox-option-selected" : ""}`}
+                        onMouseDown={() => {
+                          updateForm({ directoryNumber: "" });
+                          setDnSearch("");
+                          setDnDropdownOpen(false);
+                        }}
+                      >
+                        <span className="combobox-main">Affectation automatique</span>
+                      </li>
+                    )}
+                    {filteredDirectoryNumbers.slice(0, 10).map((dn) => (
+                      <li
+                        key={dn.id}
+                        className={`combobox-option ${String(form.directoryNumber) === String(dn.numero) ? "combobox-option-selected" : ""}`}
+                        onMouseDown={() => {
+                          updateForm({ directoryNumber: dn.numero });
+                          setDnSearch("");
+                          setDnDropdownOpen(false);
+                        }}
+                      >
+                        {dn._current && (
+                          <span className="combobox-sub" style={{ marginRight: 6 }}>actuel ·</span>
+                        )}
+                        <span className="combobox-main">{formatNumero(dn.numero)}</span>
+                      </li>
+                    ))}
+                    {filteredDirectoryNumbers.length === 0 && (
+                      <li className="combobox-option" style={{ pointerEvents: "none", opacity: 0.5 }}>
+                        <span className="combobox-main">Aucun résultat</span>
+                      </li>
+                    )}
+                  </ul>
+                )}
                 {form.directoryNumber && (
                   <span className="input-hint">📞 {formatNumero(form.directoryNumber)}</span>
                 )}
                 {!form.directoryNumber && !editingContrat && (
                   <span className="input-hint">
-                    Sélectionnez un numéro LIBRE.
+                    Sélectionnez un numéro LIBRE ou laissez vide pour une affectation automatique.
                   </span>
                 )}
                 {!form.directoryNumber && editingContrat && (
@@ -700,7 +776,6 @@ function Contrats() {
           </div>
         </div>
       )}
-
 
       {/* ── Search bar ── */}
       <div className="search-bar">

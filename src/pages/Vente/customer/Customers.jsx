@@ -12,7 +12,7 @@ import "../../../styles/Page.css";
 
 const EMPTY_FORM = {
   nom: "", prenom: "", telephone: "", email: "",
-  adresse: "", ville: "",
+  adresse: "", ville: "", dateActivation: '', dateDesactivation: '',
   documentType: "1",
   cinNumber: "", passportNumber: "",
   image: null, customerGroupId: "",
@@ -26,6 +26,8 @@ function getValue(obj, field) {
     case "telephone": return obj.telephone ?? "";
     case "adresse": return obj.adresse ?? "";
     case "ville": return obj.ville ?? "";
+    case "dateActivation": return obj.dateActivation ?? "";
+    case "dateDesactivation": return obj.dateDesactivation ?? "";
     case "document": return obj.documentType === 1 ? "CIN" : "Passeport";
     case "numero": return obj.documentType === 1 ? (obj.cinNumber ?? "") : (obj.passportNumber ?? "");
     default: return "";
@@ -50,10 +52,6 @@ function Th({ label, field, sortField, sortOrder, onSort }) {
 }
 
 /* ── Icônes SVG ──────────────────────────────────────────────── */
-const IconTag = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>;
-const IconPlus = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>;
-const IconEdit = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>;
-const IconTrash = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></svg>;
 const IconSearch = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>;
 const IconClose = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>;
 
@@ -374,7 +372,9 @@ const Customers = () => {
         c.email?.toLowerCase().includes(term) ||
         c.telephone?.toLowerCase().includes(term) ||
         c.adresse?.toLowerCase().includes(term) ||
-        c.ville?.toLowerCase().includes(term)
+        c.ville?.toLowerCase().includes(term) ||
+        c.dateActivation?.toLowerCase().includes(term) ||
+        c.dateDesactivation?.toLowerCase().includes(term)
       )
       : customers;
     return [...filtered].sort((a, b) => {
@@ -434,6 +434,8 @@ const Customers = () => {
     fd.append("nom", form.nom); fd.append("prenom", form.prenom);
     fd.append("telephone", form.telephone); fd.append("email", form.email);
     fd.append("adresse", form.adresse); fd.append("ville", form.ville);
+    fd.append("dateActivation", form.dateActivation);
+    fd.append("dateDesactivation", form.dateDesactivation);
     fd.append("documentType", form.documentType);
     fd.append("customerGroupId", form.customerGroupId);
     if (form.documentType === "1" && form.cinNumber) fd.append("cinNumber", form.cinNumber);
@@ -669,7 +671,10 @@ const Customers = () => {
                   {/* <Th label="Ville" field="ville"     {...thProps} /> */}
                   <Th label="Document" field="document"  {...thProps} />
                   <Th label="Numéro" field="numero"    {...thProps} />
-                  <th>Image</th>
+                  <Th label="Date d'activation" field="dateActivation" {...thProps} />
+                  <Th label="Date de désactivation" field="dateDesactivation" {...thProps} />
+
+                  {/* <th>Image</th> */}
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -677,7 +682,7 @@ const Customers = () => {
                 {pageItems.map((c) => {
                   const isCin = c.documentType === 1;
                   const docNum = isCin ? c.cinNumber : c.passportNumber;
-                  const docImg = isCin ? c.cinImagePath : c.passportImagePath;
+                  // const docImg = isCin ? c.cinImagePath : c.passportImagePath;
                   return (
                     <tr key={c.id}>
                       {/* ✅ id-cell */}
@@ -729,11 +734,13 @@ const Customers = () => {
 
                       <td className="mono">{docNum || "—"}</td>
 
-                      <td>
+                      <td>{c.dateActivation || "—"}</td>
+                      <td>{c.dateDesactivation || "—"}</td>
+                      {/* <td>
                         {docImg
                           ? <img src={getImageUrl(docImg)} alt="doc" className="doc-thumb" />
                           : <span style={{ color: "var(--color-text-tertiary)" }}>—</span>}
-                      </td>
+                      </td> */}
 
                       {/* ✅ action-buttons + btn-action + btn-view / btn-edit / btn-delete
                            (même pattern que CustomerGroups) */}
