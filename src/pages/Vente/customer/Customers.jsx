@@ -14,7 +14,7 @@ const EMPTY_FORM = {
   nom: "", prenom: "", telephone: "", email: "",
   adresse: "", ville: "", dateActivation: '', dateDesactivation: '',
   documentType: "1",
-  cinNumber: "", passportNumber: "",
+  cinNumber: "", passportNumber: "", status: "",
   image: null, customerGroupId: "",
 };
 
@@ -26,6 +26,7 @@ function getValue(obj, field) {
     case "telephone": return obj.telephone ?? "";
     case "adresse": return obj.adresse ?? "";
     case "ville": return obj.ville ?? "";
+    case "status": return obj.status ?? "";
     case "dateActivation": return obj.dateActivation ?? "";
     case "dateDesactivation": return obj.dateDesactivation ?? "";
     case "document": return obj.documentType === 1 ? "CIN" : "Passeport";
@@ -373,6 +374,7 @@ const Customers = () => {
         c.telephone?.toLowerCase().includes(term) ||
         c.adresse?.toLowerCase().includes(term) ||
         c.ville?.toLowerCase().includes(term) ||
+        c.status?.toLowerCase().includes(term) ||
         c.dateActivation?.toLowerCase().includes(term) ||
         c.dateDesactivation?.toLowerCase().includes(term)
       )
@@ -434,8 +436,6 @@ const Customers = () => {
     fd.append("nom", form.nom); fd.append("prenom", form.prenom);
     fd.append("telephone", form.telephone); fd.append("email", form.email);
     fd.append("adresse", form.adresse); fd.append("ville", form.ville);
-    fd.append("dateActivation", form.dateActivation);
-    fd.append("dateDesactivation", form.dateDesactivation);
     fd.append("documentType", form.documentType);
     fd.append("customerGroupId", form.customerGroupId);
     if (form.documentType === "1" && form.cinNumber) fd.append("cinNumber", form.cinNumber);
@@ -671,6 +671,7 @@ const Customers = () => {
                   {/* <Th label="Ville" field="ville"     {...thProps} /> */}
                   <Th label="Document" field="document"  {...thProps} />
                   <Th label="Numéro" field="numero"    {...thProps} />
+                  <Th label="Status" field="status"    {...thProps} />
                   <Th label="Date d'activation" field="dateActivation" {...thProps} />
                   <Th label="Date de désactivation" field="dateDesactivation" {...thProps} />
 
@@ -733,7 +734,7 @@ const Customers = () => {
                       </td>
 
                       <td className="mono">{docNum || "—"}</td>
-
+                      <td>{c.status || "—"}</td>
                       <td>{c.dateActivation || "—"}</td>
                       <td>{c.dateDesactivation || "—"}</td>
                       {/* <td>
