@@ -12,10 +12,7 @@ const NAV = {
           label: "Utilisateurs & Accès",
           links: [
             { to: "/users", label: "Consulter Utilisateurs" },
-            { to: "/users/new", label: "Ajouter Utilisateur" },
-            { to: "/users/edit", label: "Modifier Utilisateur" },
-            { to: "/roles", label: "Consulter Rôles" },
-            { to: "/roles/perms", label: "Gérer Permissions" },
+            { to: "/users/new", label: "Ajouter Utilisateur" }
           ],
         },
         {
@@ -24,16 +21,7 @@ const NAV = {
           links: [
             { to: "/reclamations", label: "Gérer Réclamations" },
           ],
-        },
-        {
-          icon: "⚙️",
-          label: "Paramètres Système",
-          links: [
-            { to: "/settings/general", label: "Généraux" },
-            { to: "/settings/security", label: "Sécurité" },
-            { to: "/settings/notifications", label: "Notifications" },
-          ],
-        },
+        }
       ],
     },
   ],
@@ -62,6 +50,7 @@ const NAV = {
           label: "Gestion Contrats",
           links: [
             { to: "/contrats", label: "Consulter Contrats" },
+            { to: "/contrats/new", label: "Ajouter Contrat" },
           ],
         },
         {
@@ -73,18 +62,19 @@ const NAV = {
         },
         {
           icon: "🎁",
-          label: "Promotions & SAV",
+          label: "Gestion Promotions",
           links: [
-            { to: "/souscriptions", label: "Souscrire Promotion" },
-            { to: "/promotions", label: "Gérer Promotions" }
+            { to: "/souscriptions", label: "Configuration Promotion" },
+            { to: "/promotions", label: "Consulter Promotions" }
           ],
         },
 
         {
           icon: "📞",
-          label: "Reclamations",
+          label: "Gestion Réclamations",
           links: [
-            { to: "/reclamations", label: "Gérer Réclamations" },
+            { to: "/reclamations", label: "consulter Réclamations" },
+            { to: "/reclamations/new", label: "Créer Réclamation" },
           ],
         },
       ],
@@ -95,27 +85,42 @@ const NAV = {
       section: "Catalogue",
       items: [
         {
+          icon: "📦",
+          label: "Gestion Offres",
+          links: [
+            { to: "/offres", label: "Consulter Offres" },
+            { to: "/offres/new", label: "Ajouter Offre" },
+          ],
+        },
+        {
           icon: "💰",
-          label: "Offres & Plans",
+          label: "Gestion Plans Tarifaires",
           links: [
             { to: "/plans", label: "Consulter Plans" },
-            { to: "/offres", label: "Consulter Offres" },
+            { to: "/plans/new", label: "Ajouter Plan" },
           ],
         },
         {
           icon: "⚙️",
-          label: "Services & Promotions",
+          label: "Gestion Services",
           links: [
             { to: "/services", label: "Consulter Services" },
-            { to: "/promotions", label: "Consulter Promotions" },
+            { to: "/services/new", label: "Ajouter Service" },
           ],
+        },
+        {
+        icon: "🎁",
+        label: "Gestion Promotions",
+        links: [
+          { to: "/promotions", label: "Consulter Promotions" },
+          { to: "/promotions/new", label: "Ajouter Promotion" },
+        ],
         },
         {
           icon: "☎️",
           label: "Directory Numbers",
           links: [
             { to: "/directory-numbers", label: "Consulter Numéros" },
-            { to: "/directory-numbers?import=csv", label: "Importer Numéros CSV" },
           ],
         },
       ],
@@ -129,36 +134,11 @@ const NAV = {
           icon: "🔍",
           label: "Examiner Promotions",
           links: [
-            { to: "/exploit/promotions", label: "Consulter Promotions" },
-            { to: "/exploit/promotions/attente", label: "Promotions en attente" },
-            { to: "/exploit/valider", label: "Valider" },
-            { to: "/exploit/rejeter", label: "Rejeter" },
-          ],
-        },
-        {
-          icon: "⚡",
-          label: "Cycle de Vie",
-          links: [
-            { to: "/exploit/activer", label: "Activer Promotions" },
-            { to: "/exploit/suspendre", label: "Suspendre" },
-            { to: "/exploit/historique", label: "Historique" },
+            { to: "/exploit/promotions", label: "Consulter Promotions" }
           ],
         },
       ],
-    },
-    {
-      section: "Catalogue",
-      items: [
-        {
-          icon: "📦",
-          label: "Offres & Souscriptions",
-          links: [
-            { to: "/exploit/offres", label: "Offres disponibles" },
-            { to: "/exploit/souscriptions", label: "Souscriptions" },
-          ],
-        },
-      ],
-    },
+    }
   ],
 };
 

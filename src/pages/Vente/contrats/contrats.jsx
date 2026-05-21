@@ -391,7 +391,7 @@ function Contrats() {
           <button className="btn-secondary" onClick={() => csvFileRef.current.click()} disabled={csvUploading}>
             {csvUploading ? "Import en cours..." : "Importer CSV"}
           </button>
-          <button className="btn-primary" onClick={openCreate}>+ Nouveau contrat</button>
+          {/* <button className="btn-primary" onClick={openCreate}>+ Nouveau contrat</button> */}
         </div>
         <input ref={csvFileRef} type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={handleCsvUpload} />
       </div>
@@ -540,36 +540,7 @@ function Contrats() {
                 )}
               </div>
 
-              {/* ── Date début ── */}
-              <div className="form-group">
-                <label className="form-label">Date début *</label>
-                <input
-                  className={`form-control ${dateErrors.dateDebut ? "input-error" : ""}`}
-                  type="date"
-                  value={form.dateDebut}
-                  min={today()}
-                  onChange={(e) => updateForm({ dateDebut: e.target.value })}
-                  required
-                />
-                {dateErrors.dateDebut && (
-                  <span className="field-error">{dateErrors.dateDebut}</span>
-                )}
-              </div>
 
-              {/* ── Date fin ── */}
-              <div className="form-group">
-                <label className="form-label">Date fin</label>
-                <input
-                  className={`form-control ${dateErrors.dateFin ? "input-error" : ""}`}
-                  type="date"
-                  value={form.dateFin}
-                  min={form.dateDebut || today()}
-                  onChange={(e) => updateForm({ dateFin: e.target.value })}
-                />
-                {dateErrors.dateFin && (
-                  <span className="field-error">{dateErrors.dateFin}</span>
-                )}
-              </div>
 
               {/* ── Directory Number combobox ── */}
               <div className="form-group form-group-full" ref={dnDropdownRef} style={{ position: "relative" }}>
@@ -636,11 +607,6 @@ function Contrats() {
                 )}
                 {form.directoryNumber && (
                   <span className="input-hint">📞 {formatNumero(form.directoryNumber)}</span>
-                )}
-                {!form.directoryNumber && !editingContrat && (
-                  <span className="input-hint">
-                    Sélectionnez un numéro LIBRE ou laissez vide pour une affectation automatique.
-                  </span>
                 )}
                 {!form.directoryNumber && editingContrat && (
                   <span className="input-hint">
@@ -738,8 +704,8 @@ function Contrats() {
               <div className="detail-section detail-section-full">
                 <p className="detail-section-title">Informations contrat</p>
                 <div className="detail-row-grid">
-                  <DetailRow label="Date début" value={detailContrat.dateDebut} />
-                  <DetailRow label="Date fin" value={detailContrat.dateFin || "—"} />
+                  <DetailRow label="Date d'activation" value={detailContrat.dateDebut} />
+                  <DetailRow label="Date de désactivation" value={detailContrat.dateFin || "—"} />
                   <DetailRow label="Directory Number" value={detailContrat.directoryNumber || "—"} mono />
                   <DetailRow label="Statut" value={detailContrat.statut} />
                 </div>
@@ -799,8 +765,8 @@ function Contrats() {
                   <Th label="Client" field="client"          {...thProps} />
                   <Th label="Groupe customer" field="customerGroupId"    {...thProps} />
                   <Th label="Offre" field="offre"           {...thProps} />
-                  <Th label="Date début" field="dateDebut"       {...thProps} />
-                  <Th label="Date fin" field="dateFin"         {...thProps} />
+                  <Th label="Date d'activation" field="dateDebut"       {...thProps} />
+                  <Th label="Date de désactivation" field="dateFin"         {...thProps} />
                   <Th label="Statut" field="statut"          {...thProps} />
                   <Th label="Numéro" field="directoryNumber" {...thProps} />
                   <th>Actions</th>

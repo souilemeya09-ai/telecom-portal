@@ -55,9 +55,9 @@ const Users = () => {
     navigate(`/edit-user/${id}`);
   };
 
-  // Ajouter utilisateur
+  // Ajouter utilisateur - redirection vers la page de création
   const handleAdd = () => {
-    navigate("/add-user");
+    navigate("/users/new");
   };
 
   // Activer / Désactiver utilisateur
@@ -204,11 +204,11 @@ const Users = () => {
               </tbody>
             </table>
           </div>
-          ) : (
+        ) : (
           <div className="empty-state">
             <p>Aucun utilisateur trouvé.</p>
           </div>
-          )}
+        )}
       </div>
 
       {totalPages > 1 && (

@@ -300,3 +300,201 @@
   .stepper            { gap: 0; }
   .step-line          { width: 40px; }
 }
+
+/* ── Ajouts à souscriptions.css pour l'onglet Groupes ── */
+
+/* Layout double colonne */
+.groups-assign-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.groups-assign-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Barre d'options en haut */
+.assign-options-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  flex-wrap: wrap;
+}
+
+.assign-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.assign-option-check {
+  justify-content: flex-end;
+  padding-bottom: 4px;
+}
+
+/* Panel (promo ou groupe) */
+.assign-panel {
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.assign-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.assign-panel-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.assign-panel-count {
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.assign-panel-search {
+  padding: 10px 12px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+
+.assign-panel-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 420px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Item dans les listes */
+.assign-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid transparent;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.assign-item:hover {
+  background: var(--color-background-secondary);
+}
+
+.assign-item-selected {
+  background: var(--color-background-info);
+  border-color: var(--color-border-info);
+}
+
+.assign-item-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.assign-item-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.assign-item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.assign-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assign-item-sub {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: 1px;
+}
+
+.assign-item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.assign-valeur {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-info);
+}
+
+/* Pill promotion sélectionnée */
+.assign-promo-pill {
+  padding: 8px 14px;
+  background: var(--color-background-info);
+  border-bottom: 0.5px solid var(--color-border-info);
+  font-size: 12px;
+  color: var(--color-text-info);
+}
+
+/* Footer du panel groupes */
+.assign-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary);
+}
+
+.assign-footer-hint {
+  flex: 1;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .groups-assign-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .assign-options-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

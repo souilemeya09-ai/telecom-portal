@@ -1,65 +1,185 @@
 import { useState } from "react";
-import { addUser, register } from "../../api/api";
 import { useNavigate } from "react-router-dom";
-import "../../styles/AddUser.css";
+import "./addUser.css";
+import CreateCustomer from "../Vente/customer/CreateCustomer";
+
+const EMPTY_FORM = {
+    username: "",
+    email: "",
+    password: "",
+    role: "USER",
+};
+
+const ROLES = [
+    { value: "ADMIN", label: "Administrateur" },
+    { value: "METIER", label: "Métier" },
+    { value: "VENTE", label: "Vente" },
+    { value: "DSI", label: "DSI" },
+    { value: "USER", label: "Utilisateur standard" },
+];
 
 function AddUser() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("VENTE");
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [submitting, setSubmitting] = useState(false);
+    const [form, setForm] = useState(EMPTY_FORM);
+    const [errors, setErrors] = useState({});
 
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    try {
-      await addUser({ username, email, password, role });
-      navigate("/users");
-    } catch (err) {
-      alert("Erreur lors de l'ajout de l'utilisateur !");
-    }
-  };
+    const validateForm = () => {
+        const newErrors = {};
 
-  return (
-    <div className="adduser-container">
-      <form onSubmit={handleAddUser} className="adduser-form">
-        <h2>Ajouter un utilisateur</h2>
+        if (!form.username.trim()) {
+            newErrors.username = "Le nom d'utilisateur est requis";
+        }
 
-        <input
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
+        if (!form.email.trim()) {
+            newErrors.email = "L'email est requis";
+        } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+            newErrors.email = "L'email n'est pas valide";
+        }
 
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        if (!form.password) {
+            newErrors.password = "Le mot de passe est requis";
+        } else if (form.password.length < 6) {
+            newErrors.password = "Le mot de passe doit contenir au moins 6 caractères";
+        }
 
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        if (!form.role) {
+            newErrors.role = "Le rôle est requis";
+        }
 
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-        >
-          <option value="VENTE">VENTE</option>
-          <option value="DSI">DSI</option>
-          <option value="METIER">METIER</option>
-          <option value="EXPLOIT">EXPLOIT</option>
-        </select>
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
-        <button type="submit">Ajouter</button>
-      </form>
-    </div>
-  );
+    const setField = (field) => (e) => {
+        setForm((f) => ({ ...f, [field]: e.target.value }));
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: "" }));
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            await CreateCustomer({
+                username: form.username.trim(),
+                email: form.email.trim(),
+                password: form.password,
+                role: form.role,
+            });
+            navigate("/users");
+        } catch (err) {
+            console.error(err);
+            setErrors({ submit: err.response?.data?.message || err.message || "Erreur lors de la création de l'utilisateur" });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleCancel = () => {
+        navigate("/users");
+    };
+
+    return (
+        <div className="add-user-page">
+            <div className="page-header">
+                <div>
+                    <h1 className="page-title">Nouvel utilisateur</h1>
+                    <p className="page-subtitle">Créer un compte utilisateur pour l'accès à la plateforme</p>
+                </div>
+            </div>
+
+            <div className="form-container">
+                <form className="user-form" onSubmit={handleSubmit}>
+                    {errors.submit && (
+                        <div className="alert alert-error">
+                            {errors.submit}
+                        </div>
+                    )}
+
+                    <div className="form-group">
+                        <label className="form-label">Nom d'utilisateur *</label>
+                        <input
+                            className={`form-control ${errors.username ? "error" : ""}`}
+                            value={form.username}
+                            onChange={setField("username")}
+                            placeholder="Ex: jean.dupont, jdupont87..."
+                            autoFocus
+                        />
+                        {errors.username && <span className="field-error">{errors.username}</span>}
+                        <span className="input-hint">Nom unique pour l'identification</span>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Email *</label>
+                        <input
+                            type="email"
+                            className={`form-control ${errors.email ? "error" : ""}`}
+                            value={form.email}
+                            onChange={setField("email")}
+                            placeholder="exemple@domaine.com"
+                        />
+                        {errors.email && <span className="field-error">{errors.email}</span>}
+                        <span className="input-hint">Email professionnel valide</span>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Mot de passe *</label>
+                        <input
+                            type="password"
+                            className={`form-control ${errors.password ? "error" : ""}`}
+                            value={form.password}
+                            onChange={setField("password")}
+                            placeholder="Minimum 6 caractères"
+                        />
+                        {errors.password && <span className="field-error">{errors.password}</span>}
+                        <span className="input-hint">Le mot de passe doit contenir au moins 6 caractères</span>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Rôle *</label>
+                        <select
+                            className={`form-control ${errors.role ? "error" : ""}`}
+                            value={form.role}
+                            onChange={setField("role")}
+                        >
+                            {ROLES.map((role) => (
+                                <option key={role.value} value={role.value}>
+                                    {role.label}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.role && <span className="field-error">{errors.role}</span>}
+                        <span className="input-hint">
+                            <strong>Métier</strong> : Gestion des offres, services, promotions<br />
+                            <strong>Vente</strong> : Gestion des clients et réclamations<br />
+                            <strong>DSI</strong> : Gestion des réclamations<br />
+                            <strong>Utilisateur standard</strong> : Accès limité
+                        </span>
+                    </div>
+
+                    <div className="form-actions">
+                        <button type="button" className="btn-secondary" onClick={handleCancel}>
+                            Annuler
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn-primary"
+                            disabled={submitting}
+                        >
+                            {submitting ? "Création en cours..." : "Créer l'utilisateur"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
 }
 
 export default AddUser;

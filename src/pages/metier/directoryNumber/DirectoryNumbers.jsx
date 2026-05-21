@@ -67,7 +67,7 @@ function contractLabel(number) {
 
 function activationLabel(number) {
   if (number.dateActivation) return number.dateActivation;
-  return number.status === "LIBRE" ? "Non activé" : "—";
+  return number.status === "LIBRE" ? "—" : "—";
 }
 
 function desactivationLabel(number) {

@@ -159,3 +159,64 @@
   right: 0;
   top: 1em;
 }
+
+
+
+/* Ajoutez ces styles à votre Login.css */
+
+.error-message {
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: shake 0.5s ease-in-out;
+}
+
+.error-icon {
+  font-size: 18px;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 14px;
+  flex: 1;
+}
+
+/* Animation pour l'erreur */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* Désactiver le bouton pendant le chargement */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+button.loading {
+  position: relative;
+}
+
+button.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  right: 12px;
+  margin-top: -8px;
+  border: 2px solid white;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

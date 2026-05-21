@@ -28,6 +28,11 @@ import CustomerGroups from "./pages/Vente/customer/CustomerGroups";
 import CreateCustomer from "./pages/Vente/customer/CreateCustomer";
 import CustomerGroupForm from "./components/CustomerGroupForm";
 import DirectoryNumbers from "./pages/metier/directoryNumber/DirectoryNumbers";
+import TelecomConnect from "./pages/TelecomConnect";
+import CreateReclamation from "./pages/Vente/reclamation/CreateReclamation";
+import CreateContrat from "./pages/Vente/contrats/CreateContrat";
+import CreatePlanTarifaire from "./pages/metier/planTarifaire/CreatePlanTarifaire";
+import CreatePromotion from "./pages/metier/promotion/CreatePromotion";
 function App() {
   return (
     <BrowserRouter>
@@ -42,6 +47,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Routes protégées */}
+        <Route path="/" element={<TelecomConnect />} />
         <Route
           path="/"
           element={
@@ -51,28 +57,32 @@ function App() {
           }
         >
 
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
 
           {/* Users */}
           <Route path="users" element={<Users />} />
-          <Route path="add-user" element={<AddUser />} />
-          <Route path="edit-user/:id" element={<EditUser />} />
+          <Route path="users/new" element={<AddUser />} />
+          <Route path="users/edit/:id" element={<EditUser />} />
 
 
           {/* Contracts */}
           <Route path="/contrats" element={<Contrats />} />
+          <Route path="/contrats/new" element={<CreateContrat />} />
           <Route path="/services" element={<ServiceList />} />
-          <Route path="/AddService" element={<CreateService />} />
+          <Route path="/services/new" element={<CreateService />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/create-customer" element={<CreateCustomer />} />
           <Route path="/groups" element={<CustomerGroups />} />
           <Route path="/groups/new" element={<CustomerGroupForm />} />
           <Route path="/offres" element={<Offres />} />
-          <Route path="/create-offre" element={<CreateOffre />} />
+          <Route path="/offres/new" element={<CreateOffre />} />
           <Route path="/promotions" element={<Promotions />} />
+          <Route path="/promotions/new" element={<CreatePromotion />} />
           <Route path="/souscriptions" element={<SouscriptionsPromotion />} />
           <Route path="/reclamations" element={<Reclamations />} />
+          <Route path="/reclamations/new" element={<CreateReclamation />} />
           <Route path="/plans" element={<PlansTarifaires />} />
+          <Route path="/plans/new" element={<CreatePlanTarifaire />} />
           <Route path="/directory-numbers" element={<DirectoryNumbers />} />
 
           <Route path="/exploit/promotions" element={<ExploitPromotion />} />

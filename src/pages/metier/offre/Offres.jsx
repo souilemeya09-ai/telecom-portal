@@ -226,7 +226,6 @@ function Offres() {
               <button className="btn-secondary" onClick={() => csvFileRef.current.click()} disabled={csvUploading}>
                 {csvUploading ? "Import en cours..." : "Importer CSV"}
               </button>
-              <button className="btn-primary" onClick={openCreate}>+ Nouvelle offre</button>
             </div>
             <input ref={csvFileRef} type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={handleCsvUpload} />
           </>

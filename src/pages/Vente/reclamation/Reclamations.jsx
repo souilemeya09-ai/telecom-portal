@@ -182,11 +182,11 @@ function Reclamations() {
           <h1 className="page-title">Réclamations</h1>
           <p className="page-subtitle">{reclamations.length} réclamation{reclamations.length !== 1 ? "s" : ""}</p>
         </div>
-        {
+        {/* {
           role === "VENTE" && (
             <button className="btn-primary" onClick={openCreate}>+ Nouvelle réclamation</button>
           )
-        }
+        } */}
       </div>
 
       {/* ── Metric cards ── */}

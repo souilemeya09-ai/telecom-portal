@@ -178,7 +178,7 @@ function PlansTarifaires() {
           <button className="btn-secondary" onClick={() => csvFileRef.current.click()} disabled={csvUploading}>
             {csvUploading ? "Import en cours..." : "Importer CSV"}
           </button>
-          <button className="btn-primary" onClick={openCreate}>+ Nouveau plan</button>
+          {/* <button className="btn-primary" onClick={openCreate}>+ Nouveau plan</button> */}
         </div>
         <input ref={csvFileRef} type="file" accept=".csv,text/csv" style={{ display: "none" }} onChange={handleCsvUpload} />
       </div>
@@ -224,7 +224,6 @@ function PlansTarifaires() {
               <div className="form-group">
                 <label className="form-label">Prix mensuel (TND) *</label>
                 <div className="input-with-prefix">
-                  <span className="input-prefix">TND</span>
                   <input className="form-control" type="number" min="0" step="0.01"
                     value={form.prixMensuel} onChange={set("prixMensuel")}
                     placeholder="0.00" required />

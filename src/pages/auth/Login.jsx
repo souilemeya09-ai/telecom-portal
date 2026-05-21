@@ -13,16 +13,61 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const getErrorMessage = (err) => {
+    // Vérifier si c'est une réponse HTTP avec un statut
+    if (err.response) {
+      const status = err.response.status;
+      const data = err.response.data;
+      
+      // Message personnalisé selon le statut
+      if (status === 400) {
+        if (data && data.message) {
+          return data.message;
+        }
+        return "Requête invalide. Vérifiez vos informations.";
+      }
+      
+      if (status === 401) {
+        return "Non autorisé. Vérifiez vos identifiants.";
+      }
+      
+      if (status === 403) {
+        return "Accès interdit. Contactez l'administrateur.";
+      }
+      
+      if (status === 404) {
+        return "Utilisateur non trouvé.";
+      }
+      
+      // Message générique du backend
+      if (data && data.message) {
+        return data.message;
+      }
+    }
+    
+    // Erreur réseau
+    if (err.message && err.message.includes("Network Error")) {
+      return "Erreur de connexion au serveur. Vérifiez votre connexion internet.";
+    }
+    
+    // Message par défaut
+    return "Email ou mot de passe incorrect";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    
     try {
       await login(email, password);
       navigate("/");
-
     } catch (err) {
-      setError("Nom d'utilisateur ou mot de passe incorrect");
+      console.error("Login error:", err);
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -33,7 +78,7 @@ const Login = () => {
           <div className="login-logo">
             <img src={userLogo} alt="User" />
           </div>
-          <h2>Login</h2>
+          <h2>Connexion</h2>
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -45,6 +90,8 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
+                autoComplete="email"
               />
             </div>
 
@@ -57,21 +104,28 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
+                autoComplete="current-password"
               />
             </div>
 
-
-            <button type="submit">Submit</button>
+            <button type="submit" disabled={loading} className={loading ? "loading" : ""}>
+              {loading ? "Connexion en cours..." : "Se connecter"}
+            </button>
           </form>
 
-          {error && <p className="error">{error}</p>}
+          {error && (
+            <div className="error-message">
+              <span className="error-icon">⚠️</span>
+              <span className="error-text">{error}</span>
+            </div>
+          )}
+          
           <div className="forgot-password">
             <Link to="/forgot-password">Mot de passe oublié ?</Link>
           </div>
         </div>
       </div>
-
-
     </div>
   );
 };

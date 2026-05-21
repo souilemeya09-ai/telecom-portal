@@ -4,116 +4,124 @@ import {
   getPromotions,
   souscrirePromotion,
   getSouscriptionsByContrat,
+  getCustomerGroups,
+  assignerPromotion,
 } from "../../../api/api";
 import "./souscriptions.css";
 
+// ─── Constants ───────────────────────────────────────────────
 const STATUT_INFO = {
-  ACTIVE: { label: "Active", cls: "badge-actif" },
+  ACTIVE:  { label: "Active",  cls: "badge-actif" },
   EXPIRÉE: { label: "Expirée", cls: "badge-resilie" },
   ANNULÉE: { label: "Annulée", cls: "badge-default" },
 };
 
 const PROMO_STATUT_INFO = {
   EN_ATTENTE: { label: "En attente", cls: "badge-attente" },
-  VALIDEE: { label: "Validée", cls: "badge-validee" },
-  REJETEE: { label: "Rejetée", cls: "badge-rejetee" },
-  ACTIVE: { label: "Active", cls: "badge-active" },
-  SUSPENDUE: { label: "Suspendue", cls: "badge-suspendue" },
+  VALIDEE:    { label: "Validée",    cls: "badge-validee" },
+  REJETEE:    { label: "Rejetée",    cls: "badge-rejetee" },
+  ACTIVE:     { label: "Active",     cls: "badge-active" },
+  SUSPENDUE:  { label: "Suspendue",  cls: "badge-suspendue" },
 };
 
+const TYPE_LABELS  = { ENTERPRISE: "Entreprise", FAMILY: "Famille", SME: "PME", OTHER: "Autre" };
+const TYPE_COLORS  = { ENTERPRISE: "type-enterprise", FAMILY: "type-family", SME: "type-sme", OTHER: "type-other" };
+
+const formatValeur = (p) =>
+  p?.typeReduction === "POURCENTAGE" ? `${p.valeurReduction}%` : `${p?.valeurReduction} TND`;
+
 // ─── Étape 1 : Sélectionner un contrat ──────────────────────
-function StepContrat({ contrats, selected, onSelect, loading }) {
-  const [search, setSearch] = useState("");
+// function StepContrat({ contrats, selected, onSelect, loading }) {
+//   const [search, setSearch] = useState("");
 
-  const filtered = useMemo(() => {
-    const t = search.toLowerCase();
-    return contrats.filter((c) =>
-      `${c.client?.nom} ${c.client?.prenom}`.toLowerCase().includes(t) ||
-      (c.directoryNumber ?? "").toString().includes(t) ||
-      c.offre?.nom?.toLowerCase().includes(t)
-    );
-  }, [contrats, search]);
+//   const filtered = useMemo(() => {
+//     const t = search.toLowerCase();
+//     return contrats.filter(
+//       (c) =>
+//         `${c.client?.nom} ${c.client?.prenom}`.toLowerCase().includes(t) ||
+//         (c.directoryNumber ?? "").toString().includes(t) ||
+//         c.offre?.nom?.toLowerCase().includes(t)
+//     );
+//   }, [contrats, search]);
 
-  return (
-    <div className="step-content">
-      <div className="step-search">
-        <input type="text" className="form-control"
-          placeholder="Rechercher client, offre, numéro..."
-          value={search} onChange={(e) => setSearch(e.target.value)} />
-      </div>
+//   return (
+//     <div className="step-content">
+//       <div className="step-search">
+//         <input
+//           type="text"
+//           className="form-control"
+//           placeholder="Rechercher client, offre, numéro..."
+//           value={search}
+//           onChange={(e) => setSearch(e.target.value)}
+//         />
+//       </div>
 
-      {loading ? (
-        <div className="loading-state">Chargement des contrats...</div>
-      ) : (
-        <div className="contrat-grid">
-          {filtered.map((c) => (
-            <div key={c.id}
-              className={`contrat-card ${selected?.id === c.id ? "contrat-card-selected" : ""}`}
-              onClick={() => onSelect(c)}>
-              <div className="contrat-card-header">
-                <div className="avatar">{c.client?.nom?.[0]?.toUpperCase() ?? "?"}</div>
-                <div>
-                  <div className="client-name">{c.client?.nom} {c.client?.prenom}</div>
-                  <div className="client-email">{c.client?.email}</div>
-                </div>
-                {selected?.id === c.id && <span className="check-icon">✓</span>}
-              </div>
-              <div className="contrat-card-body">
-                <div className="contrat-info-row">
-                  <span className="detail-label">Offre</span>
-                  <span className="detail-value">{c.offre?.nom ?? "—"}</span>
-                </div>
-                <div className="contrat-info-row">
-                  <span className="detail-label">Numéro</span>
-                  <span className="detail-value mono">{c.directoryNumber || "—"}</span>
-                </div>
-                <div className="contrat-info-row">
-                  <span className="detail-label">Depuis</span>
-                  <span className="detail-value">{c.dateDebut}</span>
-                </div>
-              </div>
-              <div className="contrat-card-footer">
-                <span className={`badge ${c.statut === "ACTIF" ? "badge-actif" : "badge-resilie"}`}>
-                  {c.statut}
-                </span>
-              </div>
-            </div>
-          ))}
-          {filtered.length === 0 && (
-            <div className="empty-state"><p>Aucun contrat trouvé.</p></div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+//       {loading ? (
+//         <div className="loading-state">Chargement des contrats...</div>
+//       ) : (
+//         <div className="contrat-grid">
+//           {filtered.map((c) => (
+//             <div
+//               key={c.id}
+//               className={`contrat-card ${selected?.id === c.id ? "contrat-card-selected" : ""}`}
+//               onClick={() => onSelect(c)}
+//             >
+//               <div className="contrat-card-header">
+//                 <div className="avatar">{c.client?.nom?.[0]?.toUpperCase() ?? "?"}</div>
+//                 <div>
+//                   <div className="client-name">{c.client?.nom} {c.client?.prenom}</div>
+//                   <div className="client-email">{c.client?.email}</div>
+//                 </div>
+//                 {selected?.id === c.id && <span className="check-icon">✓</span>}
+//               </div>
+//               <div className="contrat-card-body">
+//                 <div className="contrat-info-row">
+//                   <span className="detail-label">Offre</span>
+//                   <span className="detail-value">{c.offre?.nom ?? "—"}</span>
+//                 </div>
+//                 <div className="contrat-info-row">
+//                   <span className="detail-label">Numéro</span>
+//                   <span className="detail-value mono">{c.directoryNumber || "—"}</span>
+//                 </div>
+//                 <div className="contrat-info-row">
+//                   <span className="detail-label">Depuis</span>
+//                   <span className="detail-value">{c.dateDebut}</span>
+//                 </div>
+//               </div>
+//               <div className="contrat-card-footer">
+//                 <span className={`badge ${c.statut === "ACTIF" ? "badge-actif" : "badge-resilie"}`}>
+//                   {c.statut}
+//                 </span>
+//               </div>
+//             </div>
+//           ))}
+//           {filtered.length === 0 && (
+//             <div className="empty-state"><p>Aucun contrat trouvé.</p></div>
+//           )}
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
 
 // ─── Étape 2 : Sélectionner une promotion ───────────────────
 function StepPromotion({ promotions, selected, onSelect, contrat }) {
   const [search, setSearch] = useState("");
 
-  // Calculer ancienneté du contrat en mois
   const moisAnciennete = useMemo(() => {
     if (!contrat?.dateDebut) return 0;
     const debut = new Date(contrat.dateDebut);
-    console.log("date début contrat:", debut);
     const now = new Date();
-    console.log("date actuelle:", now);
-    return (now.getFullYear() - debut.getFullYear()) * 12 +
-      (now.getMonth() - debut.getMonth());
+    return (now.getFullYear() - debut.getFullYear()) * 12 + (now.getMonth() - debut.getMonth());
   }, [contrat]);
 
   const today = new Date().toISOString().split("T")[0];
 
-  // Vérif éligibilité côté front (double sécurité)
   const checkEligibility = (promo) => {
     const reasons = [];
-    if (promo.statut !== "ACTIVE")
-      reasons.push("La promotion n'est pas active");
-    if (promo.dateDebut && today < promo.dateDebut)
-      reasons.push("La promotion n'a pas encore commencé");
-    if (promo.dateFin && today > promo.dateFin)
-      reasons.push("La promotion est expirée");
+    if (promo.statut !== "ACTIVE")            reasons.push("La promotion n'est pas active");
+    if (promo.dateDebut && today < promo.dateDebut) reasons.push("La promotion n'a pas encore commencé");
+    if (promo.dateFin   && today > promo.dateFin)   reasons.push("La promotion est expirée");
     if (promo.ancienneteMinimale && moisAnciennete < promo.ancienneteMinimale)
       reasons.push(`Ancienneté insuffisante (${moisAnciennete} / ${promo.ancienneteMinimale} mois requis)`);
     return reasons;
@@ -121,20 +129,15 @@ function StepPromotion({ promotions, selected, onSelect, contrat }) {
 
   const filtered = useMemo(() => {
     const t = search.toLowerCase();
-    return promotions.filter((p) =>
-      p.nomPromotion?.toLowerCase().includes(t) ||
-      p.typeReduction?.toLowerCase().includes(t)
+    return promotions.filter(
+      (p) =>
+        p.nomPromotion?.toLowerCase().includes(t) ||
+        p.typeReduction?.toLowerCase().includes(t)
     );
   }, [promotions, search]);
 
-  const formatValeur = (p) =>
-    p.typeReduction === "POURCENTAGE"
-      ? `${p.valeurReduction}%`
-      : `${p.valeurReduction} TND`;
-
   return (
     <div className="step-content">
-      {/* Contrat sélectionné — résumé */}
       <div className="selected-contrat-banner">
         <div className="avatar sm">{contrat?.client?.nom?.[0]?.toUpperCase()}</div>
         <div>
@@ -144,34 +147,34 @@ function StepPromotion({ promotions, selected, onSelect, contrat }) {
       </div>
 
       <div className="step-search">
-        <input type="text" className="form-control"
+        <input
+          type="text"
+          className="form-control"
           placeholder="Rechercher une promotion..."
-          value={search} onChange={(e) => setSearch(e.target.value)} />
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
       <div className="promo-grid">
         {filtered.map((p) => {
-          const reasons = checkEligibility(p);
-          const eligible = reasons.length === 0;
+          const reasons   = checkEligibility(p);
+          const eligible  = reasons.length === 0;
           const isSelected = selected?.id === p.id;
           const si = PROMO_STATUT_INFO[p.statut] ?? { label: p.statut, cls: "badge-default" };
 
           return (
-            <div key={p.id}
-              className={`promo-card
-                ${isSelected ? "promo-card-selected" : ""}
-                ${!eligible ? "promo-card-disabled" : ""}
-              `}
-              onClick={() => eligible && onSelect(isSelected ? null : p)}>
-
+            <div
+              key={p.id}
+              className={`promo-card ${isSelected ? "promo-card-selected" : ""} ${!eligible ? "promo-card-disabled" : ""}`}
+              onClick={() => eligible && onSelect(isSelected ? null : p)}
+            >
               <div className="promo-card-header">
                 <div>
                   <div className="client-name">{p.nomPromotion}</div>
                   <span className={`badge ${si.cls}`} style={{ marginTop: 4 }}>{si.label}</span>
                 </div>
-                <div className="promo-valeur-badge">
-                  {formatValeur(p)}
-                </div>
+                <div className="promo-valeur-badge">{formatValeur(p)}</div>
                 {isSelected && <span className="check-icon">✓</span>}
               </div>
 
@@ -204,7 +207,6 @@ function StepPromotion({ promotions, selected, onSelect, contrat }) {
                 )}
               </div>
 
-              {/* Raisons non-éligibilité */}
               {!eligible && (
                 <div className="ineligible-reasons">
                   {reasons.map((r, i) => (
@@ -225,15 +227,9 @@ function StepPromotion({ promotions, selected, onSelect, contrat }) {
 
 // ─── Étape 3 : Confirmation ──────────────────────────────────
 function StepConfirmation({ contrat, promotion }) {
-  const formatValeur = (p) =>
-    p.typeReduction === "POURCENTAGE"
-      ? `${p.valeurReduction}%`
-      : `${p.valeurReduction} TND`;
-
   return (
     <div className="step-content">
       <div className="confirmation-grid">
-        {/* Client / Contrat */}
         <div className="detail-section">
           <p className="detail-section-title">Contrat client</p>
           <div className="client-cell" style={{ marginBottom: 10 }}>
@@ -257,7 +253,6 @@ function StepConfirmation({ contrat, promotion }) {
           </div>
         </div>
 
-        {/* Promotion */}
         <div className="detail-section">
           <p className="detail-section-title">Promotion appliquée</p>
           <div className="detail-row">
@@ -283,7 +278,6 @@ function StepConfirmation({ contrat, promotion }) {
         </div>
       </div>
 
-      {/* Récapitulatif */}
       <div className="confirmation-recap">
         <div className="recap-icon">🎉</div>
         <div className="recap-text">
@@ -296,19 +290,307 @@ function StepConfirmation({ contrat, promotion }) {
   );
 }
 
+// ─── Onglet : Assignation Groupes ────────────────────────────
+function TabGroupes({ promotions, loading }) {
+  const [groups, setGroups]             = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(true);
+  const [selectedPromo, setSelectedPromo] = useState(null);
+  const [selectedGroups, setSelectedGroups] = useState(new Set());
+  const [searchPromo, setSearchPromo]   = useState("");
+  const [searchGroup, setSearchGroup]   = useState("");
+  const [inheritToMembers, setInheritToMembers] = useState(true);
+  const [startDate, setStartDate]       = useState(new Date().toISOString().split("T")[0]);
+  const [endDate, setEndDate]           = useState("");
+  const [submitting, setSubmitting]     = useState(false);
+  const [results, setResults]           = useState([]); // {groupId, groupName, success, message}
+
+  const idVendeur = localStorage.getItem("userId");
+  useEffect(() => {
+    getCustomerGroups()
+      .then(setGroups)
+      .catch(console.error)
+      .finally(() => setLoadingGroups(false));
+  }, []);
+
+  const activePromotions = useMemo(
+    () => promotions.filter((p) => p.statut === "ACTIVE"),
+    [promotions]
+  );
+
+  const filteredPromos = useMemo(() => {
+    const t = searchPromo.toLowerCase();
+    return activePromotions.filter(
+      (p) =>
+        p.nomPromotion?.toLowerCase().includes(t) ||
+        p.typeReduction?.toLowerCase().includes(t)
+    );
+  }, [activePromotions, searchPromo]);
+
+  const filteredGroups = useMemo(() => {
+    const t = searchGroup.toLowerCase();
+    return groups.filter(
+      (g) =>
+        g.name?.toLowerCase().includes(t) ||
+        g.groupCode?.toLowerCase().includes(t) ||
+        TYPE_LABELS[g.groupType]?.toLowerCase().includes(t)
+    );
+  }, [groups, searchGroup]);
+
+  const toggleGroup = (id) => {
+    setSelectedGroups((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const handleAssign = async () => {
+    if (!selectedPromo || selectedGroups.size === 0) return;
+    setSubmitting(true);
+    setResults([]);
+    const res = [];
+    for (const groupId of selectedGroups) {
+      const grp = groups.find((g) => g.id === groupId);
+      try {
+        await assignerPromotion(selectedPromo.id, {
+          assignedById: idVendeur, // TODO: remplacer par l'ID de l'utilisateur connecté
+          targetType: "CUSTOMER_GROUP",
+          targetGroupId: groupId,
+          effectiveStartDate: startDate,
+          effectiveEndDate: endDate || null,
+          inheritedToMembers: inheritToMembers,
+          assignmentMode: "MANUAL",
+        });
+        res.push({ groupId, groupName: grp?.name, success: true });
+      } catch (err) {
+        const msg =
+          err.response?.data?.message ||
+          (typeof err.response?.data === "string" ? err.response.data : null) ||
+          err.message ||
+          "Erreur inconnue";
+        res.push({ groupId, groupName: grp?.name, success: false, message: msg });
+      }
+    }
+    setResults(res);
+    setSubmitting(false);
+    if (res.every((r) => r.success)) {
+      setSelectedGroups(new Set());
+      setSelectedPromo(null);
+    }
+  };
+
+  const resetAll = () => {
+    setResults([]);
+    setSelectedPromo(null);
+    setSelectedGroups(new Set());
+  };
+
+  // ── Résultat post-assignation ──
+  if (results.length > 0) {
+    const allOk = results.every((r) => r.success);
+    return (
+      <div className={`result-card ${allOk ? "result-success" : "result-error"}`}>
+        <div className="result-icon">{allOk ? "✅" : "⚠️"}</div>
+        <div className="result-content">
+          <h3>{allOk ? "Assignation réussie !" : "Résultats partiels"}</h3>
+          <ul style={{ marginTop: 8, paddingLeft: 16, fontSize: "0.875rem" }}>
+            {results.map((r) => (
+              <li key={r.groupId} style={{ marginBottom: 4 }}>
+                {r.success ? "✓" : "✗"} <strong>{r.groupName}</strong>
+                {!r.success && <span style={{ color: "inherit", opacity: 0.8 }}> — {r.message}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <button className="btn-primary" onClick={resetAll}>Nouvelle assignation</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="groups-assign-layout">
+      {/* ── Options d'assignation ── */}
+      <div className="assign-options-bar">
+        <div className="assign-option">
+          <label className="form-label">Date début</label>
+          <input
+            type="date"
+            className="form-control"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </div>
+        <div className="assign-option">
+          <label className="form-label">Date fin</label>
+          <input
+            type="date"
+            className="form-control"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
+        <div className="assign-option assign-option-check">
+          <label className="primary-check">
+            <input
+              type="checkbox"
+              checked={inheritToMembers}
+              onChange={(e) => setInheritToMembers(e.target.checked)}
+            />
+            <span>Héritage aux membres</span>
+          </label>
+        </div>
+      </div>
+
+      {/* ── Double liste ── */}
+      <div className="groups-assign-grid">
+
+        {/* Promotions */}
+        <div className="assign-panel">
+          <div className="assign-panel-header">
+            <span className="assign-panel-title">Promotions actives</span>
+            <span className="assign-panel-count">{activePromotions.length}</span>
+          </div>
+          <div className="assign-panel-search">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Rechercher..."
+              value={searchPromo}
+              onChange={(e) => setSearchPromo(e.target.value)}
+            />
+          </div>
+          <div className="assign-panel-list">
+            {loading ? (
+              <div className="loading-state">Chargement...</div>
+            ) : filteredPromos.length === 0 ? (
+              <div className="empty-state"><p>Aucune promotion active.</p></div>
+            ) : (
+              filteredPromos.map((p) => {
+                const isSelected = selectedPromo?.id === p.id;
+                return (
+                  <div
+                    key={p.id}
+                    className={`assign-item ${isSelected ? "assign-item-selected" : ""}`}
+                    onClick={() => setSelectedPromo(isSelected ? null : p)}
+                  >
+                    <div className="assign-item-main">
+                      <div className="assign-item-name">{p.nomPromotion}</div>
+                      <div className="assign-item-sub">
+                        {p.typeReduction === "POURCENTAGE" ? "Pourcentage" : "Montant fixe"}
+                        {p.dateDebut && ` · ${p.dateDebut} → ${p.dateFin || "∞"}`}
+                      </div>
+                    </div>
+                    <div className="assign-item-right">
+                      <span className="assign-valeur">{formatValeur(p)}</span>
+                      {isSelected && <span className="check-icon">✓</span>}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Groupes */}
+        <div className="assign-panel">
+          <div className="assign-panel-header">
+            <span className="assign-panel-title">Groupes clients</span>
+            <span className="assign-panel-count">
+              {selectedGroups.size > 0 ? `${selectedGroups.size} sél.` : groups.length}
+            </span>
+          </div>
+          <div className="assign-panel-search">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Rechercher..."
+              value={searchGroup}
+              onChange={(e) => setSearchGroup(e.target.value)}
+            />
+          </div>
+
+          {selectedPromo && (
+            <div className="assign-promo-pill">
+              Promotion : <strong>{selectedPromo.nomPromotion}</strong> · {formatValeur(selectedPromo)}
+            </div>
+          )}
+
+          <div className="assign-panel-list">
+            {loadingGroups ? (
+              <div className="loading-state">Chargement des groupes...</div>
+            ) : filteredGroups.length === 0 ? (
+              <div className="empty-state"><p>Aucun groupe trouvé.</p></div>
+            ) : (
+              filteredGroups.map((g) => {
+                const isSelected = selectedGroups.has(g.id);
+                const memberCount =
+                  g.memberCount > 0
+                    ? g.memberCount
+                    : (g.members ?? []).filter((m) => m.status === "ACTIVE").length;
+                return (
+                  <div
+                    key={g.id}
+                    className={`assign-item ${isSelected ? "assign-item-selected" : ""} ${!selectedPromo ? "assign-item-disabled" : ""}`}
+                    onClick={() => selectedPromo && toggleGroup(g.id)}
+                    title={!selectedPromo ? "Sélectionnez d'abord une promotion" : undefined}
+                  >
+                    <div className="assign-item-avatar">
+                      {g.name?.[0]?.toUpperCase() ?? "G"}
+                    </div>
+                    <div className="assign-item-main">
+                      <div className="assign-item-name">{g.name}</div>
+                      <div className="assign-item-sub">
+                        {g.groupCode} · {memberCount} membre{memberCount !== 1 ? "s" : ""}
+                      </div>
+                    </div>
+                    <div className="assign-item-right">
+                      <span className={`badge ${TYPE_COLORS[g.groupType]}`}>
+                        {TYPE_LABELS[g.groupType] ?? g.groupType}
+                      </span>
+                      {isSelected && <span className="check-icon">✓</span>}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          <div className="assign-footer">
+            <span className="assign-footer-hint">
+              {!selectedPromo
+                ? "← Sélectionnez une promotion"
+                : selectedGroups.size === 0
+                ? "Sélectionnez au moins un groupe"
+                : `${selectedGroups.size} groupe${selectedGroups.size > 1 ? "s" : ""} · ${inheritToMembers ? "héritage activé" : "sans héritage"}`}
+            </span>
+            <button
+              className="btn-primary"
+              onClick={handleAssign}
+              disabled={submitting || !selectedPromo || selectedGroups.size === 0}
+            >
+              {submitting ? "Assignation..." : "✅ Assigner"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Composant principal ─────────────────────────────────────
 function SouscriptionsPromotion() {
-  const [contrats, setContrats] = useState([]);
-  const [promotions, setPromotions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState(1); // 1=contrat, 2=promo, 3=confirm
-  const [selectedContrat, setContrat] = useState(null);
-  const [selectedPromo, setPromo] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null); // succès/erreur
-  const [histTab, setHistTab] = useState(false);
+  const [contrats, setContrats]         = useState([]);
+  const [promotions, setPromotions]     = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [activeTab, setActiveTab]       = useState("individuel"); // individuel | groupes | historique
+  const [step, setStep]                 = useState(1);
+  const [selectedContrat, setContrat]   = useState(null);
+  const [selectedPromo, setPromo]       = useState(null);
+  const [submitting, setSubmitting]     = useState(false);
+  const [result, setResult]             = useState(null);
   const [souscriptions, setSouscriptions] = useState([]);
-  const [loadingHist, setLoadingHist] = useState(false);
+  const [loadingHist, setLoadingHist]   = useState(false);
+  const [histContrat, setHistContrat]   = useState(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -316,25 +598,31 @@ function SouscriptionsPromotion() {
     setLoading(true);
     try {
       const [c, p] = await Promise.all([
-        getContrats({ page: 0, size: contrats.length || 1000 }),
-        getPromotions({ page: 0, size: promotions.length || 1000 })
+        getContrats({ page: 0, size: 1000 }),
+        getPromotions({ page: 0, size: 1000 }),
       ]);
-      // Garder seulement les contrats actifs
-      setContrats((c.content || []).filter((c) => c.statut === "ACTIF"));
+      setContrats((c.content || []).filter((ct) => ct.statut === "ACTIF"));
       setPromotions(p.content || []);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ── Navigation steps ─────────────────────────────────────
-  const goNext = () => setStep((s) => Math.min(s + 1, 3));
-  const goPrev = () => setStep((s) => Math.max(s - 1, 1));
-  const reset = () => {
-    setStep(1); setContrat(null); setPromo(null);
-    setResult(null); setSubmitting(false);
+  // ── Navigation wizard ────────────────────────────────────
+  const goNext  = () => setStep((s) => Math.min(s + 1, 3));
+  const goPrev  = () => setStep((s) => Math.max(s - 1, 1));
+  const reset   = () => { setStep(1); setContrat(null); setPromo(null); setResult(null); };
+
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    reset();
+    setHistContrat(null);
+    setSouscriptions([]);
   };
 
-  // ── Souscription ─────────────────────────────────────────
+  // ── Souscription individuelle ────────────────────────────
   const handleSouscrire = async () => {
     setSubmitting(true);
     setResult(null);
@@ -343,20 +631,15 @@ function SouscriptionsPromotion() {
       setResult({ success: true });
     } catch (err) {
       let msg = "Erreur inconnue";
-
       if (err.response?.data) {
-        if (typeof err.response.data === "string") {
-          msg = err.response.data;
-        } else if (err.response.data.message) {
-          msg = err.response.data.message;
-        }
+        msg = typeof err.response.data === "string"
+          ? err.response.data
+          : err.response.data.message ?? msg;
       } else if (err.message) {
         msg = err.message;
       }
-
       setResult({ success: false, message: msg });
-    }
-    finally {
+    } finally {
       setSubmitting(false);
     }
   };
@@ -370,7 +653,7 @@ function SouscriptionsPromotion() {
   };
 
   const handleSelectContratHist = (c) => {
-    setContrat(c);
+    setHistContrat(c);
     loadHistorique(c.id);
   };
 
@@ -380,185 +663,20 @@ function SouscriptionsPromotion() {
     { n: 3, label: "Validation" },
   ];
 
-  // ────────────────────────────────────────────────────────────
   return (
     <div className="page-wrapper">
 
       {/* ── Header ── */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Souscription aux promotions</h1>
-          <p className="page-subtitle">Appliquer une promotion à un contrat client</p>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className={`btn-secondary ${!histTab ? "tab-active" : ""}`}
-            onClick={() => { setHistTab(false); reset(); }}>
-            ➕ Nouvelle souscription
-          </button>
-          <button className={`btn-secondary ${histTab ? "tab-active" : ""}`}
-            onClick={() => setHistTab(true)}>
-            📋 Historique
-          </button>
+          <h1 className="page-title">Configuration des promotions</h1>
+          <p className="page-subtitle">Appliquer une promotion à un contrat ou à un groupe client</p>
         </div>
       </div>
 
-      {/* ══════════════ HISTORIQUE ══════════════ */}
-      {histTab ? (
-        <div>
-          <div className="form-panel" style={{ marginBottom: "1rem" }}>
-            <h3 className="form-panel-title">Sélectionner un contrat pour voir l'historique</h3>
-            <div className="contrat-grid">
-              {contrats.map((c) => (
-                <div key={c.id}
-                  className={`contrat-card ${selectedContrat?.id === c.id ? "contrat-card-selected" : ""}`}
-                  onClick={() => handleSelectContratHist(c)}>
-                  <div className="contrat-card-header">
-                    <div className="avatar">{c.client?.nom?.[0]?.toUpperCase() ?? "?"}</div>
-                    <div>
-                      <div className="client-name">{c.client?.nom} {c.client?.prenom}</div>
-                      <div className="client-email">{c.offre?.nom}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* ══════════════ ONGLET : GROUPES ══════════════ */}
+        <TabGroupes promotions={promotions} loading={loading} />
 
-          {selectedContrat && (
-            <div className="table-card">
-              <div style={{ padding: "1rem 1.25rem", borderBottom: "0.5px solid var(--border)" }}>
-                <strong>Souscriptions de {selectedContrat.client?.nom} {selectedContrat.client?.prenom}</strong>
-              </div>
-              {loadingHist ? (
-                <div className="loading-state">Chargement...</div>
-              ) : souscriptions.length === 0 ? (
-                <div className="empty-state"><p>Aucune souscription trouvée pour ce contrat.</p></div>
-              ) : (
-                <div className="table-scroll">
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Promotion</th>
-                        <th>Date souscription</th>
-                        <th>Statut</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {souscriptions.map((s) => {
-                        const si = STATUT_INFO[s.statut] ?? { label: s.statut, cls: "badge-default" };
-                        return (
-                          <tr key={s.id}>
-                            <td className="id-cell">{s.id}</td>
-                            <td>
-                              <div className="client-name">
-                                {s.promotion?.nomPromotion ?? `Promotion #${s.promotion?.id}`}
-                              </div>
-                            </td>
-                            <td className="date-cell">{s.dateSouscription}</td>
-                            <td><span className={`badge ${si.cls}`}>{si.label}</span></td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-      ) : (
-        /* ══════════════ NOUVELLE SOUSCRIPTION ══════════════ */
-        <>
-          {/* ── Résultat final ── */}
-          {result ? (
-            <div className={`result-card ${result.success ? "result-success" : "result-error"}`}>
-              <div className="result-icon">{result.success ? "✅" : "❌"}</div>
-              <div className="result-content">
-                <h3>{result.success ? "Souscription réussie !" : "Échec de la souscription"}</h3>
-                <p>
-                  {result.success
-                    ? `La promotion "${selectedPromo?.nomPromotion}" a été appliquée au contrat de ${selectedContrat?.client?.nom} ${selectedContrat?.client?.prenom}.`
-                    : result.message}
-                </p>
-              </div>
-              <button className="btn-primary" onClick={reset}>
-                {result.success ? "Nouvelle souscription" : "Réessayer"}
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* ── Stepper ── */}
-              <div className="stepper">
-                {STEPS.map((s, i) => (
-                  <div key={s.n} style={{ display: "flex", alignItems: "center" }}>
-                    <div className={`step-item ${step === s.n ? "step-active" : step > s.n ? "step-done" : ""}`}>
-                      <div className="step-circle">
-                        {step > s.n ? "✓" : s.n}
-                      </div>
-                      <span className="step-label">{s.label}</span>
-                    </div>
-                    {i < STEPS.length - 1 && (
-                      <div className={`step-line ${step > s.n ? "step-line-done" : ""}`} />
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* ── Contenu step ── */}
-              <div className="form-panel" style={{ marginTop: 0 }}>
-
-                {step === 1 && (
-                  <StepContrat
-                    contrats={contrats}
-                    selected={selectedContrat}
-                    onSelect={setContrat}
-                    loading={loading}
-                  />
-                )}
-                {step === 2 && (
-                  <StepPromotion
-                    promotions={promotions}
-                    selected={selectedPromo}
-                    onSelect={setPromo}
-                    contrat={selectedContrat}
-                  />
-                )}
-                {step === 3 && (
-                  <StepConfirmation
-                    contrat={selectedContrat}
-                    promotion={selectedPromo}
-                  />
-                )}
-
-                {/* ── Navigation ── */}
-                <div className="step-nav">
-                  {step > 1 && (
-                    <button className="btn-secondary" onClick={goPrev}>← Retour</button>
-                  )}
-                  <div style={{ flex: 1 }} />
-                  {step < 3 ? (
-                    <button
-                      className="btn-primary"
-                      onClick={goNext}
-                      disabled={
-                        (step === 1 && !selectedContrat) ||
-                        (step === 2 && !selectedPromo)
-                      }>
-                      Suivant →
-                    </button>
-                  ) : (
-                    <button className="btn-primary" onClick={handleSouscrire} disabled={submitting}>
-                      {submitting ? "Souscription en cours..." : "✅ Confirmer la souscription"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </>
-      )}
     </div>
   );
 }

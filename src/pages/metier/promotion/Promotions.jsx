@@ -244,9 +244,9 @@ function Promotions() {
                     <h1 className="page-title">Promotions</h1>
                     <p className="page-subtitle">{promotions.length} promotion{promotions.length !== 1 ? "s" : ""}</p>
                 </div>
-               {role === "METIER" && (
+               {/* {role === "METIER" && (
                     <button className="btn-primary" onClick={openCreate}>+ Nouvelle promotion</button>
-                )}
+                )} */}
             </div>
 
             {/* ── Stats ── */}
@@ -314,15 +314,15 @@ function Promotions() {
                             </div>
 
                             {/* Ancienneté minimale */}
-                            <div className="form-group">
+                            {/* <div className="form-group">
                                 <label className="form-label">Ancienneté minimale (mois)</label>
                                 <input className="form-control" type="number" min="0"
                                     value={form.ancienneteMinimale} onChange={set("ancienneteMinimale")}
                                     placeholder="ex: 6 mois" />
-                            </div>
+                            </div> */}
 
                             {/* Dates */}
-                            <div className="form-group">
+                            {/* <div className="form-group">
                                 <label className="form-label">Date début *</label>
                                 <input className="form-control" type="date" value={form.dateDebut}
                                     onChange={set("dateDebut")} required />
@@ -331,17 +331,17 @@ function Promotions() {
                                 <label className="form-label">Date fin</label>
                                 <input className="form-control" type="date" value={form.dateFin}
                                     onChange={set("dateFin")} />
-                            </div>
+                            </div> */}
 
                             {/* Règle éligibilité */}
-                            <div className="form-group form-group-full">
+                            {/* <div className="form-group form-group-full">
                                 <label className="form-label">Règle d'éligibilité</label>
                                 <textarea className="form-control" rows={2}
                                     value={form.regleEligibilite} onChange={set("regleEligibilite")}
                                     placeholder="ex: Réservé aux clients avec offre MOBILE, ancienneté > 6 mois..."
                                     style={{ resize: "vertical" }}
                                 />
-                            </div>
+                            </div> */}
 
                             <div className="form-actions">
                                 <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
@@ -393,7 +393,7 @@ function Promotions() {
                             </div>
 
                             {/* Éligibilité */}
-                            <div className="detail-section">
+                            {/* <div className="detail-section">
                                 <p className="detail-section-title">Éligibilité</p>
                                 <div className="detail-row">
                                     <span className="detail-label">Ancienneté min.</span>
@@ -409,7 +409,7 @@ function Promotions() {
                                         {detailPromo.regleEligibilite || "—"}
                                     </span>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Créateur / Validateur */}
                             <div className="detail-section detail-section-full">
@@ -514,8 +514,8 @@ function Promotions() {
                                     <Th label="Nom" field="nomPromotion"   {...thProps} />
                                     <Th label="Type" field="typeReduction"  {...thProps} />
                                     <Th label="Valeur" field="valeurReduction"{...thProps} />
-                                    <Th label="Date début" field="dateDebut"      {...thProps} />
-                                    <Th label="Date fin" field="dateFin"        {...thProps} />
+                                    {/* <Th label="Date début" field="dateDebut"      {...thProps} /> */}
+                                    {/* <Th label="Date fin" field="dateFin"        {...thProps} /> */}
                                     <Th label="Statut" field="statut"         {...thProps} />
                                     <th>Actions</th>
                                 </tr>
@@ -550,8 +550,8 @@ function Promotions() {
                                             <td>
                                                 <span className="remise-badge">{formatValeur(p)}</span>
                                             </td>
-                                            <td className="date-cell">{p.dateDebut || "—"}</td>
-                                            <td className="date-cell">{p.dateFin || "—"}</td>
+                                            {/* <td className="date-cell">{p.dateDebut || "—"}</td> */}
+                                            {/* <td className="date-cell">{p.dateFin || "—"}</td> */}
                                             <td><span className={`badge ${si.cls}`}>{si.label}</span></td>
                                             <td>
                                                 <div className="action-buttons">
