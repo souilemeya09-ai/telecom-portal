@@ -13,29 +13,9 @@ const EMPTY_FORM = {
   clientId: "",
   customerGroupId: "",
   offreId: "",
-  dateDebut: "",
-  dateFin: "",
   directoryNumber: "",
 };
 
-// Date helpers
-const today = () => new Date().toISOString().split("T")[0];
-
-function validateDates(dateDebut, dateFin) {
-  const errors = {};
-  const now = today();
-
-  if (dateDebut && dateDebut < now) {
-    errors.dateDebut = "La date de début doit être aujourd'hui ou dans le futur.";
-  }
-  if (dateFin && dateDebut && dateFin <= dateDebut) {
-    errors.dateFin = "La date de fin doit être postérieure à la date de début.";
-  }
-  if (dateFin && dateFin < now) {
-    errors.dateFin = "La date de fin doit être dans le futur.";
-  }
-  return errors;
-}
 
 function formatNumero(num) {
   const s = String(num);
@@ -134,20 +114,10 @@ function CreateContrat() {
     if (patch.clientId !== undefined || patch.customerGroupId !== undefined) {
       setHolderError("");
     }
-    if (patch.dateDebut !== undefined || patch.dateFin !== undefined) {
-      setDateErrors(validateDates(next.dateDebut, next.dateFin));
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const errors = validateDates(form.dateDebut, form.dateFin);
-    if (Object.keys(errors).length > 0) {
-      setDateErrors(errors);
-      return;
-    }
-
     const hasClient = Boolean(form.clientId);
     const hasGroup = Boolean(form.customerGroupId);
 
@@ -164,9 +134,7 @@ function CreateContrat() {
     setSubmitting(true);
     try {
       const payload = {
-        offreId: Number(form.offreId),
-        dateDebut: form.dateDebut,
-        dateFin: form.dateFin || null,
+        offreId: Number(form.offreId)
       };
       
       if (hasClient) payload.clientId = Number(form.clientId);
@@ -333,35 +301,6 @@ function CreateContrat() {
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
-
-          {/* Date de début */}
-          <div className="form-group">
-            <label className="form-label">Date d'activation *</label>
-            <input
-              type="date"
-              className={`form-control ${dateErrors.dateDebut ? "error" : ""}`}
-              value={form.dateDebut}
-              onChange={(e) => updateForm({ dateDebut: e.target.value })}
-              required
-            />
-            {dateErrors.dateDebut && (
-              <span className="field-error">{dateErrors.dateDebut}</span>
-            )}
-          </div>
-
-          {/* Date de fin */}
-          <div className="form-group">
-            <label className="form-label">Date de désactivation</label>
-            <input
-              type="date"
-              className={`form-control ${dateErrors.dateFin ? "error" : ""}`}
-              value={form.dateFin}
-              onChange={(e) => updateForm({ dateFin: e.target.value })}
-            />
-            {dateErrors.dateFin && (
-              <span className="field-error">{dateErrors.dateFin}</span>
             )}
           </div>
 

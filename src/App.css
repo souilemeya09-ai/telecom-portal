@@ -427,7 +427,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem 1.5rem;
-  padding: 1.25rem 0;
+  padding: 1.25rem 28px;
 }
 
 .form-group {

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { createCustomerGroup, updateCustomerGroup } from "../api/api";
+import { createCustomerGroup, updateCustomerGroup } from "../../../api/api";
+import { useNavigate } from "react-router-dom";
 
 const GROUP_TYPES = ["ENTERPRISE", "FAMILY", "SME", "OTHER"];
 const GROUP_STATUS = ["ACTIVE", "INACTIVE"];
@@ -15,7 +16,8 @@ function CustomerGroupForm({ editingGroup = null, onSuccess }) {
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
+  
   const isEdit = Boolean(editingGroup);
 
   const handleChange = (field) => (e) =>
@@ -29,6 +31,7 @@ function CustomerGroupForm({ editingGroup = null, onSuccess }) {
       if (isEdit) await updateCustomerGroup(editingGroup.id, form);
       else await createCustomerGroup(form);
       onSuccess?.();
+      navigate("/groups");
     } catch (err) {
       setError(err.response?.data?.message || err.message || "Une erreur est survenue.");
     } finally {
@@ -66,7 +69,7 @@ function CustomerGroupForm({ editingGroup = null, onSuccess }) {
           </div>
         )}
 
-        <form className="form-grid" onSubmit={handleSubmit}>
+        <form className="form-grid" style={{ padding: '1.25rem 28px' }} onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Nom du groupe *</label>
             <input

@@ -9,28 +9,8 @@ import Pagination from "../../../components/Pagination";
 import "./contrat.css"
 
 const EMPTY_FORM = {
-  clientId: "", customerGroupId: "", offreId: "",
-  dateDebut: "", dateFin: "", directoryNumber: "",
+  clientId: "", customerGroupId: "", offreId: "", directoryNumber: "",
 };
-
-// ── Date helpers ─────────────────────────────────────────────
-const today = () => new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
-
-function validateDates(dateDebut, dateFin) {
-  const errors = {};
-  const now = today();
-
-  if (dateDebut && dateDebut < now) {
-    errors.dateDebut = "La date de début doit être aujourd'hui ou dans le futur.";
-  }
-  if (dateFin && dateDebut && dateFin <= dateDebut) {
-    errors.dateFin = "La date de fin doit être postérieure à la date de début.";
-  }
-  if (dateFin && dateFin < now) {
-    errors.dateFin = "La date de fin doit être dans le futur.";
-  }
-  return errors;
-}
 
 // ── Sort helpers ─────────────────────────────────────────────
 function getValue(obj, field) {
@@ -38,8 +18,8 @@ function getValue(obj, field) {
     case "id": return obj.id;
     case "client": return obj.client ? `${obj.client.nom} ${obj.client.prenom}` : "";
     case "offre": return obj.offre?.nom ?? "";
-    case "dateDebut": return obj.dateDebut ?? "";
-    case "dateFin": return obj.dateFin ?? "";
+    case "dateActivation": return obj.dateActivation ?? "";
+    case "dateDesactivation": return obj.dateDesactivation ?? "";
     case "statut": return obj.statut ?? "";
     case "directoryNumber": return obj.directoryNumber ?? "";
     default: return "";
@@ -244,9 +224,6 @@ function Contrats() {
     if (patch.clientId !== undefined || patch.customerGroupId !== undefined) {
       setHolderError("");
     }
-    if (patch.dateDebut !== undefined || patch.dateFin !== undefined) {
-      setDateErrors(validateDates(next.dateDebut, next.dateFin));
-    }
   };
 
   // ── Formulaire ────────────────────────────────────────────
@@ -267,8 +244,6 @@ function Contrats() {
       clientId: c.clientId || c.client?.id || "",
       customerGroupId: c.customerGroupId || c.customerGroup?.id || "",
       offreId: c.offreId || c.offre?.id || "",
-      dateDebut: c.dateDebut || "",
-      dateFin: c.dateFin || "",
       directoryNumber: c.directoryNumber || "",
     });
     setDateErrors({});
@@ -291,12 +266,6 @@ function Contrats() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const errors = validateDates(form.dateDebut, form.dateFin);
-    if (Object.keys(errors).length > 0) {
-      setDateErrors(errors);
-      return;
-    }
-
     const hasClient = Boolean(form.clientId);
     const hasGroup = Boolean(form.customerGroupId);
 
@@ -314,8 +283,8 @@ function Contrats() {
     try {
       const payload = {
         offreId: Number(form.offreId),
-        dateDebut: form.dateDebut,
-        dateFin: form.dateFin || null,
+        // dateDebut: form.dateDebut,
+        // dateFin: form.dateFin || null,
       };
       if (hasClient) payload.clientId = Number(form.clientId);
       if (hasGroup) payload.customerGroupId = Number(form.customerGroupId);
@@ -704,8 +673,8 @@ function Contrats() {
               <div className="detail-section detail-section-full">
                 <p className="detail-section-title">Informations contrat</p>
                 <div className="detail-row-grid">
-                  <DetailRow label="Date d'activation" value={detailContrat.dateDebut} />
-                  <DetailRow label="Date de désactivation" value={detailContrat.dateFin || "—"} />
+                  <DetailRow label="Date d'activation" value={detailContrat.dateActivation} />
+                  <DetailRow label="Date de désactivation" value={detailContrat.dateDesactivation || "—"} />
                   <DetailRow label="Directory Number" value={detailContrat.directoryNumber || "—"} mono />
                   <DetailRow label="Statut" value={detailContrat.statut} />
                 </div>
@@ -765,8 +734,8 @@ function Contrats() {
                   <Th label="Client" field="client"          {...thProps} />
                   <Th label="Groupe customer" field="customerGroupId"    {...thProps} />
                   <Th label="Offre" field="offre"           {...thProps} />
-                  <Th label="Date d'activation" field="dateDebut"       {...thProps} />
-                  <Th label="Date de désactivation" field="dateFin"         {...thProps} />
+                  <Th label="Date d'activation" field="dateActivation"       {...thProps} />
+                  <Th label="Date de désactivation" field="dateDesactivation"         {...thProps} />
                   <Th label="Statut" field="statut"          {...thProps} />
                   <Th label="Numéro" field="directoryNumber" {...thProps} />
                   <th>Actions</th>
@@ -797,8 +766,8 @@ function Contrats() {
                       })()}
                     </td>
                     <td className="offre-cell">{c.offre?.nom ?? "—"}</td>
-                    <td>{c.dateDebut}</td>
-                    <td>{c.dateFin || "—"}</td>
+                    <td>{c.dateActivation}</td>
+                    <td>{c.dateDesactivation || "—"}</td>
                     <td><span className={statutClass(c.statut)}>{c.statut}</span></td>
                     <td className="mono">{c.directoryNumber || "—"}</td>
                     <td>

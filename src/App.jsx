@@ -26,7 +26,7 @@ import ExploitPromotion from "./pages/exploit/ExploitPromotion";
 import Dashboard from "./components/dashboard/Dashboard";
 import CustomerGroups from "./pages/Vente/customer/CustomerGroups";
 import CreateCustomer from "./pages/Vente/customer/CreateCustomer";
-import CustomerGroupForm from "./components/CustomerGroupForm";
+import CustomerGroupForm from "./pages/Vente/customer/CustomerGroupForm";
 import DirectoryNumbers from "./pages/metier/directoryNumber/DirectoryNumbers";
 import TelecomConnect from "./pages/TelecomConnect";
 import CreateReclamation from "./pages/Vente/reclamation/CreateReclamation";

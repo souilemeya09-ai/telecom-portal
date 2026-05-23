@@ -53,18 +53,6 @@ function CreatePromotion() {
             newErrors.valeurReduction = "La valeur doit être un nombre positif";
         }
 
-        if (!form.dateDebut) {
-            newErrors.dateDebut = "La date de début est requise";
-        }
-
-        if (form.dateDebut && form.dateFin && form.dateFin <= form.dateDebut) {
-            newErrors.dateFin = "La date de fin doit être postérieure à la date de début";
-        }
-
-        if (form.ancienneteMinimale && (isNaN(form.ancienneteMinimale) || Number(form.ancienneteMinimale) < 0)) {
-            newErrors.ancienneteMinimale = "L'ancienneté minimale doit être un nombre positif";
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };

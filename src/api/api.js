@@ -2,6 +2,7 @@ import axios from "axios";
 import { refreshApi } from "./authApi.js";
 
 const BASE_URL = "http://localhost:8080/api";
+const getCurrentUserId = localStorage.getItem("userId");
 
 // ✅ Instance axios propre
 const api = axios.create({
@@ -639,3 +640,47 @@ export async function getPromotionsByGroup(groupId) {
   const res = await api.get(`/promotions/group/${groupId}`);
   return res.data;
 }
+
+
+// API functions pour la gestion des dates
+export const getPromotionCustomersWithDates = async (promotionId, groupId) => {
+  const response = await api.get(`/promotion-dates/customers`, {
+    params: { promotionId, groupId }
+  });
+  return response.data;
+};
+
+// Modifiez cette fonction dans votre api.js
+// Dans api.js
+export const updateCustomerDates = async (customerId, promotionId, startDate, endDate, groupId, userId) => {
+  const response = await api.put(`/promotion-dates/customers/${customerId}`, {
+    promotionId,
+    startDate,
+    endDate,
+    groupId,
+    userId
+  });
+  // Retourner directement les données
+  return response.data;
+};
+
+export const bulkUpdateCustomerDates = async (data) => {
+  const response = await api.put(`/promotion-dates/customers/bulk`, data, {
+    params: { userId: getCurrentUserId() }
+  });
+  return response.data;
+};
+
+export const resetCustomerDates = async (customerId, promotionId) => {
+  const response = await api.put(`/promotion-dates/customers/${customerId}/reset`, {
+    params: { promotionId }
+  });
+  return response.data;
+};
+
+export const applyDatesToAllMembers = async (groupId, promotionId, startDate, endDate, userId) => {
+  const response = await api.post(`/promotion-dates/groups/${groupId}/apply-to-all`, null, {
+    params: { promotionId, startDate, endDate, userId: userId ?? getCurrentUserId() }
+  });
+  return response.data;
+};

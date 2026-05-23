@@ -11,7 +11,7 @@ import {
   getPromotions,
 } from "../../../api/api";
 import Pagination from "../../../components/Pagination";
-import CustomerGroupForm from "../../../components/CustomerGroupForm";
+import CustomerGroupForm from "./CustomerGroupForm";
 import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/customers.css";
 
