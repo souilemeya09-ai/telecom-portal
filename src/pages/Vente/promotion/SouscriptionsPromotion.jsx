@@ -761,7 +761,7 @@ function TabGroupes({ promotions, loading, contrats }) {
     <div className="groups-tab-enhanced">
 
       {/* Sélecteur de type de cible */}
-      <div className="target-type-selector">
+      {/* <div className="target-type-selector">
         <button
           className={`target-type-btn ${activeTargetType === "groups" ? "active" : ""}`}
           onClick={() => setActiveTargetType("groups")}
@@ -770,7 +770,7 @@ function TabGroupes({ promotions, loading, contrats }) {
           Groupes clients
           <span className="target-count">{groups.length}</span>
         </button>
-      </div>
+      </div> */}
 
       <div className="dual-list-container">
         {/* Liste des promotions */}
@@ -936,13 +936,13 @@ function TabGroupes({ promotions, loading, contrats }) {
               onClick={handleAssign}
               disabled={submitting || !selectedPromo || getTotalSelectedCount() === 0}
             >
-              {submitting ? "Assignation..." : "✅ Assigner"}
+              {submitting ? "Assignation..." : "✅ OK"}
             </button>
           </div>
         </div>
       </div>
 
-      <div className="options-panel">
+      {/* <div className="options-panel"> */}
         {/* <div className="option-group">
           <label className="option-label">📅 Date de début</label>
           <input
@@ -972,7 +972,7 @@ function TabGroupes({ promotions, loading, contrats }) {
             <span>👥 Hériter aux membres du groupe</span>
           </label>
         </div>
-      </div>
+      {/* </div> */}
       {/* {showDateManager && selectedPromoForDates && selectedGroupForDates && (
         <div className="modal-overlay">
           <div className="modal-large">
@@ -999,7 +999,7 @@ function SouscriptionsPromotion() {
   const [contrats, setContrats] = useState([]);
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("tableau");
+  const [activeTab, setActiveTab] = useState("groupes");
   const [step, setStep] = useState(1);
   const [selectedContrat, setContrat] = useState(null);
   const [selectedPromo, setPromo] = useState(null);
@@ -1133,7 +1133,7 @@ function SouscriptionsPromotion() {
         </div>
       </div>
 
-      <div className="tabs-container">
+      {/* <div className="tabs-container">
         <button className={`tab-button ${activeTab === "tableau" ? "active" : ""}`}
           onClick={() => setActiveTab("tableau")}>
           <span className="tab-icon">📊</span>
@@ -1146,7 +1146,7 @@ function SouscriptionsPromotion() {
           <span className="tab-icon">👥</span>
           Assignation par groupes
         </button>
-      </div>
+      </div> */}
 
       <div className="content-area">
         {activeTab === "groupes" && (
@@ -1154,10 +1154,6 @@ function SouscriptionsPromotion() {
             promotions={promotions}
             loading={loading}
             contrats={contrats}
-          />
-        )}
-        {activeTab === "tableau" && (
-          <CustomerPromotionDateManager
           />
         )}
         {/* {activeTab === "individuel" && renderWizard()} */}

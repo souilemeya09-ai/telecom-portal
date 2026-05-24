@@ -233,7 +233,7 @@ function CreateContrat() {
           </div>
 
           {/* Customer group */}
-          <div className="form-group">
+          {/* <div className="form-group">
             <label className="form-label">Customer group</label>
             <select
               className="form-control"
@@ -254,11 +254,11 @@ function CreateContrat() {
             {holderError && (
               <span className="field-error">{holderError}</span>
             )}
-          </div>
+          </div> */}
 
           {/* Offre combobox */}
           <div className="form-group" ref={offreDropdownRef} style={{ position: "relative" }}>
-            <label className="form-label">Offre *</label>
+            <label className="form-label">Offre </label>
             <input
               className="form-control"
               type="text"
@@ -306,7 +306,7 @@ function CreateContrat() {
 
           {/* Directory Number combobox */}
           <div className="form-group" ref={dnDropdownRef} style={{ position: "relative" }}>
-            <label className="form-label">Directory Number</label>
+            <label className="form-label">Numéro de ligne du contrat</label>
             <input
               className="form-control"
               type="text"

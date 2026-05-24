@@ -33,6 +33,8 @@ import CreateReclamation from "./pages/Vente/reclamation/CreateReclamation";
 import CreateContrat from "./pages/Vente/contrats/CreateContrat";
 import CreatePlanTarifaire from "./pages/metier/planTarifaire/CreatePlanTarifaire";
 import CreatePromotion from "./pages/metier/promotion/CreatePromotion";
+import CustomerPromotionDateManager from "./pages/Vente/promotion/CustomerPromotionDateManager";
+
 function App() {
   return (
     <BrowserRouter>
@@ -79,6 +81,7 @@ function App() {
           <Route path="/promotions" element={<Promotions />} />
           <Route path="/promotions/new" element={<CreatePromotion />} />
           <Route path="/souscriptions" element={<SouscriptionsPromotion />} />
+          <Route path="/souscriptions/clients" element={<CustomerPromotionDateManager />} />
           <Route path="/reclamations" element={<Reclamations />} />
           <Route path="/reclamations/new" element={<CreateReclamation />} />
           <Route path="/plans" element={<PlansTarifaires />} />

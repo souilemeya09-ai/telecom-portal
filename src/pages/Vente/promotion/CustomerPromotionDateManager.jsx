@@ -240,7 +240,7 @@ function PromoCard({ promo, customerId, groupId, onUpdated }) {
                             Annuler
                         </button>
                         <button className="btn-xs save" onClick={handleSave} disabled={saving}>
-                            {saving ? "Sauvegarde..." : "✓ Enregistrer"}
+                            {saving ? "Sauvegarde..." : "✓ Assigner"}
                         </button>
                     </>
                 ) : (

@@ -31,19 +31,55 @@
   line-height: 1;
 }
 
-.stat-attente       { border-left: 3px solid #f59e0b; }
-.stat-attente       .stat-value { color: #d97706; }
-.stat-active-promo  { border-left: 3px solid #22c55e; }
-.stat-active-promo  .stat-value { color: #16a34a; }
-.stat-validee       { border-left: 3px solid #3b82f6; }
-.stat-validee       .stat-value { color: #2563eb; }
+.stat-attente {
+  border-left: 3px solid #f59e0b;
+}
+
+.stat-attente .stat-value {
+  color: #d97706;
+}
+
+.stat-active-promo {
+  border-left: 3px solid #22c55e;
+}
+
+.stat-active-promo .stat-value {
+  color: #16a34a;
+}
+
+.stat-validee {
+  border-left: 3px solid #3b82f6;
+}
+
+.stat-validee .stat-value {
+  color: #2563eb;
+}
 
 /* ── Statut badges ── */
-.badge-attente   { background: #fef3c7; color: #d97706; }
-.badge-validee   { background: #eff6ff; color: #2563eb; }
-.badge-rejetee   { background: #fef2f2; color: #dc2626; }
-.badge-active    { background: #f0fdf4; color: #16a34a; }
-.badge-suspendue { background: #f5f3ff; color: #7c3aed; }
+.badge-attente {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.badge-validee {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.badge-rejetee {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.badge-active {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.badge-suspendue {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
 
 /* ── Remise badge ── */
 .remise-badge {
@@ -107,25 +143,49 @@
   cursor: pointer;
   transition: all 0.15s;
 }
-.filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.filter-btn:hover {
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .filter-btn-active {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
+
 .filter-count {
-  background: rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   padding: 1px 7px;
   font-size: 0.75rem;
 }
-.filter-btn-active .filter-count { background: rgba(255,255,255,0.25); }
+
+.filter-btn-active .filter-count {
+  background: rgba(255, 255, 255, 0.25);
+}
 
 /* ── Action buttons spécifiques ── */
-.btn-action-valider:hover   { background: #f0fdf4; border-color: #22c55e; }
-.btn-action-rejeter:hover   { background: var(--danger-light); border-color: var(--danger); }
-.btn-action-activer:hover   { background: var(--accent-light); border-color: var(--accent); }
-.btn-action-suspendre:hover { background: #f5f3ff; border-color: #7c3aed; }
+.btn-action-valider:hover {
+  background: #f0fdf4;
+  border-color: #22c55e;
+}
+
+.btn-action-rejeter:hover {
+  background: var(--danger-light);
+  border-color: var(--danger);
+}
+
+.btn-action-activer:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.btn-action-suspendre:hover {
+  background: #f5f3ff;
+  border-color: #7c3aed;
+}
 
 /* ── Statut action buttons in modal ── */
 .btn-success {
@@ -140,7 +200,10 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.btn-success:hover { background: #15803d; }
+
+.btn-success:hover {
+  background: #15803d;
+}
 
 /* ── Input with prefix (shared with services) ── */
 .input-with-prefix {
@@ -151,10 +214,12 @@
   overflow: hidden;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
+
 .input-with-prefix:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
+
 .input-prefix {
   padding: 0 10px;
   background: var(--surface-2);
@@ -167,11 +232,13 @@
   display: flex;
   align-items: center;
 }
+
 .input-with-prefix .form-control {
   border: none;
   border-radius: 0;
   box-shadow: none;
 }
+
 .input-with-prefix .form-control:focus {
   border: none;
   box-shadow: none;
@@ -194,9 +261,18 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
-  .stats-row          { grid-template-columns: 1fr 1fr; }
-  .filter-search-row  { flex-direction: column; align-items: stretch; }
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filter-search-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
+
 @media (max-width: 480px) {
-  .stats-row { grid-template-columns: 1fr; }
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
 }

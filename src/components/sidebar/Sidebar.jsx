@@ -65,6 +65,7 @@ const NAV = {
           label: "Gestion Promotions",
           links: [
             { to: "/souscriptions", label: "Configuration Promotion" },
+            { to: "/souscriptions/clients", label: "Assignement Promotion" },
             { to: "/promotions", label: "Consulter Promotions" }
           ],
         },

@@ -26,6 +26,16 @@ function getValue(obj, field) {
   }
 }
 
+function formatDateTime(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (isNaN(d)) return value;
+  return d.toLocaleString("fr-FR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
 function SortIcon({ field, sortField, sortOrder }) {
   if (sortField !== field) return <span className="sort-icon sort-idle">⇅</span>;
   return <span className="sort-icon sort-active">{sortOrder === "asc" ? "↑" : "↓"}</span>;
@@ -204,9 +214,9 @@ function Contrats() {
   const filteredDirectoryNumbers = useMemo(() => {
     const all = editingContrat?.directoryNumber
       ? [
-          { id: "current", numero: editingContrat.directoryNumber, _current: true },
-          ...availableDirectoryNumbers,
-        ]
+        { id: "current", numero: editingContrat.directoryNumber, _current: true },
+        ...availableDirectoryNumbers,
+      ]
       : availableDirectoryNumbers;
     const term = dnSearch.trim().replace(/\s/g, "");
     if (!term) return all;
@@ -399,9 +409,9 @@ function Contrats() {
                   value={
                     form.clientId
                       ? (() => {
-                          const c = clients.find((c) => String(c.id) === String(form.clientId));
-                          return c ? `${c.nom} ${c.prenom}` : clientSearch;
-                        })()
+                        const c = clients.find((c) => String(c.id) === String(form.clientId));
+                        return c ? `${c.nom} ${c.prenom}` : clientSearch;
+                      })()
                       : clientSearch
                   }
                   onChange={(e) => {
@@ -471,9 +481,9 @@ function Contrats() {
                   value={
                     form.offreId
                       ? (() => {
-                          const o = offers.find((o) => String(o.id) === String(form.offreId));
-                          return o ? (o.nomOffre || o.nom || "Sans nom") : offreSearch;
-                        })()
+                        const o = offers.find((o) => String(o.id) === String(form.offreId));
+                        return o ? (o.nomOffre || o.nom || "Sans nom") : offreSearch;
+                      })()
                       : offreSearch
                   }
                   onChange={(e) => {
@@ -537,7 +547,7 @@ function Contrats() {
                   autoComplete="off"
                 />
                 {dnDropdownOpen && (
-                  <ul className="combobox-dropdown" style={{height:'100%', paddingBottom:'20px'}}>
+                  <ul className="combobox-dropdown" style={{ height: '100%', paddingBottom: '20px' }}>
                     {/* Option "aucun" pour création */}
                     {!editingContrat && (
                       <li
@@ -673,8 +683,8 @@ function Contrats() {
               <div className="detail-section detail-section-full">
                 <p className="detail-section-title">Informations contrat</p>
                 <div className="detail-row-grid">
-                  <DetailRow label="Date d'activation" value={detailContrat.dateActivation} />
-                  <DetailRow label="Date de désactivation" value={detailContrat.dateDesactivation || "—"} />
+                  <DetailRow label="Date d'activation" value={formatDateTime(detailContrat.dateActivation)} />
+                  <DetailRow label="Date de désactivation" value={formatDateTime(detailContrat.dateDesactivation)} />
                   <DetailRow label="Directory Number" value={detailContrat.directoryNumber || "—"} mono />
                   <DetailRow label="Statut" value={detailContrat.statut} />
                 </div>
@@ -766,8 +776,8 @@ function Contrats() {
                       })()}
                     </td>
                     <td className="offre-cell">{c.offre?.nom ?? "—"}</td>
-                    <td>{c.dateActivation}</td>
-                    <td>{c.dateDesactivation || "—"}</td>
+                    <td>{formatDateTime(c.dateActivation)}</td>
+                    <td>{formatDateTime(c.dateDesactivation)}</td>
                     <td><span className={statutClass(c.statut)}>{c.statut}</span></td>
                     <td className="mono">{c.directoryNumber || "—"}</td>
                     <td>

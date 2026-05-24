@@ -151,7 +151,7 @@ const S = {
     footer: {
         background: "#0f172a", color: "#e2e8f0",
         padding: "32px 48px",
-        display: "flex", justifyContent: "space-between", alignItems: "center",
+        display: "flex", justifyContent: "center", alignItems: "center",
         flexWrap: "wrap", gap: 12,
     },
     footerLogo: { display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 16 },
@@ -230,7 +230,7 @@ export default function TelecomConnect() {
         }
     }
 
-    const navigate = useNavigate();     
+    const navigate = useNavigate();
     const role = localStorage.getItem("role");
 
     return (
@@ -248,9 +248,8 @@ export default function TelecomConnect() {
             <div style={S.page}>
                 {/* ── NAV ── */}
                 <nav style={S.nav}>
-                    <div style={S.navLogo}>
-                        <span style={S.navLogoIcon}>📶</span>
-                        Telecom Connect
+                    <div className="nb-logo" onClick={() => navigate("/")}>
+                       <img src="/images/logo.jpg" alt="Logo" width={100} />
                     </div>
                     <div style={S.navLinks}>
                         {["Offres", "Services", "Avantages", "Contact"].map((l) => (
@@ -375,11 +374,7 @@ export default function TelecomConnect() {
 
                 {/* ── FOOTER ── */}
                 <footer style={S.footer}>
-                    <div style={S.footerLogo}>
-                        <span style={S.footerWifi}>📶</span>
-                        Telecom Connect
-                    </div>
-                    <div style={S.footerCopy}>© 2024 Telecom Connect. Tous droits réservés.</div>
+                    <div style={S.footerCopy}>© {new Date().getFullYear()} BILLCOM. Tous droits réservés.</div>
                 </footer>
             </div>
         </>
