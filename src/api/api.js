@@ -2,7 +2,7 @@ import axios from "axios";
 import { refreshApi } from "./authApi.js";
 
 const BASE_URL = "http://localhost:8080/api";
-const getCurrentUserId = localStorage.getItem("userId");
+const getCurrentUserId = () => localStorage.getItem("userId");
 
 // ✅ Instance axios propre
 const api = axios.create({
@@ -583,6 +583,9 @@ export async function retirerMembreGroupe(groupId, customerId) {
   return res.data;
 }
 
+export const getGroupMembers = (groupId) =>
+  api.get(`/customer-groups/${groupId}/members`).then(r => r.data);
+
 // ══════════════════════════════════════════════════════════════
 // PROMOTION ASSIGNMENTS  — /api/promotions
 // ══════════════════════════════════════════════════════════════
@@ -598,6 +601,11 @@ export async function retirerMembreGroupe(groupId, customerId) {
 //   inheritedToMembers?,
 //   assignmentMode?
 // }
+
+// Suspendre un assignment de promotion
+export const suspendrePromotionAssignment = (promotionId, assignmentId) =>
+  api.put(`/promotions/${promotionId}/assignments/${assignmentId}/suspendre`).then(r => r.data);
+
 export async function assignerPromotion(promotionId, dto) {
   const res = await api.post(`/promotions/${promotionId}/assignments`, dto);
   return res.data;
@@ -665,6 +673,7 @@ export const updateCustomerDates = async (customerId, promotionId, startDate, en
 };
 
 export const bulkUpdateCustomerDates = async (data) => {
+  console.log("Payload envoyé:", JSON.stringify(data)); // ← ajoutez ça pour débugger
   const response = await api.put(`/promotion-dates/customers/bulk`, data, {
     params: { userId: getCurrentUserId() }
   });

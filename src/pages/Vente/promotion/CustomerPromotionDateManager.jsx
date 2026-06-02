@@ -5,13 +5,13 @@ import {
     getCustomerGroups,
     getCustomerGroupById,
     getPromotionsByGroup,
-    updateCustomerDates,
+    bulkUpdateCustomerDates,
     getAssignmentsByPromotion,
 } from "../../../api/api";
 import "./CustomerPromotionDateManager.css";
 
 // ─── Helpers ─────────────────────────────────────────────────
-const TYPE_ICONS  = { ENTERPRISE: "🏢", FAMILY: "👨‍👩‍👧", SME: "📊", OTHER: "📁" };
+const TYPE_ICONS = { ENTERPRISE: "🏢", FAMILY: "👨‍👩‍👧", SME: "📊", OTHER: "📁" };
 const TYPE_LABELS = { ENTERPRISE: "Entreprise", FAMILY: "Famille", SME: "PME", OTHER: "Autre" };
 
 const AVATAR_COLORS = [
@@ -52,9 +52,9 @@ const fmtVal = (p) =>
 
 // ─── Helpers période ─────────────────────────────────────────
 const PERIOD_UNITS = [
-    { value: "jours",  label: "Jours",  labelShort: "j"    },
-    { value: "mois",   label: "Mois",   labelShort: "mois" },
-    { value: "ans",    label: "Ans",    labelShort: "an"   },
+    { value: "jours", label: "Jours", labelShort: "j" },
+    { value: "mois", label: "Mois", labelShort: "mois" },
+    { value: "ans", label: "Ans", labelShort: "an" },
 ];
 
 /**
@@ -67,7 +67,7 @@ const computeEndDate = (startISO, amount, unit) => {
     const n = parseInt(amount, 10);
     if (unit === "jours") d.setDate(d.getDate() + n);
     else if (unit === "mois") d.setMonth(d.getMonth() + n);
-    else if (unit === "ans")  d.setFullYear(d.getFullYear() + n);
+    else if (unit === "ans") d.setFullYear(d.getFullYear() + n);
     // retourner YYYY-MM-DD
     return d.toISOString().split("T")[0];
 };
@@ -80,19 +80,19 @@ const inferPeriod = (startISO, endISO) => {
     if (!startISO || !endISO) return { amount: "", unit: "mois" };
     const days = Math.round((new Date(endISO) - new Date(startISO)) / 86400000);
     if (days <= 0) return { amount: "", unit: "mois" };
-    if (days < 30)  return { amount: days,                         unit: "jours" };
-    if (days < 365) return { amount: Math.round(days / 30),        unit: "mois"  };
-    return            { amount: Math.round(days / 365),            unit: "ans"   };
+    if (days < 30) return { amount: days, unit: "jours" };
+    if (days < 365) return { amount: Math.round(days / 30), unit: "mois" };
+    return { amount: Math.round(days / 365), unit: "ans" };
 };
 
 // ─── PromoCard ────────────────────────────────────────────────
 function PromoCard({ promo, customerId, groupId, onUpdated }) {
-    const [editing,      setEditing]  = useState(false);
-    const [startDate,    setStart]    = useState(promo.effectiveStartDate ?? "");
-    const [periodAmount, setAmount]   = useState(() => inferPeriod(promo.effectiveStartDate, promo.effectiveEndDate).amount);
-    const [periodUnit,   setUnit]     = useState(() => inferPeriod(promo.effectiveStartDate, promo.effectiveEndDate).unit);
-    const [saving,       setSaving]   = useState(false);
-    const [feedback,     setFeedback] = useState(null);
+    const [editing, setEditing] = useState(false);
+    const [startDate, setStart] = useState(promo.effectiveStartDate ?? "");
+    const [periodAmount, setAmount] = useState(() => inferPeriod(promo.effectiveStartDate, promo.effectiveEndDate).amount);
+    const [periodUnit, setUnit] = useState(() => inferPeriod(promo.effectiveStartDate, promo.effectiveEndDate).unit);
+    const [saving, setSaving] = useState(false);
+    const [feedback, setFeedback] = useState(null);
     const userId = localStorage.getItem("userId");
 
     // Date fin calculée automatiquement
@@ -119,20 +119,23 @@ function PromoCard({ promo, customerId, groupId, onUpdated }) {
         }
         setSaving(true);
         try {
-            const response = await updateCustomerDates(
-                customerId,
-                promo.promotionId ?? promo.id,
-                startDate        || null,
-                computedEndDate  || null,
-                groupId,
-                userId,
-            );
-            if (response?.success) {
+            const response = await bulkUpdateCustomerDates({
+                userId: userId,
+                promotionId: promo.promotionId ?? promo.id,
+                groupId: groupId,
+                customerIds: [Number(customerId)],
+                newStartDate: startDate || null,
+                newEndDate: computedEndDate || null,
+            });
+
+            // bulkUpdate retourne { successCount, failedCount, errors[] }
+            if (response?.successCount > 0) {
                 onUpdated(promo.assignmentId ?? promo.id, startDate, computedEndDate || null);
-                showFeedback(true, response.message || "Dates mises à jour ✓");
+                showFeedback(true, "Dates enregistrées — en attente de validation par l'exploit ⏳");
                 setEditing(false);
             } else {
-                throw new Error(response?.message || "Erreur lors de la mise à jour");
+                const errMsg = response?.errors?.[0]?.errorMessage || "Erreur lors de la mise à jour";
+                throw new Error(errMsg);
             }
         } catch (e) {
             showFeedback(false, e.response?.data?.message || e.message || "Erreur lors de la mise à jour");
@@ -150,14 +153,34 @@ function PromoCard({ promo, customerId, groupId, onUpdated }) {
         setFeedback(null);
     };
 
-    const displayStart = editing ? startDate          : promo.effectiveStartDate;
-    const displayEnd   = editing ? computedEndDate    : promo.effectiveEndDate;
-    const periode      = calcPeriode(displayStart, displayEnd);
+    const displayStart = editing ? startDate : promo.effectiveStartDate;
+    const displayEnd = editing ? computedEndDate : promo.effectiveEndDate;
+    const periode = calcPeriode(displayStart, displayEnd);
 
     return (
         <div className={`promo-card-item${editing ? " editing" : ""}`}>
             {/* En-tête */}
             <div className="promo-card-top">
+                <div style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    fontSize: "0.72rem",
+                    fontWeight: 600,
+                    padding: "2px 10px",
+                    borderRadius: 20,
+                    marginBottom: 8,
+                    background: promo.validationStatus === "VALIDATED"
+                        ? "#e8f5e9" : promo.validationStatus === "REJECTED"
+                            ? "#fdecea" : "#fff8e1",
+                    color: promo.validationStatus === "VALIDATED"
+                        ? "#2e7d32" : promo.validationStatus === "REJECTED"
+                            ? "#c62828" : "#f57f17",
+                }}>
+                    {promo.validationStatus === "VALIDATED" && "✓ Actif"}
+                    {promo.validationStatus === "REJECTED" && "✗ Rejeté"}
+                    {(!promo.validationStatus || promo.validationStatus === "PENDING") && "⏳ En attente de validation"}
+                </div>
                 <div>
                     <div className="promo-card-name">
                         {promo.typeReduction === "POURCENTAGE" ? "🎯" : "💰"}{" "}
@@ -244,7 +267,14 @@ function PromoCard({ promo, customerId, groupId, onUpdated }) {
                         </button>
                     </>
                 ) : (
-                    <button className="btn-xs edit" onClick={() => setEditing(true)}>
+                    <button
+                        className="btn-xs edit"
+                        onClick={() => setEditing(true)}
+                        disabled={promo.validationStatus === "VALIDATED"}
+                        title={promo.validationStatus === "VALIDATED"
+                            ? "Cet assignment est déjà validé par l'exploit"
+                            : "Modifier les dates"}
+                    >
                         ✏ Modifier les dates
                     </button>
                 )}
@@ -255,9 +285,9 @@ function PromoCard({ promo, customerId, groupId, onUpdated }) {
 
 // ─── ClientRow ────────────────────────────────────────────────
 function ClientRow({ row, groupId, colSpan, onUpdatePromo, refreshTrigger }) {
-    const [open,       setOpen]       = useState(false);
-    const [promos,     setPromos]     = useState(null);
-    const [promoLoad,  setPromoLoad]  = useState(false);
+    const [open, setOpen] = useState(false);
+    const [promos, setPromos] = useState(null);
+    const [promoLoad, setPromoLoad] = useState(false);
     const [promoError, setPromoError] = useState(null);
 
     const loadPromos = useCallback(async () => {
@@ -272,37 +302,52 @@ function ClientRow({ row, groupId, colSpan, onUpdatePromo, refreshTrigger }) {
             const promosWithDates = await Promise.all(
                 promoList.map(async (promo) => {
                     try {
-                        const assignments     = await getAssignmentsByPromotion(promo.id);
-                        const assignmentsList = Array.isArray(assignments) ? assignments : assignments.content ?? [];
+                        const assignments = await getAssignmentsByPromotion(promo.id);
+                        const assignmentsList = Array.isArray(assignments)
+                            ? assignments
+                            : assignments.content ?? [];
 
-                        const customerAssignment = assignmentsList.find(
-                            a => a.targetType === "CUSTOMER" && a.targetCustomerId === row.client.id,
-                        );
-                        if (customerAssignment) {
+                        // 1. Chercher d'abord un assignment individuel pour ce client
+                        // Trier par id desc pour prendre le plus récent
+                        const customerAssignments = assignmentsList
+                            .filter(a => a.targetType === "CUSTOMER" && a.targetCustomerId === row.client.id)
+                            .sort((a, b) => b.id - a.id);
+
+                        if (customerAssignments.length > 0) {
+                            const ca = customerAssignments[0];
                             return {
                                 ...promo,
-                                effectiveStartDate: customerAssignment.effectiveStartDate,
-                                effectiveEndDate:   customerAssignment.effectiveEndDate,
-                                assignmentId:       customerAssignment.id,
-                                assignmentMode:     customerAssignment.assignmentMode,
+                                effectiveStartDate: ca.effectiveStartDate,
+                                effectiveEndDate: ca.effectiveEndDate,
+                                assignmentId: ca.id,
+                                assignmentMode: ca.assignmentMode,
+                                validationStatus: ca.validationStatus,  // ✅ inclure
+                                status: ca.status,
                             };
                         }
 
-                        const groupAssignment = assignmentsList.find(
-                            a => a.targetType === "CUSTOMER_GROUP" && a.targetGroupId === groupId,
-                        );
-                        if (groupAssignment?.inheritedToMembers) {
+                        // 2. Sinon chercher l'assignment groupe
+                        const groupAssignment = assignmentsList
+                            .filter(a => a.targetType === "CUSTOMER_GROUP" && a.targetGroupId === groupId)
+                            .sort((a, b) => b.id - a.id)[0];
+
+                        if (groupAssignment) {
                             return {
                                 ...promo,
                                 effectiveStartDate: groupAssignment.effectiveStartDate,
-                                effectiveEndDate:   groupAssignment.effectiveEndDate,
-                                assignmentId:       groupAssignment.id,
-                                assignmentMode:     groupAssignment.assignmentMode,
+                                effectiveEndDate: groupAssignment.effectiveEndDate,
+                                assignmentId: groupAssignment.id,
+                                assignmentMode: groupAssignment.assignmentMode,
+                                validationStatus: groupAssignment.validationStatus, // ✅ inclure
+                                status: groupAssignment.status,
                             };
                         }
-                        return promo;
+
+                        // 3. Aucun assignment trouvé — promo sans dates
+                        return { ...promo, validationStatus: "PENDING", status: "PENDING" };
+
                     } catch {
-                        return promo;
+                        return { ...promo, validationStatus: "PENDING" };
                     }
                 }),
             );
@@ -328,7 +373,13 @@ function ClientRow({ row, groupId, colSpan, onUpdatePromo, refreshTrigger }) {
         setPromos(prev =>
             prev.map(p =>
                 (p.assignmentId ?? p.id) === assignmentId
-                    ? { ...p, effectiveStartDate: startDate, effectiveEndDate: endDate }
+                    ? {
+                        ...p,
+                        effectiveStartDate: startDate,
+                        effectiveEndDate: endDate,
+                        validationStatus: "PENDING",
+                        status: "PENDING",
+                    }
                     : p,
             ),
         );
@@ -453,20 +504,20 @@ function ClientRow({ row, groupId, colSpan, onUpdatePromo, refreshTrigger }) {
 
 // ─── Composant principal ──────────────────────────────────────
 function CustomerPromotionDateManager() {
-    const [groups,      setGroups]      = useState([]);
+    const [groups, setGroups] = useState([]);
     const [activeGroup, setActiveGroup] = useState(null);
-    const [rows,        setRows]        = useState([]);
+    const [rows, setRows] = useState([]);
     const [groupPromos, setGroupPromos] = useState([]);
-    const [loading,     setLoading]     = useState(false);
-    const [error,       setError]       = useState(null);
-    const [refreshKey,  setRefreshKey]  = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     // Filtres
-    const [search,       setSearch]       = useState("");
+    const [search, setSearch] = useState("");
     const [filterPromoId, setFilterPromoId] = useState("all");
-    const [sortKey,      setSortKey]      = useState("client");
-    const [sortDir,      setSortDir]      = useState("asc");
-    const [page,         setPage]         = useState(0);
+    const [sortKey, setSortKey] = useState("client");
+    const [sortDir, setSortDir] = useState("asc");
+    const [page, setPage] = useState(0);
     const PAGE_SIZE = 10;
 
     // 1. Charger les groupes au montage
@@ -519,15 +570,15 @@ function CustomerPromotionDateManager() {
 
             const rowsBuilt = members.map((member) => {
                 const client = member.customer ?? member.client ?? {
-                    id:     member.customerId,
-                    nom:    member.nom     ?? member.customerName  ?? "",
-                    prenom: member.prenom  ?? "",
-                    email:  member.email   ?? member.customerEmail ?? "",
+                    id: member.customerId,
+                    nom: member.nom ?? member.customerName ?? "",
+                    prenom: member.prenom ?? "",
+                    email: member.email ?? member.customerEmail ?? "",
                 };
 
                 let firstPromo = null;
                 if (promoList.length > 0) {
-                    const fp          = promoList[0];
+                    const fp = promoList[0];
                     const assignments = assignmentsMap.get(fp.id) || [];
                     const cA = assignments.find(a => a.targetType === "CUSTOMER" && a.targetCustomerId === client.id);
                     if (cA) {
@@ -541,10 +592,10 @@ function CustomerPromotionDateManager() {
                 }
 
                 return {
-                    id:         member.customerId ?? client.id,
+                    id: member.customerId ?? client.id,
                     client,
                     group,
-                    statut:     member.status ?? member.statut ?? "ACTIF",
+                    statut: member.status ?? member.statut ?? "ACTIF",
                     promoCount: promoList.length,
                     firstPromo,
                 };
@@ -596,8 +647,8 @@ function CustomerPromotionDateManager() {
         });
     }, [rows, search, sortKey, sortDir]);
 
-    const paginated   = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-    const totalPages  = Math.ceil(filtered.length / PAGE_SIZE);
+    const paginated = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
 
     const handleSort = (key) => {
         if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
@@ -611,7 +662,7 @@ function CustomerPromotionDateManager() {
         </span>
     );
 
-    const COL_SPAN         = 5;
+    const COL_SPAN = 5;
     const totalAssignments = rows.reduce((s, r) => s + r.promoCount, 0);
 
     return (
@@ -680,28 +731,6 @@ function CustomerPromotionDateManager() {
                         : "↻ Actualiser"}
                 </button>
             </div>
-
-            {/* Filtre par promotion */}
-            {/* {groupPromos.length > 0 && (
-                <div className="promo-filter-bar">
-                    <span className="promo-filter-label">Promotion :</span>
-                    <button
-                        className={`promo-filter-pill${filterPromoId === "all" ? " active" : ""}`}
-                        onClick={() => setFilterPromoId("all")}
-                    >
-                        Toutes ({groupPromos.length})
-                    </button>
-                    {groupPromos.map(p => (
-                        <button
-                            key={p.id}
-                            className={`promo-filter-pill${filterPromoId === p.id ? " active" : ""}`}
-                            onClick={() => setFilterPromoId(filterPromoId === p.id ? "all" : p.id)}
-                        >
-                            {p.nomPromotion ?? p.name} · {fmtVal(p)}
-                        </button>
-                    ))}
-                </div>
-            )} */}
 
             {/* Tableau */}
             <div className="gpt-table-wrap">
