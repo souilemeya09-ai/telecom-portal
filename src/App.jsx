@@ -9,7 +9,6 @@ import EditUser from "./pages/dsi/EditUser";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 
-import Footer from "./components/Footer/Footer";
 import DashboardLayout from "./components/DashboardLayouts";
 import ProtectedRoute from "./middelware/ProtectedRoute";
 import Contrats from "./pages/Vente/contrats/contrats";

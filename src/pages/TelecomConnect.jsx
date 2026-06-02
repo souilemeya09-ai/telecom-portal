@@ -1,5 +1,10 @@
-import { use, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import StructuredAnswer from "../components/StructuredAnswer";
+import MarkdownAnswer from "../components/MarkdownAnswer";
+import { getOffres, getServices } from "../api/api";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 // ─── Inline styles ──────────────────────────────────────────────────────────
 const S = {
@@ -25,7 +30,7 @@ const S = {
     // HERO
     hero: {
         background: "linear-gradient(160deg, #eff6ff 0%, #f5f3ff 50%, #ede9fe 100%)",
-        padding: "80px 24px 100px", textAlign: "center", position: "relative", overflow: "hidden",
+        padding: "120px 24px 140px", textAlign: "center", position: "relative", overflow: "hidden",
     },
     heroBadge: {
         display: "inline-flex", alignItems: "center", gap: 7,
@@ -111,6 +116,8 @@ const S = {
     serviceCard: {
         background: "#fff", border: "1.5px solid #e5e7eb",
         borderRadius: 14, padding: "28px 20px", textAlign: "center",
+        cursor: "pointer",
+        transition: "transform 0.2s ease",
     },
     serviceIcon: {
         width: 52, height: 52, borderRadius: "50%",
@@ -119,6 +126,99 @@ const S = {
     },
     serviceName: { fontSize: 15, fontWeight: 700, color: "#111827", marginBottom: 5 },
     serviceDesc: { fontSize: 13, color: "#6b7280" },
+
+    // ADVANTAGES SECTION
+    advantagesBg: { background: "#fff", padding: "80px 24px" },
+    advantagesGrid: {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+        gap: 24, maxWidth: 1000, margin: "0 auto",
+    },
+    advantageCard: {
+        background: "#f9fafb",
+        border: "1px solid #e5e7eb",
+        borderRadius: 16,
+        padding: "32px 24px",
+        textAlign: "center",
+        transition: "transform 0.2s ease",
+    },
+    advantageIcon: {
+        width: 64, height: 64, borderRadius: "50%",
+        background: "#eff6ff", display: "flex", alignItems: "center",
+        justifyContent: "center", margin: "0 auto 20px", fontSize: 28, color: "#2563eb",
+    },
+    advantageTitle: { fontSize: 18, fontWeight: 700, color: "#111827", marginBottom: 12 },
+    advantageDesc: { fontSize: 14, color: "#6b7280", lineHeight: 1.6 },
+
+    // CONTACT SECTION
+    contactBg: { background: "#f0f9ff", padding: "80px 24px" },
+    contactContainer: {
+        maxWidth: 1000, margin: "0 auto",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+        gap: 40,
+    },
+    contactInfo: {
+        background: "#fff",
+        border: "1px solid #e5e7eb",
+        borderRadius: 16,
+        padding: "32px",
+    },
+    contactForm: {
+        background: "#fff",
+        border: "1px solid #e5e7eb",
+        borderRadius: 16,
+        padding: "32px",
+    },
+    contactTitle: { fontSize: 20, fontWeight: 700, color: "#0f172a", marginBottom: 20 },
+    contactDetail: {
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        marginBottom: 20,
+        padding: "12px",
+        background: "#f9fafb",
+        borderRadius: 12,
+    },
+    contactIcon: { fontSize: 20, color: "#2563eb" },
+    contactText: { fontSize: 14, color: "#374151", lineHeight: 1.5 },
+    formGroup: { marginBottom: 20 },
+    formLabel: { display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 },
+    formInput: {
+        width: "100%",
+        padding: "10px 12px",
+        border: "1.5px solid #e5e7eb",
+        borderRadius: 8,
+        fontSize: 14,
+        color: '#101116',
+        fontFamily: "inherit",
+        transition: "border-color 0.2s ease",
+        background: '#f9fafb'
+    },
+    formTextarea: {
+        width: "100%",
+        padding: "10px 12px",
+        border: "1.5px solid #e5e7eb",
+        color: '#101116',
+        borderRadius: 8,
+        fontSize: 14,
+        fontFamily: "inherit",
+        resize: "vertical",
+        minHeight: 100,
+        background: '#f9fafb'
+
+    },
+    submitBtn: {
+        width: "100%",
+        padding: "12px",
+        background: "#2563eb",
+        color: "#fff",
+        border: "none",
+        borderRadius: 8,
+        fontSize: 14,
+        fontWeight: 600,
+        cursor: "pointer",
+    },
 
     // AI SECTION
     aiSection: { background: "#eff6ff", padding: "64px 24px", textAlign: "center" },
@@ -154,35 +254,41 @@ const S = {
         display: "flex", justifyContent: "center", alignItems: "center",
         flexWrap: "wrap", gap: 12,
     },
-    footerLogo: { display: "flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 16 },
-    footerWifi: { color: "#60a5fa", fontSize: 20 },
     footerCopy: { fontSize: 13, color: "#94a3b8" },
 };
 
-// ─── Data ──────────────────────────────────────────────────────────────────
-const PLANS = [
+// ─── Données des avantages ──────────────────────────────────────────────────
+const ADVANTAGES = [
     {
-        name: "Fibre 50 Mbps", price: "19.99", badge: null,
-        features: ["WiFi ultra rapide", "Installation gratuite", "Support 24/7"],
+        icon: "⚡",
+        title: "Fibre ultra-rapide",
+        description: "Profitez de débits jusqu'à 1 Gbps pour une expérience Internet sans limite"
     },
     {
-        name: "Fibre 300 Mbps", price: "29.99", badge: { label: "Populaire", color: "blue" },
-        features: ["Débit symétrique", "WiFi 6 inclus", "Appels illimités fixes", "Installation VIP"],
-        featured: true,
+        icon: "📺",
+        title: "TV 4K incluse",
+        description: "Accédez à plus de 200 chaînes et au replay 7 jours, le tout en qualité 4K"
     },
     {
-        name: "Fibre 1 Gbps", price: "49.99", badge: { label: "Nouveau", color: "purple" },
-        features: ["Débit maximum", "2 Répéteurs WiFi", "TV 4K incluse", "Support prioritaire"],
+        icon: "📱",
+        title: "Mobile 5G",
+        description: "La meilleure couverture 5G pour rester connecté partout, tout le temps"
     },
-];
-
-const SERVICES = [
-    { icon: "📶", name: "Internet Fibre", desc: "Connexion stable et ultra-rapide" },
-    { icon: "📞", name: "Appels illimités", desc: "Vers les fixes et mobiles" },
-    { icon: "📺", name: "TV intelligente", desc: "+200 chaînes en qualité 4K" },
-    { icon: "🎧", name: "Support technique", desc: "Assistance disponible 24/7" },
-    { icon: "📡", name: "Couverture 5G", desc: "Le meilleur réseau mobile" },
-    { icon: "💼", name: "Solutions entreprise", desc: "Des offres pour les pros" },
+    {
+        icon: "🎧",
+        title: "Support 24/7",
+        description: "Une équipe dédiée à votre écoute, disponible jour et nuit"
+    },
+    {
+        icon: "💰",
+        title: "Prix bloqués",
+        description: "Nos prix sont garantis sans augmentation pendant 2 ans"
+    },
+    {
+        icon: "🔒",
+        title: "Sécurité maximale",
+        description: "Protection antivirus et pare-feu inclus pour naviguer en toute sécurité"
+    }
 ];
 
 // ─── Spinner ───────────────────────────────────────────────────────────────
@@ -196,141 +302,394 @@ function Spinner() {
     );
 }
 
-// ─── App ───────────────────────────────────────────────────────────────────
+// ─── Composant principal ───────────────────────────────────────────────────
 export default function TelecomConnect() {
+    const navigate = useNavigate();
+    const role = localStorage.getItem("role");
+
     const [question, setQuestion] = useState("");
+    const [offres, setOffres] = useState([]);
+    const [services, setServices] = useState([]);
     const [answer, setAnswer] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [history, setHistory] = useState([]);
+    const [inputValue, setInputValue] = useState("");
+    const [currentAnswer, setCurrentAnswer] = useState("");
+    const [confirmQuestion, setConfirmQuestion] = useState(null);
 
-    async function askAI() {
-        if (!question.trim() || loading) return;
+    // États pour le formulaire de contact
+    const [contactForm, setContactForm] = useState({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+    });
+    const [contactStatus, setContactStatus] = useState(null);
+
+    const answerRef = useRef("");
+    const loadingRef = useRef(false);
+
+    // Fonction pour obtenir le nom du plan tarifaire
+    const getPlanName = (planTarifaireId) => {
+        const plans = {
+            1: { name: "Mobile Starter", price: "9.99", features: ["Appels illimités", "20 Go internet", "SMS/MMS illimités"] },
+            2: { name: "Fixe Pro", price: "14.99", features: ["Ligne fixe professionnelle", "Appels illimités", "Messagerie vocale"] },
+            3: { name: "Internet Fibre Pro", price: "34.99", features: ["Fibre symétrique", "IP fixe", "SLA 99.9%"] },
+            4: { name: "TV Premium", price: "19.99", features: ["200+ chaînes", "Replay 7 jours", "Enregistrement cloud"] },
+            5: { name: "Bundle", price: "49.99", features: ["Économies jusqu'à 30%", "Support prioritaire", "Facture unique"] }
+        };
+        return plans[planTarifaireId] || { name: "Plan standard", price: "0", features: [] };
+    };
+
+    // Fonction pour obtenir les détails d'un service par son ID
+    const getServiceDetails = (serviceId) => {
+        const service = services.find(s => s.id === serviceId);
+        if (service) {
+            return {
+                icon: getServiceIcon(service.nomService),
+                name: service.nomService,
+                desc: service.description || getDefaultDescription(service.nomService)
+            };
+        }
+        return null;
+    };
+
+    // Fonction pour obtenir une icône basée sur le nom du service
+    const getServiceIcon = (serviceName) => {
+        const icons = {
+            "Mobile": "📱",
+            "Internet": "💻",
+            "Fibre": "📶",
+            "TV": "📺",
+            "Fixe": "📞",
+            "Streaming": "🎬",
+            "Cloud": "☁️",
+            "Sécurité": "🔒",
+            "Support": "🎧"
+        };
+        for (const [key, icon] of Object.entries(icons)) {
+            if (serviceName.includes(key)) return icon;
+        }
+        return "📡";
+    };
+
+    // Fonction pour obtenir une description par défaut
+    const getDefaultDescription = (serviceName) => {
+        const descriptions = {
+            "Mobile": "Appels et data mobile",
+            "Internet": "Connexion haut débit",
+            "Fibre": "Internet ultra-rapide",
+            "TV": "Divertissement TV",
+            "Fixe": "Téléphonie fixe",
+            "Streaming": "Contenu à la demande",
+            "Cloud": "Stockage en ligne",
+            "Sécurité": "Protection des données",
+            "Support": "Assistance technique"
+        };
+        for (const [key, desc] of Object.entries(descriptions)) {
+            if (serviceName.includes(key)) return desc;
+        }
+        return "Service de qualité";
+    };
+
+    // Récupérer les offres et services depuis l'API
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const offresResponse = await getOffres();
+                if (offresResponse && offresResponse.content) {
+                    setOffres(offresResponse.content);
+                } else if (Array.isArray(offresResponse)) {
+                    setOffres(offresResponse);
+                }
+
+                const servicesResponse = await getServices();
+                if (servicesResponse && servicesResponse.content) {
+                    setServices(servicesResponse.content);
+                } else if (Array.isArray(servicesResponse)) {
+                    setServices(servicesResponse);
+                }
+            } catch (err) {
+                console.error("Erreur lors du chargement des données :", err);
+                setOffres([]);
+                setServices([]);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Transformer les services pour l'affichage
+    const getDisplayServices = () => {
+        if (!services.length) return [];
+        return services.map(service => ({
+            id: service.id,
+            icon: getServiceIcon(service.nomService),
+            name: service.nomService,
+            desc: service.description || getDefaultDescription(service.nomService)
+        }));
+    };
+
+    // Transformer une offre en format compatible avec l'affichage
+    const formatOfferForDisplay = (offer) => {
+        const plan = getPlanName(offer.planTarifaireId);
+        const offerServices = offer.serviceIds
+            .map(id => getServiceDetails(id))
+            .filter(s => s !== null)
+            .map(s => s.name);
+
+        let badge = null;
+        if (offer.typeOffre === "BUNDLE") {
+            badge = { label: "Bundle", color: "purple" };
+        } else if (offer.typeOffre === "MOBILE" && offer.id === 9) {
+            badge = { label: "Populaire", color: "blue" };
+        } else if (offer.typeOffre === "INTERNET" && offer.id === 11) {
+            badge = { label: "Recommandé", color: "blue" };
+        }
+
+        const featured = offer.typeOffre === "BUNDLE" || offer.id === 11;
+
+        return {
+            id: offer.id,
+            name: offer.nomOffre,
+            type: offer.typeOffre,
+            price: plan.price,
+            originalPrice: plan.price,
+            badge: badge,
+            featured: featured,
+            features: [
+                ...offerServices.slice(0, 3),
+                offer.typeOffre === "BUNDLE" ? "Économies jusqu'à 30%" : null,
+                offer.planTarifaireId ? "Support inclus" : null
+            ].filter(Boolean),
+            rawOffer: offer
+        };
+    };
+
+    // Filtrer et organiser les offres pour l'affichage
+    const getDisplayOffers = () => {
+        if (!offres.length) return [];
+        const priorityOrder = ["BUNDLE", "INTERNET", "MOBILE", "TV", "FIXE"];
+        const sorted = [...offres].sort((a, b) => {
+            const indexA = priorityOrder.indexOf(a.typeOffre);
+            const indexB = priorityOrder.indexOf(b.typeOffre);
+            return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+        });
+        return sorted.slice(0, 3).map(formatOfferForDisplay);
+    };
+
+    const displayOffers = getDisplayOffers();
+    const displayServices = getDisplayServices();
+
+    // Fonction pour poser une question à l'IA
+    const askAI = useCallback(async (customQuestion) => {
+        const currentQuestion = (customQuestion ?? question).trim();
+        if (!currentQuestion || loadingRef.current) return;
+
+        loadingRef.current = true;
         setLoading(true);
-        setAnswer("");
+        setError("");
         try {
-            const res = await fetch("https://api.anthropic.com/v1/messages", {
+            const res = await fetch(`${API_BASE_URL}/api/assistant/chat`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                },
                 body: JSON.stringify({
-                    model: "claude-sonnet-4-20250514",
-                    max_tokens: 1000,
-                    system:
-                        "Tu es un conseiller commercial pour Telecom Connect, un opérateur fibre en France. " +
-                        "Réponds de façon concise, aimable et professionnelle en français. " +
-                        "Les offres disponibles sont : Fibre 50 Mbps à 19,99€/mois, Fibre 300 Mbps à 29,99€/mois (la plus populaire), Fibre 1 Gbps à 49,99€/mois.",
-                    messages: [{ role: "user", content: question }],
+                    message: currentQuestion,
+                    history: history,
                 }),
             });
+
             const data = await res.json();
-            const text = data.content?.find((b) => b.type === "text")?.text || "Désolé, je n'ai pas pu obtenir une réponse.";
-            setAnswer(text);
-        } catch {
-            setAnswer("Une erreur s'est produite. Veuillez réessayer.");
+
+            if (!res.ok) {
+                throw new Error(data?.message || "Le serveur a retourné une erreur.");
+            }
+
+            const aiAnswer = data?.answer || "Désolé, je n'ai pas pu obtenir une réponse.";
+
+            setAnswer(aiAnswer);
+            answerRef.current = aiAnswer;
+            setHistory((prev) => [
+                ...prev,
+                { role: "user", content: currentQuestion },
+                { role: "assistant", content: aiAnswer },
+            ]);
+            setQuestion("");
+            setCurrentAnswer(aiAnswer);
+            setInputValue("");
+        } catch (err) {
+            setError(err.message || "Une erreur s'est produite. Veuillez réessayer.");
+            setAnswer("");
         } finally {
+            loadingRef.current = false;
             setLoading(false);
+        }
+    }, [question, history]);
+
+    function handleSuggestionClick(text) {
+        setConfirmQuestion(text);
+    }
+
+    function confirmAndAskAI() {
+        if (confirmQuestion) {
+            setQuestion(confirmQuestion);
+            setTimeout(() => askAI(confirmQuestion), 0);
+            setConfirmQuestion(null);
         }
     }
 
-    const navigate = useNavigate();
-    const role = localStorage.getItem("role");
+    function cancelAskAI() {
+        setConfirmQuestion(null);
+    }
+
+    // Gestionnaire de soumission du formulaire de contact
+    const handleContactSubmit = (e) => {
+        e.preventDefault();
+        // Simulation d'envoi (à remplacer par votre API)
+        setContactStatus("Sending...");
+        setTimeout(() => {
+            setContactStatus("Message envoyé avec succès !");
+            setContactForm({ name: "", email: "", subject: "", message: "" });
+            setTimeout(() => setContactStatus(null), 3000);
+        }, 1500);
+    };
+
+    const handleInputChange = (e) => {
+        setContactForm({
+            ...contactForm,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const scrollToSection = (sectionId) => {
+        document.getElementById(sectionId).scrollIntoView({ behavior: "smooth" });
+    };
 
     return (
         <>
             <style>{`
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Segoe UI', sans-serif; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeUp 0.3s ease; }
-        .pricing-card:hover { transform: translateY(-4px); }
-        .btn-hover:hover { opacity: 0.88; }
-      `}</style>
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body { font-family: 'Inter', 'Segoe UI', sans-serif; }
+                @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+                .fade-in { animation: fadeUp 0.3s ease; }
+                .pricing-card:hover, .advantage-card:hover, .service-card:hover { transform: translateY(-4px); transition: transform 0.2s ease; }
+                .btn-hover:hover { opacity: 0.88; transition: opacity 0.2s ease; }
+                .form-input:focus, .form-textarea:focus { outline: none; border-color: #2563eb; }
+            `}</style>
 
             <div style={S.page}>
-                {/* ── NAV ── */}
+                {/* Navigation */}
                 <nav style={S.nav}>
-                    <div className="nb-logo" onClick={() => navigate("/")}>
-                       <img src="/images/logo.jpg" alt="Logo" width={100} />
+                    <div className="nb-logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+                        <img src="/images/logo.jpg" alt="Logo" width={100} />
                     </div>
                     <div style={S.navLinks}>
-                        {["Offres", "Services", "Avantages", "Contact"].map((l) => (
-                            <a key={l} style={S.navLink}>{l}</a>
-                        ))}
+                        <a onClick={() => scrollToSection("offres")} style={S.navLink}>Offres</a>
+                        <a onClick={() => scrollToSection("services")} style={S.navLink}>Services</a>
+                        <a onClick={() => scrollToSection("avantages")} style={S.navLink}>Avantages</a>
+                        <a onClick={() => scrollToSection("contact")} style={S.navLink}>Contact</a>
                     </div>
-                    {role && (
-                        <button style={S.navBtn} onClick={() => navigate("/dashboard")} className="btn-hover">Espace Client</button>
-                    )}
+                    <button style={S.navBtn} onClick={() => navigate(role ? "/dashboard" : "/login")} className="btn-hover">
+                        Espace Client
+                    </button>
                 </nav>
 
-                {/* ── HERO ── */}
+                {/* Hero Section */}
                 <section style={S.hero}>
-                    <div style={S.heroBadge}>
-                        <span style={S.heroBadgeDot} />
-                        Nouveau : La 5G est maintenant disponible
-                    </div>
-                    <h1 style={S.heroTitle}>Connectez‑vous au futur</h1>
+                    <h1 style={S.heroTitle}>Connectez-vous au futur</h1>
                     <p style={S.heroSub}>
                         Connectez-vous au futur avec notre réseau ultra-rapide. Profitez de nos offres sur mesure pour rester toujours connecté, partout.
                     </p>
                     <div style={S.heroActions}>
-                        <button style={S.btnPrimary} className="btn-hover">Découvrir les offres</button>
-                        <button style={S.btnOutline} className="btn-hover">Contacter un conseiller</button>
+                        <button style={S.btnPrimary} className="btn-hover" onClick={() => scrollToSection("offres")}>
+                            Découvrir les offres
+                        </button>
+                        <button style={S.btnOutline} className="btn-hover" onClick={() => scrollToSection("contact")}>
+                            Contacter un conseiller
+                        </button>
                     </div>
                 </section>
 
-                {/* ── PRICING ── */}
-                <section style={S.section}>
-                    <h2 style={S.sectionTitle}>Nos Offres Fibre</h2>
-                    <p style={S.sectionSub}>Choisissez le forfait qui correspond à vos besoins</p>
-                    <div style={S.pricingGrid}>
-                        {PLANS.map((plan) => (
-                            <div key={plan.name} style={S.pricingCard(plan.featured)} className="pricing-card">
-                                {plan.badge && (
-                                    <div style={S.badge(plan.badge.color)}>{plan.badge.label}</div>
-                                )}
-                                <div style={S.planName}>{plan.name}</div>
-                                <div style={S.planPrice}>
-                                    <span style={S.planPriceNum}>{plan.price}</span>
-                                    <span style={S.planPriceUnit}>€/mois</span>
+                {/* Offers Section */}
+                <section style={S.section} id="offres">
+                    <h2 style={S.sectionTitle}>Nos Offres</h2>
+                    <p style={S.sectionSub}>Choisissez l'offre qui correspond à vos besoins</p>
+                    {offres.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "40px" }}>
+                            <p>Chargement des offres...</p>
+                        </div>
+                    ) : (
+                        <div style={S.pricingGrid}>
+                            {displayOffers.map((plan) => (
+                                <div key={plan.id} style={S.pricingCard(plan.featured)} className="pricing-card">
+                                    {plan.badge && (
+                                        <div style={S.badge(plan.badge.color)}>{plan.badge.label}</div>
+                                    )}
+                                    <div style={S.planName}>{plan.name}</div>
+                                    <div style={S.planPrice}>
+                                        <span style={S.planPriceNum}>{plan.price}</span>
+                                        <span style={S.planPriceUnit}>€/mois</span>
+                                    </div>
+                                    <ul style={S.featureList}>
+                                        {plan.features.map((f, idx) => (
+                                            <li key={idx} style={S.featureItem}>
+                                                <span style={S.checkIcon}>✓</span>
+                                                {f}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
-                                <ul style={S.featureList}>
-                                    {plan.features.map((f) => (
-                                        <li key={f} style={S.featureItem}>
-                                            <span style={S.checkIcon}>✓</span>
-                                            {f}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <button style={S.planBtn(plan.featured)} className="btn-hover">
-                                    Choisir cette offre
-                                </button>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </section>
 
-                {/* ── AI ASSISTANT ── */}
+                {/* AI Assistant Section */}
                 <section style={S.aiSection}>
                     <h2 style={{ ...S.sectionTitle, marginBottom: 8 }}>Un conseiller IA disponible 24/7</h2>
                     <p style={{ ...S.sectionSub, marginBottom: 28 }}>
                         Posez vos questions sur nos offres et obtenez une réponse instantanée
                     </p>
+
                     <div style={S.aiBox}>
                         <input
                             style={S.aiInput}
                             placeholder="Quelle offre me recommandez-vous ?"
-                            value={question}
-                            onChange={(e) => setQuestion(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && askAI()}
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && askAI(inputValue)}
                         />
-                        <button style={S.aiBtn} className="btn-hover" onClick={askAI} disabled={loading}>
-                            {loading ? <Spinner /> : "Demander →"}
+                        <button
+                            style={{
+                                ...S.aiBtn,
+                                opacity: loading ? 0.7 : 1,
+                                cursor: loading ? "not-allowed" : "pointer",
+                            }}
+                            className="btn-hover"
+                            onClick={() => askAI()}
+                            disabled={loading}
+                        >
+                            {loading ? <Spinner /> : "Demander ?"}
                         </button>
                     </div>
 
-                    {answer && (
+                    {error && (
+                        <div style={{ ...S.aiResult, color: "#b91c1c", border: "1.5px solid #fecaca" }} className="fade-in">
+                            <div style={{ ...S.aiTag, color: "#b91c1c" }}>ERREUR</div>
+                            {error}
+                        </div>
+                    )}
+
+                    {(answer || loading) && (
                         <div style={S.aiResult} className="fade-in">
-                            <div style={S.aiTag}>CONSEILLER IA</div>
-                            {answer}
+                            <div style={S.aiTag}>
+                                CONSEILLER IA
+                                {loading && <span style={{ marginLeft: '8px', fontSize: '12px' }}>(En cours...)</span>}
+                            </div>
+                            {answer ? <MarkdownAnswer answer={answer} /> : loading && <Spinner />}
                         </div>
                     )}
 
@@ -338,16 +697,21 @@ export default function TelecomConnect() {
                         {[
                             "Quelle est la meilleure offre ?",
                             "Y a-t-il la TV incluse ?",
-                            "Comment s'inscrire ?",
+                            "Y a-t-il la WiFi incluse ?",
                             "Couverture 5G dans ma région ?",
                         ].map((s) => (
                             <button
                                 key={s}
-                                onClick={() => setQuestion(s)}
+                                onClick={() => handleSuggestionClick(s)}
                                 style={{
-                                    background: "#fff", border: "1.5px solid #bfdbfe",
-                                    color: "#2563eb", fontSize: 12.5, padding: "5px 13px",
-                                    borderRadius: 100, cursor: "pointer", fontFamily: "inherit",
+                                    background: "#fff",
+                                    border: "1.5px solid #bfdbfe",
+                                    color: "#2563eb",
+                                    fontSize: 12.5,
+                                    padding: "5px 13px",
+                                    borderRadius: 100,
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
                                 }}
                                 className="btn-hover"
                             >
@@ -357,25 +721,244 @@ export default function TelecomConnect() {
                     </div>
                 </section>
 
-                {/* ── SERVICES ── */}
-                <section style={S.servicesBg}>
+                {/* Services Section */}
+                <section style={S.servicesBg} id="services">
                     <h2 style={S.sectionTitle}>Nos Services</h2>
-                    <p style={{ ...S.sectionSub, marginBottom: 40 }}>&nbsp;</p>
-                    <div style={S.servicesGrid}>
-                        {SERVICES.map((sv) => (
-                            <div key={sv.name} style={S.serviceCard} className="pricing-card">
-                                <div style={S.serviceIcon}>{sv.icon}</div>
-                                <div style={S.serviceName}>{sv.name}</div>
-                                <div style={S.serviceDesc}>{sv.desc}</div>
+                    <p style={{ ...S.sectionSub, marginBottom: 40 }}>
+                        Découvrez tous nos services disponibles
+                    </p>
+                    {services.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "40px" }}>
+                            <p>Chargement des services...</p>
+                        </div>
+                    ) : (
+                        <div style={S.servicesGrid}>
+                            {displayServices.map((service) => (
+                                <div
+                                    key={service.id}
+                                    style={S.serviceCard}
+                                    className="service-card"
+                                    onClick={() => handleSuggestionClick(`Parlez-moi du service ${service.name}`)}
+                                >
+                                    <div style={S.serviceIcon}>{service.icon}</div>
+                                    <div style={S.serviceName}>{service.name}</div>
+                                    <div style={S.serviceDesc}>{service.desc}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* Advantages Section - NOUVELLE SECTION */}
+                <section style={S.advantagesBg} id="avantages">
+                    <h2 style={S.sectionTitle}>Pourquoi nous choisir ?</h2>
+                    <p style={S.sectionSub}>Des avantages qui font la différence</p>
+                    <div style={S.advantagesGrid}>
+                        {ADVANTAGES.map((adv, index) => (
+                            <div key={index} style={S.advantageCard} className="advantage-card">
+                                <div style={S.advantageIcon}>{adv.icon}</div>
+                                <div style={S.advantageTitle}>{adv.title}</div>
+                                <div style={S.advantageDesc}>{adv.description}</div>
                             </div>
                         ))}
                     </div>
                 </section>
 
-                {/* ── FOOTER ── */}
+                {/* Contact Section - NOUVELLE SECTION */}
+                <section style={S.contactBg} id="contact">
+                    <h2 style={S.sectionTitle}>Contactez-nous</h2>
+                    <p style={S.sectionSub}>Une question ? Un conseiller vous répond dans les plus brefs délais</p>
+
+                    <div style={S.contactContainer}>
+                        {/* Informations de contact */}
+                        <div style={S.contactInfo}>
+                            <h3 style={S.contactTitle}>Nos coordonnées</h3>
+                            <div style={S.contactDetail}>
+                                <div style={S.contactIcon}>📍</div>
+                                <div style={S.contactText}>
+                                    <strong>Adresse</strong><br />
+                                    123 Avenue de la République, 75000 Paris
+                                </div>
+                            </div>
+                            <div style={S.contactDetail}>
+                                <div style={S.contactIcon}>📞</div>
+                                <div style={S.contactText}>
+                                    <strong>Téléphone</strong><br />
+                                    +33 (0)1 23 45 67 89
+                                </div>
+                            </div>
+                            <div style={S.contactDetail}>
+                                <div style={S.contactIcon}>✉️</div>
+                                <div style={S.contactText}>
+                                    <strong>Email</strong><br />
+                                    contact@billcom.com
+                                </div>
+                            </div>
+                            <div style={S.contactDetail}>
+                                <div style={S.contactIcon}>⏰</div>
+                                <div style={S.contactText}>
+                                    <strong>Horaires</strong><br />
+                                    Lundi - Vendredi: 9h - 19h<br />
+                                    Samedi: 10h - 17h
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Formulaire de contact */}
+                        <div style={S.contactForm}>
+                            <h3 style={S.contactTitle}>Envoyez-nous un message</h3>
+                            <form onSubmit={handleContactSubmit}>
+                                <div style={S.formGroup}>
+                                    <label style={S.formLabel}>Nom complet *</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={contactForm.name}
+                                        onChange={handleInputChange}
+                                        style={S.formInput}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                                <div style={S.formGroup}>
+                                    <label style={S.formLabel}>Email *</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={contactForm.email}
+                                        onChange={handleInputChange}
+                                        style={S.formInput}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                                <div style={S.formGroup}>
+                                    <label style={S.formLabel}>Sujet *</label>
+                                    <input
+                                        type="text"
+                                        name="subject"
+                                        value={contactForm.subject}
+                                        onChange={handleInputChange}
+                                        style={S.formInput}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                                <div style={S.formGroup}>
+                                    <label style={S.formLabel}>Message *</label>
+                                    <textarea
+                                        name="message"
+                                        value={contactForm.message}
+                                        onChange={handleInputChange}
+                                        style={S.formTextarea}
+                                        className="form-textarea"
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" style={S.submitBtn} className="btn-hover">
+                                    {contactStatus === "Sending..." ? "Envoi en cours..." : "Envoyer le message"}
+                                </button>
+                                {contactStatus && contactStatus !== "Sending..." && (
+                                    <div style={{
+                                        marginTop: 12,
+                                        padding: 8,
+                                        borderRadius: 6,
+                                        background: contactStatus.includes("succès") ? "#dcfce7" : "#fee2e2",
+                                        color: contactStatus.includes("succès") ? "#166534" : "#991b1b",
+                                        fontSize: 13,
+                                        textAlign: "center"
+                                    }}>
+                                        {contactStatus}
+                                    </div>
+                                )}
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Footer */}
                 <footer style={S.footer}>
                     <div style={S.footerCopy}>© {new Date().getFullYear()} BILLCOM. Tous droits réservés.</div>
                 </footer>
+
+                {/* Modal de confirmation */}
+                {confirmQuestion && (
+                    <div style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: "rgba(0,0,0,0.5)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1000,
+                    }} onClick={cancelAskAI}>
+                        <div style={{
+                            background: "#fff",
+                            borderRadius: 16,
+                            padding: "24px",
+                            maxWidth: 400,
+                            width: "90%",
+                            boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1)",
+                            animation: "fadeUp 0.2s ease",
+                        }} onClick={(e) => e.stopPropagation()}>
+                            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12, color: "#0f172a" }}>
+                                Confirmation
+                            </h3>
+                            <p style={{ fontSize: 14, color: "#374151", marginBottom: 20 }}>
+                                Voulez-vous vraiment demander à l'assistant IA :
+                            </p>
+                            <p style={{
+                                fontSize: 15,
+                                fontWeight: 500,
+                                color: "#2563eb",
+                                background: "#eff6ff",
+                                padding: "10px 12px",
+                                borderRadius: 8,
+                                marginBottom: 24,
+                                borderLeft: "3px solid #2563eb"
+                            }}>
+                                "{confirmQuestion}"
+                            </p>
+                            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                                <button
+                                    onClick={cancelAskAI}
+                                    style={{
+                                        padding: "8px 16px",
+                                        borderRadius: 8,
+                                        border: "1.5px solid #e5e7eb",
+                                        background: "#fff",
+                                        color: "#374151",
+                                        fontSize: 14,
+                                        fontWeight: 500,
+                                        cursor: "pointer",
+                                    }}
+                                    className="btn-hover"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    onClick={confirmAndAskAI}
+                                    style={{
+                                        padding: "8px 16px",
+                                        borderRadius: 8,
+                                        border: "none",
+                                        background: "#2563eb",
+                                        color: "#fff",
+                                        fontSize: 14,
+                                        fontWeight: 500,
+                                        cursor: "pointer",
+                                    }}
+                                    className="btn-hover"
+                                >
+                                    Confirmer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
