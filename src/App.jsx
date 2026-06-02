@@ -33,75 +33,78 @@ import CreateContrat from "./pages/Vente/contrats/CreateContrat";
 import CreatePlanTarifaire from "./pages/metier/planTarifaire/CreatePlanTarifaire";
 import CreatePromotion from "./pages/metier/promotion/CreatePromotion";
 import CustomerPromotionDateManager from "./pages/Vente/promotion/CustomerPromotionDateManager";
+import NavigationLoader from "./components/navigation/NavigationLoader";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <NavigationLoader>
+        <Routes>
 
-        {/* Routes publiques */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+          {/* Routes publiques */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        {/* mot de passe oublié */}
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+          {/* mot de passe oublié */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Routes protégées */}
-        <Route path="/" element={<TelecomConnect />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
+          {/* Routes protégées */}
+          <Route path="/" element={<TelecomConnect />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
 
-          <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
 
-          {/* Users */}
-          <Route path="users" element={<Users />} />
-          <Route path="users/new" element={<AddUser />} />
-          <Route path="users/edit/:id" element={<EditUser />} />
+            {/* Users */}
+            <Route path="users" element={<Users />} />
+            <Route path="users/new" element={<AddUser />} />
+            <Route path="users/edit/:id" element={<EditUser />} />
 
 
-          {/* Contracts */}
-          <Route path="/contrats" element={<Contrats />} />
-          <Route path="/contrats/new" element={<CreateContrat />} />
-          <Route path="/services" element={<ServiceList />} />
-          <Route path="/services/new" element={<CreateService />} />
-          <Route path="/customers" element={<Customers />} />
-          <Route path="/create-customer" element={<CreateCustomer />} />
-          <Route path="/groups" element={<CustomerGroups />} />
-          <Route path="/groups/new" element={<CustomerGroupForm />} />
-          <Route path="/offres" element={<Offres />} />
-          <Route path="/offres/new" element={<CreateOffre />} />
-          <Route path="/promotions" element={<Promotions />} />
-          <Route path="/promotions/new" element={<CreatePromotion />} />
-          <Route path="/souscriptions" element={<SouscriptionsPromotion />} />
-          <Route path="/souscriptions/clients" element={<CustomerPromotionDateManager />} />
-          <Route path="/reclamations" element={<Reclamations />} />
-          <Route path="/reclamations/new" element={<CreateReclamation />} />
-          <Route path="/plans" element={<PlansTarifaires />} />
-          <Route path="/plans/new" element={<CreatePlanTarifaire />} />
-          <Route path="/directory-numbers" element={<DirectoryNumbers />} />
+            {/* Contracts */}
+            <Route path="/contrats" element={<Contrats />} />
+            <Route path="/contrats/new" element={<CreateContrat />} />
+            <Route path="/services" element={<ServiceList />} />
+            <Route path="/services/new" element={<CreateService />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/create-customer" element={<CreateCustomer />} />
+            <Route path="/groups" element={<CustomerGroups />} />
+            <Route path="/groups/new" element={<CustomerGroupForm />} />
+            <Route path="/offres" element={<Offres />} />
+            <Route path="/offres/new" element={<CreateOffre />} />
+            <Route path="/promotions" element={<Promotions />} />
+            <Route path="/promotions/new" element={<CreatePromotion />} />
+            <Route path="/souscriptions" element={<SouscriptionsPromotion />} />
+            <Route path="/souscriptions/clients" element={<CustomerPromotionDateManager />} />
+            <Route path="/reclamations" element={<Reclamations />} />
+            <Route path="/reclamations/new" element={<CreateReclamation />} />
+            <Route path="/plans" element={<PlansTarifaires />} />
+            <Route path="/plans/new" element={<CreatePlanTarifaire />} />
+            <Route path="/directory-numbers" element={<DirectoryNumbers />} />
 
-          <Route path="/exploit/promotions" element={<ExploitPromotion />} />
-          <Route path="/exploit/promotions/attente" element={<ExploitPromotion />} />
-          <Route path="/exploit/valider" element={<ExploitPromotion />} />
-          <Route path="/exploit/rejeter" element={<ExploitPromotion />} />
-          <Route path="/exploit/activer" element={<ExploitPromotion />} />
-          <Route path="/exploit/suspendre" element={<ExploitPromotion />} />
-          <Route path="/exploit/souscriptions" element={<ExploitPromotion />} />
-          <Route path="/exploit/historique" element={<ExploitPromotion />} />
-          <Route path="/exploit/offres" element={<ExploitPromotion />} />
-        </Route>
+            <Route path="/exploit/promotions" element={<ExploitPromotion />} />
+            <Route path="/exploit/promotions/attente" element={<ExploitPromotion />} />
+            <Route path="/exploit/valider" element={<ExploitPromotion />} />
+            <Route path="/exploit/rejeter" element={<ExploitPromotion />} />
+            <Route path="/exploit/activer" element={<ExploitPromotion />} />
+            <Route path="/exploit/suspendre" element={<ExploitPromotion />} />
+            <Route path="/exploit/souscriptions" element={<ExploitPromotion />} />
+            <Route path="/exploit/historique" element={<ExploitPromotion />} />
+            <Route path="/exploit/offres" element={<ExploitPromotion />} />
+          </Route>
 
-        {/* Redirection */}
-        <Route path="*" element={<Navigate to="/login" />} />
+          {/* Redirection */}
+          <Route path="*" element={<Navigate to="/login" />} />
 
-      </Routes>
+        </Routes>
+      </NavigationLoader>
     </BrowserRouter>
   );
 }
