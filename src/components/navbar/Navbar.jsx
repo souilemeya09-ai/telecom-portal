@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
-import logo from "../../assets/billcomm.png";
 
 const Navbar = ({ breadcrumb = [], notificationCount = 3 }) => {
   const navigate = useNavigate();
@@ -17,16 +16,8 @@ const Navbar = ({ breadcrumb = [], notificationCount = 3 }) => {
 
   return (
     <nav className="navbar">
-      <div className="nb-logo" onClick={() => navigate("/")}>
-        <div className="nb-logo-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-          </svg>
-        </div>
-        <div className="nb-brand">
-          <div className="nb-name">BillComm</div>
-          <div className="nb-tag">BSS Platform</div>
-        </div>
+      <div className="nb-logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+        <img src="/images/logo1.png" alt="Logo" width={130} />
       </div>
 
       {breadcrumb.length > 0 && (
@@ -49,23 +40,6 @@ const Navbar = ({ breadcrumb = [], notificationCount = 3 }) => {
 
       {token && (
         <>
-          <div className="nb-status">
-            <span className="nb-status-dot" />
-            <span className="nb-status-txt">Réseau OK</span>
-          </div>
-
-          <div className="nb-notif">
-            <button className="nb-notif-btn" aria-label="Notifications">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-            </button>
-            {notificationCount > 0 && (
-              <span className="nb-badge">{notificationCount}</span>
-            )}
-          </div>
-
           <div className="nb-user">
             <div className="nb-avatar">{initials}</div>
             <div className="nb-uinfo">
