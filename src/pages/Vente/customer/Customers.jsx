@@ -670,7 +670,7 @@ const Customers = () => {
                   <Th label="Adresse" field="adresse"   {...thProps} />
                   {/* <Th label="Ville" field="ville"     {...thProps} /> */}
                   <Th label="Document" field="document"  {...thProps} />
-                  <Th label="Numéro" field="numero"    {...thProps} />
+                  <Th label="CIN" field="numero"    {...thProps} />
                   <Th label="Status" field="status"    {...thProps} />
                   <Th label="Date d'activation" field="dateActivation" {...thProps} />
                   <Th label="Date de désactivation" field="dateDesactivation" {...thProps} />
@@ -751,10 +751,10 @@ const Customers = () => {
                             onClick={() => setPromosModal(c)} title="Voir promotions">
                             👁
                           </button>
-                          <button className="btn-action"
+                          {/* <button className="btn-action"
                             onClick={() => setAssignModal(c)} title="Assigner une promotion">
                             ➕
-                          </button>
+                          </button> */}
                           <button className="btn-action btn-edit"
                             onClick={() => openEdit(c)} title="Modifier">
                             ✏️

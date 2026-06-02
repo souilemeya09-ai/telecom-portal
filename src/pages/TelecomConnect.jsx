@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StructuredAnswer from "../components/StructuredAnswer";
 import MarkdownAnswer from "../components/MarkdownAnswer";
-import { getOffres, getServices } from "../api/api";
+import { getPublicOffres, getPublicServices } from "../api/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
@@ -310,6 +310,8 @@ export default function TelecomConnect() {
     const [question, setQuestion] = useState("");
     const [offres, setOffres] = useState([]);
     const [services, setServices] = useState([]);
+    const [catalogLoading, setCatalogLoading] = useState(true);
+    const [catalogError, setCatalogError] = useState("");
     const [answer, setAnswer] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -357,6 +359,7 @@ export default function TelecomConnect() {
 
     // Fonction pour obtenir une icône basée sur le nom du service
     const getServiceIcon = (serviceName) => {
+        const normalizedName = serviceName || "";
         const icons = {
             "Mobile": "📱",
             "Internet": "💻",
@@ -369,13 +372,14 @@ export default function TelecomConnect() {
             "Support": "🎧"
         };
         for (const [key, icon] of Object.entries(icons)) {
-            if (serviceName.includes(key)) return icon;
+            if (normalizedName.includes(key)) return icon;
         }
         return "📡";
     };
 
     // Fonction pour obtenir une description par défaut
     const getDefaultDescription = (serviceName) => {
+        const normalizedName = serviceName || "";
         const descriptions = {
             "Mobile": "Appels et data mobile",
             "Internet": "Connexion haut débit",
@@ -388,32 +392,38 @@ export default function TelecomConnect() {
             "Support": "Assistance technique"
         };
         for (const [key, desc] of Object.entries(descriptions)) {
-            if (serviceName.includes(key)) return desc;
+            if (normalizedName.includes(key)) return desc;
         }
         return "Service de qualité";
+    };
+
+    const normalizeApiList = (response) => {
+        if (Array.isArray(response)) return response;
+        if (Array.isArray(response?.content)) return response.content;
+        if (Array.isArray(response?.data)) return response.data;
+        return [];
     };
 
     // Récupérer les offres et services depuis l'API
     useEffect(() => {
         const fetchData = async () => {
+            setCatalogLoading(true);
+            setCatalogError("");
             try {
-                const offresResponse = await getOffres();
-                if (offresResponse && offresResponse.content) {
-                    setOffres(offresResponse.content);
-                } else if (Array.isArray(offresResponse)) {
-                    setOffres(offresResponse);
-                }
+                const [offresResponse, servicesResponse] = await Promise.all([
+                    getPublicOffres({ page: 0, size: 1000 }),
+                    getPublicServices({ page: 0, size: 1000 }),
+                ]);
 
-                const servicesResponse = await getServices();
-                if (servicesResponse && servicesResponse.content) {
-                    setServices(servicesResponse.content);
-                } else if (Array.isArray(servicesResponse)) {
-                    setServices(servicesResponse);
-                }
+                setOffres(normalizeApiList(offresResponse));
+                setServices(normalizeApiList(servicesResponse));
             } catch (err) {
                 console.error("Erreur lors du chargement des données :", err);
                 setOffres([]);
                 setServices([]);
+                setCatalogError("Impossible de charger les offres et services pour le moment.");
+            } finally {
+                setCatalogLoading(false);
             }
         };
         fetchData();
@@ -424,16 +434,16 @@ export default function TelecomConnect() {
         if (!services.length) return [];
         return services.map(service => ({
             id: service.id,
-            icon: getServiceIcon(service.nomService),
-            name: service.nomService,
-            desc: service.description || getDefaultDescription(service.nomService)
+            icon: getServiceIcon(service.nomService || service.nom || service.name),
+            name: service.nomService || service.nom || service.name || "Service",
+            desc: service.description || getDefaultDescription(service.nomService || service.nom || service.name)
         }));
     };
 
     // Transformer une offre en format compatible avec l'affichage
     const formatOfferForDisplay = (offer) => {
         const plan = getPlanName(offer.planTarifaireId);
-        const offerServices = offer.serviceIds
+        const offerServices = (offer.serviceIds || offer.services?.map((service) => service.id) || [])
             .map(id => getServiceDetails(id))
             .filter(s => s !== null)
             .map(s => s.name);
@@ -617,9 +627,17 @@ export default function TelecomConnect() {
                 <section style={S.section} id="offres">
                     <h2 style={S.sectionTitle}>Nos Offres</h2>
                     <p style={S.sectionSub}>Choisissez l'offre qui correspond à vos besoins</p>
-                    {offres.length === 0 ? (
+                    {catalogLoading ? (
                         <div style={{ textAlign: "center", padding: "40px" }}>
                             <p>Chargement des offres...</p>
+                        </div>
+                    ) : catalogError ? (
+                        <div style={{ textAlign: "center", padding: "40px", color: "#b91c1c" }}>
+                            <p>{catalogError}</p>
+                        </div>
+                    ) : displayOffers.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "40px" }}>
+                            <p>Aucune offre disponible pour le moment.</p>
                         </div>
                     ) : (
                         <div style={S.pricingGrid}>
@@ -727,9 +745,17 @@ export default function TelecomConnect() {
                     <p style={{ ...S.sectionSub, marginBottom: 40 }}>
                         Découvrez tous nos services disponibles
                     </p>
-                    {services.length === 0 ? (
+                    {catalogLoading ? (
                         <div style={{ textAlign: "center", padding: "40px" }}>
                             <p>Chargement des services...</p>
+                        </div>
+                    ) : catalogError ? (
+                        <div style={{ textAlign: "center", padding: "40px", color: "#b91c1c" }}>
+                            <p>{catalogError}</p>
+                        </div>
+                    ) : displayServices.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "40px" }}>
+                            <p>Aucun service disponible pour le moment.</p>
                         </div>
                     ) : (
                         <div style={S.servicesGrid}>
