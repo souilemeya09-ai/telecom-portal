@@ -9,13 +9,9 @@ const api = axios.create({
   baseURL: BASE_URL,
 });
 
-// ✅ Ajouter automatiquement le token
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+// Instance publique pour les pages accessibles sans connexion.
+const publicApi = axios.create({
+  baseURL: BASE_URL,
 });
 
 // ── Request interceptor : injecter le token ──────────────────
@@ -410,6 +406,12 @@ export async function getServices(params = {}) {
   const res = await api.get("/services", { params });
   return res.data;
 }
+
+export async function getPublicServices(params = {}) {
+  const res = await publicApi.get("/services", { params });
+  return res.data;
+}
+
 export async function createService(dto) {
   const res = await api.post("/services", dto);
   return res.data;
@@ -428,6 +430,12 @@ export async function getOffres(params = {}) {
   const res = await api.get("/offres", { params });
   return res.data;
 }
+
+export async function getPublicOffres(params = {}) {
+  const res = await publicApi.get("/offres", { params });
+  return res.data;
+}
+
 export async function getOffreById(id) {
   const res = await api.get(`/offres/${id}`);
   return res.data;
