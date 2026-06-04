@@ -325,17 +325,6 @@ function Sidebar() {
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="sb-footer">
-          <div className="avatar">OP</div>
-          <div className="footer-info">
-            <div className="footer-name">Opérateur Système</div>
-            <div className="footer-status">
-              <span className="online-dot" />
-              En ligne
-            </div>
-          </div>
-        </div>
       </aside>
     </>
   );
