@@ -422,7 +422,7 @@ const Customers = () => {
       documentType: String(c.documentType || "1"),
       cinNumber: c.cinNumber || "", passportNumber: c.passportNumber || "",
       image: null,
-      customerGroupId: c.customerGroupId || "",
+      customerGroupId: c.customerGroupId ? String(c.customerGroupId) : "",
     });
     setShowForm(true);
   };
@@ -585,7 +585,7 @@ const Customers = () => {
 
                 <div className="form-group">
                   <label className="form-label">groupe client (optionnel)</label>
-                  <select className="form-control" name="" id="" onChange={set("customerGroupId")} >
+                  <select className="form-control" name="" id="" value={form.customerGroupId}   onChange={set("customerGroupId")} >
                     <option value="">Sélectionner un groupe client</option>
                     {customerGroups.map((group) => (
                       <option key={group.id} value={group.id}>
@@ -594,28 +594,6 @@ const Customers = () => {
                     ))}
                   </select>
                 </div>
-
-                {/* <div className="form-group">
-                  <label className="form-label">Image {docLabel}</label>
-                  <div className="upload-zone" onClick={() => fileRef.current.click()}>
-                    {preview
-                      ? <img src={preview} alt="preview" className="upload-preview" />
-                      : <>
-                        <span className="upload-icon">📎</span>
-                        <span>Cliquer pour uploader</span>
-                        <span className="upload-hint">JPG, PNG — max 5MB</span>
-                      </>
-                    }
-                    <input ref={fileRef} type="file" accept="image/*"
-                      style={{ display: "none" }} onChange={handleImage} />
-                  </div>
-                  {preview && (
-                    <button type="button" className="upload-clear"
-                      onClick={() => { setPreview(null); setForm((f) => ({ ...f, image: null })); fileRef.current.value = ""; }}>
-                      ✕ Retirer l'image
-                    </button>
-                  )}
-                </div> */}
 
                 <div className="form-actions">
                   <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>

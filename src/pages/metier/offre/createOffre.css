@@ -318,14 +318,6 @@ select.form-control {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Focus Visible for Accessibility */
-.form-control:focus-visible,
-.btn-primary:focus-visible,
-.btn-secondary:focus-visible,
-.service-chip:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
 
 /* Type badges (for preview if needed) */
 .type-badge {

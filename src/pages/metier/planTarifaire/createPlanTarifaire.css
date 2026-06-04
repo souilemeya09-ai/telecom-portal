@@ -247,14 +247,6 @@ textarea.form-control {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Focus Visible for Accessibility */
-.form-control:focus-visible,
-.btn-primary:focus-visible,
-.btn-secondary:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
 /* Number input spinner styling */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
