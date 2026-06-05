@@ -233,9 +233,7 @@ function Services() {
               </div>
             </div>
             <div className="modal-actions">
-              <button className="btn-danger" onClick={() => setDeleteConfirm(detailService)}>Supprimer</button>
               <button className="btn-secondary" onClick={() => setDetail(null)}>Fermer</button>
-              <button className="btn-primary" onClick={() => openEdit(detailService)}>✏️ Modifier</button>
             </div>
           </div>
         </div>
