@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useCallback, useRef, useEffect } from "react";
 import "./Sidebar.css";
 
@@ -19,7 +19,7 @@ const NAV = {
           icon: "📝",
           label: "Reclamations & Rapports",
           links: [
-            { to: "/reclamations", label: "Gérer Réclamations" },
+            { to: "/reclamations", label: "Consulter Réclamations" },
           ],
         }
       ],
@@ -240,6 +240,7 @@ function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [filter, setFilter] = useState("");
+  const navigate = useNavigate();
 
   const handleOverlayClick = useCallback(() => setMobileOpen(false), []);
 
@@ -270,7 +271,7 @@ function Sidebar() {
       >
         {/* Header */}
         <div className="sb-header">
-          <div className="sb-logo">
+          <div className="sb-logo" onClick={() => navigate("/dashboard")} style={{ cursor: "pointer" }}>
             <div className="sb-logo-icon">
               <i className="pi pi-th-large"></i>
             </div>
@@ -295,22 +296,6 @@ function Sidebar() {
             <span className="sb-badge-text">{role}</span>
           </div>
         </div>
-
-        {/* Search */}
-        {!collapsed && (
-          <div className="sb-search">
-            <div className="search-wrap">
-              <i className="bi bi-search"></i>
-              <input
-                className="sb-input"
-                type="text"
-                placeholder="Rechercher…"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              />
-            </div>
-          </div>
-        )}
 
 
         {/* Navigation */}

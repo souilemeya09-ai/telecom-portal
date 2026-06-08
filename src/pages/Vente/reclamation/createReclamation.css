@@ -243,10 +243,6 @@ textarea.form-control {
   border: none;
 }
 
-.btn-primary {
-  background: #3b82f6;
-  color: white;
-}
 
 .btn-primary:hover:not(:disabled) {
   background: #2563eb;

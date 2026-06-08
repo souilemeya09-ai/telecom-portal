@@ -19,7 +19,7 @@
   --text-muted: #9aa0b4;
 
   /* Accent — orange brand */
-  --accent: #BA7517;
+  --accent: #eb601b;
   --accent-light: #FAEEDA;
   --accent-hover: #9c6212;
 
@@ -248,12 +248,12 @@
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: #eb601b !important;
   color: #fff;
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
+  background: #d45516 !important;
 }
 
 .btn-primary:active {
@@ -292,6 +292,48 @@
 
 .btn-warning:hover {
   background: #fde4b0;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.filter-btn-active {
+  background: #eb601b;
+  border-color: #eb601b;
+  color: #fff;
+}
+
+.filter-btn-active:hover {
+  color: #fff;
+}
+
+.filter-count {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 0.75rem;
+}
+
+.filter-btn-active .filter-count {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Icon action buttons */
