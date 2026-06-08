@@ -294,10 +294,10 @@ function DashboardVente() {
             </div>
 
             <div className="dash-grid-4">
-                <StatCard label="Clients" value={stats.totalClients} color="blue" icon="👤" to="/customers" navigate={navigate} />
-                <StatCard label="Contrats" value={stats.totalContrats} color="teal" icon="📄" to="/contrats" navigate={navigate} />
+                <StatCard label="Clients" value={stats.totalClients} color="blue" icon="👤"  navigate={navigate} />
+                <StatCard label="Contrats" value={stats.totalContrats} color="teal" icon="📄" navigate={navigate} />
                 <StatCard label="Contrats actifs" value={stats.contratsActifs} color="green" icon="✅" />
-                <StatCard label="Souscriptions" value={stats.totalSouscriptions} color="amber" icon="🎁" to="/souscriptions" navigate={navigate} />
+                <StatCard label="Souscriptions" value={stats.totalSouscriptions} color="amber" icon="🎁" navigate={navigate} />
             </div>
 
             <div className="dash-row-2">
@@ -590,11 +590,11 @@ function DashboardDsi() {
 
             {/* ── KPIs Power BI style ── */}
             <div className="dash-pbi-grid">
-                <div className="dash-pbi-card dash-pbi-blue" onClick={() => navigate("/customers")}>
+                <div className="dash-pbi-card dash-pbi-blue">
                     <span className="dash-pbi-value">{stats.totalClients ?? "—"}</span>
                     <span className="dash-pbi-label">Clients</span>
                 </div>
-                <div className="dash-pbi-card dash-pbi-teal" onClick={() => navigate("/contrats")}>
+                <div className="dash-pbi-card dash-pbi-teal">
                     <span className="dash-pbi-value">{stats.totalContrats ?? "—"}</span>
                     <span className="dash-pbi-label">Contrats</span>
                 </div>
@@ -602,7 +602,7 @@ function DashboardDsi() {
                     <span className="dash-pbi-value">{stats.totalReclamations ?? "—"}</span>
                     <span className="dash-pbi-label">Réclamations</span>
                 </div>
-                <div className="dash-pbi-card dash-pbi-purple" onClick={() => navigate("/promotions")}>
+                <div className="dash-pbi-card dash-pbi-purple">
                     <span className="dash-pbi-value">{stats.totalPromotions ?? "—"}</span>
                     <span className="dash-pbi-label">Promotions</span>
                 </div>
