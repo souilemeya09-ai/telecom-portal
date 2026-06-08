@@ -294,7 +294,7 @@ function DashboardVente() {
             </div>
 
             <div className="dash-grid-4">
-                <StatCard label="Clients" value={stats.totalClients} color="blue" icon="👤"  navigate={navigate} />
+                <StatCard label="Clients" value={stats.totalClients} color="blue" icon="👤" navigate={navigate} />
                 <StatCard label="Contrats" value={stats.totalContrats} color="teal" icon="📄" navigate={navigate} />
                 <StatCard label="Contrats actifs" value={stats.contratsActifs} color="green" icon="✅" />
                 <StatCard label="Souscriptions" value={stats.totalSouscriptions} color="amber" icon="🎁" navigate={navigate} />
@@ -515,19 +515,101 @@ function DashboardExploit() {
     );
 }
 
+function AssignationsPanel({ data }) {
+    const [openIds, setOpenIds] = useState(new Set());
+
+    const toggle = (id) => setOpenIds(prev => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+    });
+
+    const totalAssignments = data.reduce((s, d) => s + d.assignmentCount, 0);
+    const totalGroups = [...new Set(data.flatMap(d => d.assignedGroups.map(g => g.id)))].length;
+    const promosWithGroups = data.filter(d => d.assignedGroupCount > 0).length;
+
+    return (
+        <>
+            <div className="dash-grid-4" style={{ marginBottom: 16 }}>
+                <div className="dash-pbi-card dash-pbi-blue">
+                    <span className="dash-pbi-value">{data.length}</span>
+                    <span className="dash-pbi-label">Promotions</span>
+                </div>
+                <div className="dash-pbi-card dash-pbi-teal">
+                    <span className="dash-pbi-value">{totalAssignments}</span>
+                    <span className="dash-pbi-label">Assignations totales</span>
+                </div>
+                <div className="dash-pbi-card dash-pbi-amber">
+                    <span className="dash-pbi-value">{totalGroups}</span>
+                    <span className="dash-pbi-label">Groupes distincts</span>
+                </div>
+                <div className="dash-pbi-card dash-pbi-purple">
+                    <span className="dash-pbi-value">{promosWithGroups}</span>
+                    <span className="dash-pbi-label">Promos avec groupes</span>
+                </div>
+            </div>
+
+            <div className="dash-assign-list">
+                {data.map((promo) => {
+                    const isOpen = openIds.has(promo.promotionId);
+                    return (
+                        <div key={promo.promotionId} className="dash-assign-row">
+                            <div
+                                className="dash-assign-header"
+                                onClick={() => toggle(promo.promotionId)}
+                            >
+                                <span className={`dash-assign-chevron ${isOpen ? "open" : ""}`}>▶</span>
+                                <span className="dash-assign-name">{promo.promotion}</span>
+                                <span className="dash-badge dash-badge-blue">
+                                    {promo.assignmentCount} assign.
+                                </span>
+                                <span className="dash-badge dash-badge-teal">
+                                    {promo.assignedGroupCount} groupe{promo.assignedGroupCount !== 1 ? "s" : ""}
+                                </span>
+                            </div>
+
+                            {isOpen && (
+                                <div className="dash-assign-groups">
+                                    {promo.assignedGroups.length === 0 ? (
+                                        <p className="dash-empty">Aucun groupe assigné</p>
+                                    ) : (
+                                        promo.assignedGroups.map((g) => (
+                                            <div key={g.id} className="dash-group-item">
+                                                <span className="dash-group-name">{g.name}</span>
+                                                <div className="dash-group-tags">
+                                                    {g.groupCode && <span className="dash-tag">{g.groupCode}</span>}
+                                                    {g.groupType && <span className="dash-tag">{g.groupType}</span>}
+                                                    {g.status && (
+                                                        <span className={`dash-tag dash-tag-status ${g.status === "ACTIVE" ? "green" : "gray"}`}>
+                                                            {g.status}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </>
+    );
+}
+
 // ════════════════════════════════════════════════════════════════
 // DSI DASHBOARD
 // ════════════════════════════════════════════════════════════════
 function DashboardDsi() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
 
     // filtres actifs par donut + courbe
-    const [filterContrat,  setFilterContrat]  = useState(null);
-    const [filterReclam,   setFilterReclam]   = useState(null);
-    const [filterPromo,    setFilterPromo]    = useState(null);
-    const [filterPeriode,  setFilterPeriode]  = useState(null);
+    const [filterContrat, setFilterContrat] = useState(null);
+    const [filterReclam, setFilterReclam] = useState(null);
+    const [filterPromo, setFilterPromo] = useState(null);
+    const [filterPeriode, setFilterPeriode] = useState(null);
 
     useEffect(() => {
         getStatsDsi()
@@ -537,11 +619,11 @@ function DashboardDsi() {
     }, []);
 
     if (loading) return <div className="loading-state">Chargement...</div>;
-    if (!stats)  return <div className="empty-state"><p>Erreur de chargement</p></div>;
+    if (!stats) return <div className="empty-state"><p>Erreur de chargement</p></div>;
 
     const COLORS_CONTRATS = ["#185FA5", "#0F6E56", "#854F0B", "#534AB7"];
-    const COLORS_RECLAM   = ["#185FA5", "#854F0B", "#1D9E75", "#A32D2D"];
-    const COLORS_PROMOS   = ["#EF9F27", "#378ADD", "#1D9E75", "#E24B4A", "#888780"];
+    const COLORS_RECLAM = ["#185FA5", "#854F0B", "#1D9E75", "#A32D2D"];
+    const COLORS_PROMOS = ["#EF9F27", "#378ADD", "#1D9E75", "#E24B4A", "#888780"];
 
     // données bar chart filtrées selon les filtres actifs
     const filteredBarData = (() => {
@@ -563,7 +645,7 @@ function DashboardDsi() {
 
     const filteredLineData = (() => {
         const d = stats.promotionsParPeriode || [];
-        return d; // la courbe garde toutes les données, le filtre sert de highlight
+        return d;
     })();
 
     const hasAnyFilter = filterContrat || filterReclam || filterPromo || filterPeriode;
@@ -606,6 +688,12 @@ function DashboardDsi() {
                     <span className="dash-pbi-value">{stats.totalPromotions ?? "—"}</span>
                     <span className="dash-pbi-label">Promotions</span>
                 </div>
+            </div>
+
+            {/* ── Assignations par promotion ── */}
+            <div className="dash-panel dash-panel-full">
+                {/* <h3 className="dash-panel-title">Assignations par promotion</h3> */}
+                <AssignationsPanel data={stats.assignmentsParPromotion || []} />
             </div>
 
             {/* ── Donuts row ── */}
@@ -697,10 +785,10 @@ export default function Dashboard() {
     const role = localStorage.getItem("role");
 
     switch (role) {
-        case "VENTE":  return <DashboardVente />;
+        case "VENTE": return <DashboardVente />;
         case "METIER": return <DashboardMetier />;
-        case "EXPLOIT":return <DashboardExploit />;
-        case "DSI":    return <DashboardDsi />;
+        case "EXPLOIT": return <DashboardExploit />;
+        case "DSI": return <DashboardDsi />;
         default:
             return (
                 <div className="dash-wrapper">

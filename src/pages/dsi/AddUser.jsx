@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./addUser.css";
-import CreateCustomer from "../Vente/customer/CreateCustomer";
+import { addUser } from "../../api/api";
+
 
 const EMPTY_FORM = {
     username: "",
     email: "",
     password: "",
-    role: "USER",
+    role: "VENTE",
 };
 
 const ROLES = [
-    { value: "ADMIN", label: "Administrateur" },
+    { value: "EXPLOIT", label: "Exploitant" },
     { value: "METIER", label: "Métier" },
     { value: "VENTE", label: "Vente" },
-    { value: "DSI", label: "DSI" },
-    { value: "USER", label: "Utilisateur standard" },
+    { value: "DSI", label: "Responsable" },
 ];
 
 function AddUser() {
@@ -67,7 +67,7 @@ function AddUser() {
 
         setSubmitting(true);
         try {
-            await CreateCustomer({
+            await addUser({
                 username: form.username.trim(),
                 email: form.email.trim(),
                 password: form.password,
@@ -156,12 +156,6 @@ function AddUser() {
                             ))}
                         </select>
                         {errors.role && <span className="field-error">{errors.role}</span>}
-                        <span className="input-hint">
-                            <strong>Métier</strong> : Gestion des offres, services, promotions<br />
-                            <strong>Vente</strong> : Gestion des clients et réclamations<br />
-                            <strong>DSI</strong> : Gestion des réclamations<br />
-                            <strong>Utilisateur standard</strong> : Accès limité
-                        </span>
                     </div>
 
                     <div className="form-actions">

@@ -601,7 +601,6 @@ export default function TelecomConnect() {
                         <a onClick={() => scrollToSection("offres")} style={S.navLink}>Offres</a>
                         <a onClick={() => scrollToSection("services")} style={S.navLink}>Services</a>
                         <a onClick={() => scrollToSection("avantages")} style={S.navLink}>Avantages</a>
-                        <a onClick={() => scrollToSection("contact")} style={S.navLink}>Contact</a>
                     </div>
                     <button style={S.navBtn} onClick={() => navigate(role ? "/dashboard" : "/login")} className="btn-hover">
                         Espace Client

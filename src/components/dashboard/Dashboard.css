@@ -131,13 +131,6 @@
 }
 
 /* ── Panel ── */
-.dash-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-  box-shadow: var(--shadow);
-}
 
 .dash-panel-full {
   grid-column: 1 / -1;
@@ -505,6 +498,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
+  margin-top: 1rem;
 }
 
 /* ── KPIs Power BI ─────────────────────────────────────── */
@@ -573,14 +567,6 @@
 
 .dash-pbi-purple .dash-pbi-label {
   color: #CECBF6;
-}
-
-/* ── Donuts row 3 colonnes ─────────────────────────────── */
-.dash-row-3 {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
 }
 
 /* ── Panel filtré ──────────────────────────────────────── */
@@ -680,4 +666,375 @@
   margin-bottom: 6px;
   font-size: 12px;
   color: var(--color-text-secondary);
+}
+
+/* ── Container principal ── */
+.dash-assign-container {
+  background: var(--surface-1);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Liste des promotions ── */
+.dash-assign-list {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-1);
+}
+
+.dash-assign-row {
+  border-bottom: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.dash-assign-row:last-child {
+  border-bottom: none;
+}
+
+/* ── En-tête de promotion ── */
+.dash-assign-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  background: var(--surface-1);
+}
+
+.dash-assign-header:hover {
+  background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-1) 100%);
+  transform: translateX(2px);
+}
+
+/* ── Chevron animé ── */
+.dash-assign-chevron {
+  font-size: 12px;
+  color: var(--accent);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+
+.dash-assign-chevron.open {
+  transform: rotate(90deg);
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+/* ── Nom de la promotion ── */
+.dash-assign-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+
+/* ── Badges améliorés ── */
+.dash-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.dash-badge-blue {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
+}
+
+.dash-badge-teal {
+  background: linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 100%);
+  color: #0F766E;
+  border: 1px solid #99F6E4;
+}
+
+/* ── Zone des groupes ── */
+.dash-assign-groups {
+  padding: 8px 16px 16px 48px;
+  background: linear-gradient(135deg, var(--surface-2) 0%, var(--surface-1) 100%);
+  border-top: 1px dashed var(--border);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Item de groupe ── */
+.dash-group-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.dash-group-item:last-child {
+  border-bottom: none;
+}
+
+.dash-group-item:hover {
+  transform: translateX(4px);
+  background: rgba(24, 95, 165, 0.02);
+  padding-left: 8px;
+}
+
+/* ── Nom du groupe ── */
+.dash-group-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-group-name::before {
+  content: "👥";
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* ── Tags groupe ── */
+.dash-group-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.dash-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.dash-tag:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Status tags spécifiques ── */
+.dash-tag-status {
+  font-weight: 600;
+}
+
+.dash-tag-status.green {
+  background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+  color: #166534;
+  border-color: #86EFAC;
+}
+
+.dash-tag-status.gray {
+  background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
+  color: #4B5563;
+  border-color: #E5E7EB;
+}
+
+/* ── Message vide ── */
+.dash-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 20px;
+  text-align: center;
+  font-style: italic;
+  background: var(--surface-2);
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+/* ── Statistiques améliorées ── */
+.dash-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dash-pbi-card {
+  border-radius: 16px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.dash-pbi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.dash-pbi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.dash-pbi-card:hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.dash-pbi-value {
+  font-size: 42px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.dash-pbi-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Couleurs PBI améliorées ── */
+.dash-pbi-blue {
+  background: linear-gradient(135deg, #185FA5 0%, #1E40AF 100%);
+}
+
+.dash-pbi-teal {
+  background: linear-gradient(135deg, #0F6E56 0%, #0F766E 100%);
+}
+
+.dash-pbi-amber {
+  background: linear-gradient(135deg, #854F0B 0%, #92400E 100%);
+}
+
+.dash-pbi-purple {
+  background: linear-gradient(135deg, #534AB7 0%, #6D28D9 100%);
+}
+
+/* ── Responsive design amélioré ── */
+@media (max-width: 768px) {
+  .dash-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .dash-assign-header {
+    padding: 12px;
+    flex-wrap: wrap;
+  }
+
+  .dash-assign-name {
+    width: 100%;
+    order: 1;
+    margin-top: 4px;
+  }
+
+  .dash-badge {
+    order: 0;
+  }
+
+  .dash-assign-groups {
+    padding: 8px 12px 12px 24px;
+  }
+
+  .dash-group-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .dash-group-name {
+    width: 100%;
+  }
+
+  .dash-group-tags {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-assign-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dash-assign-chevron {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+  }
+
+  .dash-assign-name {
+    padding-right: 30px;
+  }
+}
+
+/* ── Support dark mode ── */
+@media (prefers-color-scheme: dark) {
+  .dash-badge-blue {
+    background: linear-gradient(135deg, #1E3A5F 0%, #1E40AF 100%);
+    color: #93C5FD;
+    border-color: #3B82F6;
+  }
+
+  .dash-badge-teal {
+    background: linear-gradient(135deg, #134E4A 0%, #115E59 100%);
+    color: #5EEAD4;
+    border-color: #14B8A6;
+  }
+
+  .dash-group-name::before {
+    opacity: 0.5;
+  }
+
+  .dash-tag-status.green {
+    background: linear-gradient(135deg, #064E3B 0%, #065F46 100%);
+    color: #86EFAC;
+    border-color: #22C55E;
+  }
+
+  .dash-tag-status.gray {
+    background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+    color: #9CA3AF;
+    border-color: #4B5563;
+  }
 }
