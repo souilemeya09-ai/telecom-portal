@@ -571,7 +571,7 @@ function DashboardDsi() {
     return (
         <div className="dash-wrapper">
             <div className="dash-header">
-                <h1 className="dash-title">Tableau de bord — DSI</h1>
+                <h1 className="dash-title">Tableau de bord — RESPONSABLE</h1>
                 <p className="dash-sub">Vue système globale de la plateforme</p>
                 {hasAnyFilter && (
                     <button

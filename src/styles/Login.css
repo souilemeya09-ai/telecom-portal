@@ -3,7 +3,6 @@
 .login-page-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   background: #ffffff;
   /* fond blanc */
   font-family: 'Poppins', sans-serif;
@@ -17,6 +16,12 @@
   justify-content: center;
   align-items: flex-start;
   margin-bottom: auto;
+}
+
+@media (max-width: 480px) {
+  .login-content {
+    padding: 20px;
+  }
 }
 
 /* ============================ */

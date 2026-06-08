@@ -110,12 +110,12 @@ const NAV = {
           ],
         },
         {
-        icon: "🎁",
-        label: "Gestion Promotions",
-        links: [
-          { to: "/promotions", label: "Consulter Promotions" },
-          { to: "/promotions/new", label: "Ajouter Promotion" },
-        ],
+          icon: "🎁",
+          label: "Gestion Promotions",
+          links: [
+            { to: "/promotions", label: "Consulter Promotions" },
+            { to: "/promotions/new", label: "Ajouter Promotion" },
+          ],
         },
         {
           icon: "☎️",
@@ -276,7 +276,7 @@ function Sidebar() {
               <i className="pi pi-th-large"></i>
             </div>
             <div className="sb-logo-text-wrap">
-              <div className="sb-logo-text">TeleAdmin</div>
+              <div className="sb-logo-text">Dashboard</div>
               <div className="sb-logo-sub">Plateforme BSS</div>
             </div>
           </div>
@@ -293,7 +293,7 @@ function Sidebar() {
         <div className="sb-role">
           <div className="role-pill">
             <span className="role-dot" />
-            <span className="sb-badge-text">{role}</span>
+            <span className="sb-badge-text">{role === "DSI" ? "Responsable" : role}</span>
           </div>
         </div>
 

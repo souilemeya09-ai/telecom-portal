@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import StructuredAnswer from "../components/StructuredAnswer";
 import MarkdownAnswer from "../components/MarkdownAnswer";
 import { getPublicOffres, getPublicServices } from "../api/api";
+import { LoginFooter } from "../components/Footer/FooterHome";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
@@ -791,12 +792,12 @@ export default function TelecomConnect() {
                 </section>
 
                 {/* Contact Section - NOUVELLE SECTION */}
-                <section style={S.contactBg} id="contact">
+                {/* <section style={S.contactBg} id="contact">
                     <h2 style={S.sectionTitle}>Contactez-nous</h2>
                     <p style={S.sectionSub}>Une question ? Un conseiller vous répond dans les plus brefs délais</p>
 
                     <div style={S.contactContainer}>
-                        {/* Informations de contact */}
+
                         <div style={S.contactInfo}>
                             <h3 style={S.contactTitle}>Nos coordonnées</h3>
                             <div style={S.contactDetail}>
@@ -830,7 +831,7 @@ export default function TelecomConnect() {
                             </div>
                         </div>
 
-                        {/* Formulaire de contact */}
+
                         <div style={S.contactForm}>
                             <h3 style={S.contactTitle}>Envoyez-nous un message</h3>
                             <form onSubmit={handleContactSubmit}>
@@ -900,12 +901,10 @@ export default function TelecomConnect() {
                             </form>
                         </div>
                     </div>
-                </section>
+                </section> */}
 
                 {/* Footer */}
-                <footer style={S.footer}>
-                    <div style={S.footerCopy}>© {new Date().getFullYear()} BILLCOM. Tous droits réservés.</div>
-                </footer>
+                <LoginFooter />
 
                 {/* Modal de confirmation */}
                 {confirmQuestion && (
