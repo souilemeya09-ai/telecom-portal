@@ -44,7 +44,7 @@ const Navbar = ({ breadcrumb = [], notificationCount = 3 }) => {
             <div className="nb-avatar">{initials}</div>
             <div className="nb-uinfo">
               <div className="nb-uname">Opérateur</div>
-              <div className="nb-urole">{role}</div>
+              <div className="nb-urole">{role === "DSI" ? "Responsable" : role}</div>
             </div>
           </div>
 

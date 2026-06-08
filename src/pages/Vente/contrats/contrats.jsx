@@ -742,7 +742,7 @@ function Contrats() {
                 <tr>
                   <Th label="#" field="id"              {...thProps} />
                   <Th label="Client" field="client"          {...thProps} />
-                  <Th label="Groupe customer" field="customerGroupId"    {...thProps} />
+                  {/* <Th label="Groupe customer" field="customerGroupId"    {...thProps} /> */}
                   <Th label="Offre" field="offre"           {...thProps} />
                   <Th label="Date d'activation" field="dateActivation"       {...thProps} />
                   <Th label="Date de désactivation" field="dateDesactivation"         {...thProps} />
@@ -764,7 +764,7 @@ function Contrats() {
                         </div>
                       </div>
                     </td>
-                    <td>
+                    {/* <td>
                       {(() => {
                         const group = c.customerGroup || groups.find((g) => String(g.id) === String(c.customerGroupId));
                         return group ? (
@@ -774,7 +774,7 @@ function Contrats() {
                           </div>
                         ) : "—";
                       })()}
-                    </td>
+                    </td> */}
                     <td className="offre-cell">{c.offre?.nom ?? "—"}</td>
                     <td>{formatDateTime(c.dateActivation)}</td>
                     <td>{formatDateTime(c.dateDesactivation)}</td>

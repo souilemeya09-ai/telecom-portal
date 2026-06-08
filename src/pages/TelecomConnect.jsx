@@ -649,7 +649,7 @@ export default function TelecomConnect() {
                                     <div style={S.planName}>{plan.name}</div>
                                     <div style={S.planPrice}>
                                         <span style={S.planPriceNum}>{plan.price}</span>
-                                        <span style={S.planPriceUnit}>€/mois</span>
+                                        <span style={S.planPriceUnit}>TND/mois</span>
                                     </div>
                                     <ul style={S.featureList}>
                                         {plan.features.map((f, idx) => (
