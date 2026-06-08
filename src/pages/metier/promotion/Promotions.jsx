@@ -382,37 +382,10 @@ function Promotions() {
                                     <span className="detail-label">Valeur</span>
                                     <span className="detail-value remise-value">{formatValeur(detailPromo)}</span>
                                 </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Date début</span>
-                                    <span className="detail-value">{detailPromo.dateDebut || "—"}</span>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Date fin</span>
-                                    <span className="detail-value">{detailPromo.dateFin || "—"}</span>
-                                </div>
                             </div>
 
-                            {/* Éligibilité */}
-                            {/* <div className="detail-section">
-                                <p className="detail-section-title">Éligibilité</p>
-                                <div className="detail-row">
-                                    <span className="detail-label">Ancienneté min.</span>
-                                    <span className="detail-value">
-                                        {detailPromo.ancienneteMinimale
-                                            ? `${detailPromo.ancienneteMinimale} mois`
-                                            : "—"}
-                                    </span>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="detail-label">Règle</span>
-                                    <span className="detail-value" style={{ fontSize: "0.82rem" }}>
-                                        {detailPromo.regleEligibilite || "—"}
-                                    </span>
-                                </div>
-                            </div> */}
-
                             {/* Créateur / Validateur */}
-                            <div className="detail-section detail-section-full">
+                            <div className="detail-section">
                                 <p className="detail-section-title">Intervenants</p>
                                 <div className="detail-row-grid">
                                     <div className="detail-row">
@@ -433,22 +406,6 @@ function Promotions() {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Actions métier */}
-                            {/* {getActions(detailPromo).length > 0 && (
-                                <div className="detail-section detail-section-full">
-                                    <p className="detail-section-title">Actions disponibles</p>
-                                    <div className="statut-actions">
-                                        {getActions(detailPromo).map((type) => (
-                                            <button key={type}
-                                                className={`statut-btn ${actionMeta[type].cls}`}
-                                                onClick={() => setConfirmAction({ type, promo: detailPromo })}>
-                                                {actionMeta[type].label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )} */}
                         </div>
 
                         <div className="modal-actions">
