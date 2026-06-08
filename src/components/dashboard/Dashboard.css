@@ -132,6 +132,14 @@
 
 /* ── Panel ── */
 
+.dash-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+}
+
 .dash-panel-full {
   grid-column: 1 / -1;
 }
@@ -668,6 +676,188 @@
   color: var(--color-text-secondary);
 }
 
+/* ── Catalogue métier ─────────────────────────────────── */
+.dash-offer-service-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-offer-service-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(90px, 1.35fr) 32px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.dash-offer-service-row:hover,
+.dash-offer-service-row.active {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.dash-offer-service-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.dash-offer-service-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--surface-2);
+}
+
+.dash-offer-service-fill {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.25s ease;
+}
+
+.dash-offer-service-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+
+.dash-catalog-offer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.dash-catalog-offer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-family: var(--font);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.dash-catalog-offer-btn:hover,
+.dash-catalog-offer-btn.active {
+  border-color: #185FA5;
+  background: #E6F1FB;
+}
+
+.dash-catalog-offer-btn:hover {
+  transform: translateY(-1px);
+}
+
+.dash-catalog-offer-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.dash-catalog-offer-meta {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.dash-catalog-detail {
+  min-height: 230px;
+  min-width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.dash-catalog-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dash-catalog-kicker,
+.dash-catalog-meta-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dash-catalog-title {
+  margin: 3px 0 0;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.dash-catalog-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.dash-catalog-meta-grid > div {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.dash-catalog-meta-value {
+  display: block;
+  min-width: 0;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.dash-catalog-services {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 8px;
+}
+
 /* ── Container principal ── */
 .dash-assign-container {
   background: var(--surface-1);
@@ -953,6 +1143,14 @@
     gap: 12px;
   }
 
+  .dash-row-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-catalog-widget {
+    grid-template-columns: 1fr;
+  }
+
   .dash-assign-header {
     padding: 12px;
     flex-wrap: wrap;
@@ -990,6 +1188,15 @@
 @media (max-width: 480px) {
   .dash-grid-4 {
     grid-template-columns: 1fr;
+  }
+
+  .dash-catalog-meta-grid,
+  .dash-offer-service-row {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-offer-service-count {
+    text-align: left;
   }
 
   .dash-assign-header {
@@ -1037,4 +1244,170 @@
     color: #9CA3AF;
     border-color: #4B5563;
   }
+}
+
+
+/* ── Boutons Expand/Collapse ── */
+.dash-assign-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    justify-content: flex-end;
+}
+
+.dash-assign-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dash-assign-action-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    background: var(--surface-1);
+    border-color: var(--accent);
+}
+
+.dash-assign-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dash-assign-action-btn .dash-action-count {
+    background: var(--accent);
+    color: white;
+    border-radius: 12px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+/* Version responsive pour les petits écrans */
+@media (max-width: 768px) {
+    .dash-assign-actions {
+        justify-content: stretch;
+    }
+    
+    .dash-assign-action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* Animation pour l'expansion/repliement */
+.dash-assign-groups {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Panel header avec bouton collapse ── */
+.dash-panel-header-with-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 0.5px solid var(--border);
+}
+
+.dash-panel-header-with-button .dash-panel-title {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.dash-collapse-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dash-collapse-all-btn:hover {
+    background: var(--surface-1);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.dash-collapse-all-btn:active {
+    transform: translateY(0);
+}
+
+/* ── Boutons d'action rapide à l'intérieur du panel ── */
+.dash-assign-quick-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    justify-content: flex-end;
+}
+
+.dash-quick-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dash-quick-action-btn:hover {
+    background: var(--surface-1);
+    border-color: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dash-panel-header-with-button {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .dash-collapse-all-btn {
+        justify-content: center;
+    }
+    
+    .dash-assign-quick-actions {
+        justify-content: stretch;
+    }
+    
+    .dash-quick-action-btn {
+        flex: 1;
+        justify-content: center;
+    }
 }

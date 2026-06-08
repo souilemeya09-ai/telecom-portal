@@ -266,7 +266,8 @@
 }
 
 .btn-secondary {
-  background: var(--surface);
+  background: var(--warning) !important;
+  color: #fff !important;
   color: var(--text-secondary);
   border: 0.5px solid var(--border-hover);
 }
@@ -914,6 +915,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  margin-top: 1.25rem;
   margin-bottom: 1.25rem;
 }
 
@@ -922,6 +924,11 @@
   border-radius: var(--radius);
   border: 0.5px solid var(--border);
   padding: 1rem;
+}
+
+.detail-section p {
+  color: var(--accent);
+  font-weight: bold;
 }
 
 .detail-section-full {

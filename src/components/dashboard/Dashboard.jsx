@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     getStatsVente,
@@ -27,6 +27,8 @@ function StatCard({ label, value, sub, color, icon, to, navigate }) {
 
 // ── Bar chart simple ─────────────────────────────────────────
 function BarChart({ data, keyLabel, keyValue, colors }) {
+    if (!data || !data.length) return <p className="dash-empty">Aucune donnée</p>;
+
     const max = Math.max(...data.map((d) => d[keyValue]), 1);
     return (
         <div className="dash-bar-chart">
@@ -45,6 +47,91 @@ function BarChart({ data, keyLabel, keyValue, colors }) {
                     <span className="dash-bar-count">{d[keyValue]}</span>
                 </div>
             ))}
+        </div>
+    );
+}
+
+// ── Offres : services associés ────────────────────────────────
+function ServicesByOfferChart({ data, colors, activeOffer, onSelect }) {
+    if (!data || !data.length) return <p className="dash-empty">Aucune donnée</p>;
+
+    const sortedData = [...data].sort((a, b) => Number(b.nbServices) - Number(a.nbServices));
+    const max = Math.max(...sortedData.map((d) => Number(d.nbServices)), 1);
+
+    return (
+        <div className="dash-offer-service-chart">
+            {sortedData.map((offer, i) => {
+                const label = offer.offre || "Sans nom";
+                const count = Number(offer.nbServices) || 0;
+                const isActive = activeOffer === label;
+                const isDimmed = activeOffer && !isActive;
+
+                return (
+                    <button
+                        key={`${label}-${i}`}
+                        className={`dash-offer-service-row ${isActive ? "active" : ""}`}
+                        style={{ opacity: isDimmed ? 0.45 : 1 }}
+                        onClick={() => onSelect(isActive ? null : label)}
+                    >
+                        <span className="dash-offer-service-label">{label}</span>
+                        <span className="dash-offer-service-track">
+                            <span
+                                className="dash-offer-service-fill"
+                                style={{
+                                    width: `${Math.max((count / max) * 100, count > 0 ? 5 : 0)}%`,
+                                    background: colors?.[i % colors.length] || "var(--accent)",
+                                }}
+                            />
+                        </span>
+                        <span className="dash-offer-service-count">{count}</span>
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
+function OfferCatalogWidget({ data, activeOffer, onSelect }) {
+    if (!data || !data.length) return <p className="dash-empty">Aucune donnée</p>;
+
+    const selectedOffer = data.find((offer) => offer.offre === activeOffer) || data[0];
+    const services = selectedOffer.services || [];
+
+    return (
+        <div className="dash-catalog-widget">
+
+            <div className="dash-catalog-detail">
+                <div className="dash-catalog-detail-head">
+                    <div>
+                        <span className="dash-catalog-kicker">Offre sélectionnée</span>
+                        <h4 className="dash-catalog-title">{selectedOffer.offre || "Sans nom"}</h4>
+                    </div>
+                    <span className="dash-badge dash-badge-blue">{selectedOffer.typeOffre || "N/A"}</span>
+                </div>
+
+                <div className="dash-catalog-meta-grid">
+                    <div>
+                        <span className="dash-catalog-meta-label">Plan tarifaire</span>
+                        <span className="dash-catalog-meta-value">{selectedOffer.planTarifaire || "Sans plan"}</span>
+                    </div>
+                    <div>
+                        <span className="dash-catalog-meta-label">Services liés</span>
+                        <span className="dash-catalog-meta-value">{selectedOffer.nbServices ?? services.length}</span>
+                    </div>
+                </div>
+
+                <div className="dash-catalog-services">
+                    {services.length === 0 ? (
+                        <p className="dash-empty">Aucun service associé</p>
+                    ) : (
+                        services.map((service, i) => (
+                            <span key={service.id ?? `${service.nom}-${i}`} className="dash-tag">
+                                {service.nom || "Service sans nom"}
+                            </span>
+                        ))
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
@@ -515,7 +602,7 @@ function DashboardExploit() {
     );
 }
 
-function AssignationsPanel({ data }) {
+const AssignationsPanel = forwardRef(({ data }, ref) => {
     const [openIds, setOpenIds] = useState(new Set());
 
     const toggle = (id) => setOpenIds(prev => {
@@ -524,12 +611,62 @@ function AssignationsPanel({ data }) {
         return next;
     });
 
+    const collapseAll = () => {
+        setOpenIds(new Set());
+    };
+
+    const expandAll = () => {
+        const allIds = new Set(data.map(promo => promo.promotionId));
+        setOpenIds(allIds);
+    };
+
+    // Exposer les méthodes au parent via ref
+    useImperativeHandle(ref, () => ({
+        collapseAll,
+        expandAll,
+        isAllOpen: () => openIds.size === data.length,  // ← ajouté
+
+    }));
+
+    // Fonction pour tout déplier/replier
+    const toggleAll = () => {
+        if (openIds.size === data.length) {
+            collapseAll();
+        } else {
+            expandAll();
+        }
+    };
+
     const totalAssignments = data.reduce((s, d) => s + d.assignmentCount, 0);
     const totalGroups = [...new Set(data.flatMap(d => d.assignedGroups.map(g => g.id)))].length;
     const promosWithGroups = data.filter(d => d.assignedGroupCount > 0).length;
 
+    const isAllOpen = openIds.size === data.length;
+    const isAllClosed = openIds.size === 0;
+
     return (
         <>
+            {/* Bouton Toggle unique */}
+            <div className="dash-assign-actions">
+                <button
+                    className="dash-assign-action-btn"
+                    onClick={toggleAll}
+                >
+                    {isAllOpen ? (
+                        <>
+                            <span>📁</span>
+                            Tout replier
+                            <span className="dash-action-count">{openIds.size}</span>
+                        </>
+                    ) : (
+                        <>
+                            <span>📂</span>
+                            Tout déplier
+                            {!isAllClosed && <span className="dash-action-count">{data.length - openIds.size}</span>}
+                        </>
+                    )}
+                </button>
+            </div>
             <div className="dash-grid-4" style={{ marginBottom: 16 }}>
                 <div className="dash-pbi-card dash-pbi-blue">
                     <span className="dash-pbi-value">{data.length}</span>
@@ -596,7 +733,7 @@ function AssignationsPanel({ data }) {
             </div>
         </>
     );
-}
+});
 
 // ════════════════════════════════════════════════════════════════
 // DSI DASHBOARD
@@ -604,12 +741,16 @@ function AssignationsPanel({ data }) {
 function DashboardDsi() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [panelCollapsed, setPanelCollapsed] = useState(true);
+    const [selectedOffer, setSelectedOffer] = useState(null);
 
     // filtres actifs par donut + courbe
     const [filterContrat, setFilterContrat] = useState(null);
     const [filterReclam, setFilterReclam] = useState(null);
     const [filterPromo, setFilterPromo] = useState(null);
     const [filterPeriode, setFilterPeriode] = useState(null);
+
+    const assignationsPanelRef = useRef();
 
     useEffect(() => {
         getStatsDsi()
@@ -618,12 +759,19 @@ function DashboardDsi() {
             .finally(() => setLoading(false));
     }, []);
 
+
+
     if (loading) return <div className="loading-state">Chargement...</div>;
     if (!stats) return <div className="empty-state"><p>Erreur de chargement</p></div>;
 
     const COLORS_CONTRATS = ["#185FA5", "#0F6E56", "#854F0B", "#534AB7"];
     const COLORS_RECLAM = ["#185FA5", "#854F0B", "#1D9E75", "#A32D2D"];
     const COLORS_PROMOS = ["#EF9F27", "#378ADD", "#1D9E75", "#E24B4A", "#888780"];
+    const COLORS_OFFRES = ["#185FA5", "#0F6E56", "#854F0B", "#534AB7", "#A32D2D", "#1D9E75"];
+    const servicesParOffre = stats.servicesParOffre || [];
+    const activeOffer = selectedOffer && servicesParOffre.some((offer) => offer.offre === selectedOffer)
+        ? selectedOffer
+        : null;
 
     // données bar chart filtrées selon les filtres actifs
     const filteredBarData = (() => {
@@ -671,7 +819,7 @@ function DashboardDsi() {
             </div>
 
             {/* ── KPIs Power BI style ── */}
-            <div className="dash-pbi-grid">
+            <div className="dash-panel dash-pbi-grid">
                 <div className="dash-pbi-card dash-pbi-blue">
                     <span className="dash-pbi-value">{stats.totalClients ?? "—"}</span>
                     <span className="dash-pbi-label">Clients</span>
@@ -692,9 +840,24 @@ function DashboardDsi() {
 
             {/* ── Assignations par promotion ── */}
             <div className="dash-panel dash-panel-full">
-                {/* <h3 className="dash-panel-title">Assignations par promotion</h3> */}
-                <AssignationsPanel data={stats.assignmentsParPromotion || []} />
+                <div className="dash-panel-header-with-button">
+                    <h3 className="dash-panel-title">Assignations par promotion</h3>
+                    <button
+                        className="dash-collapse-all-btn"
+                        onClick={() => setPanelCollapsed(prev => !prev)}
+                    >
+                        <span className={`dash-assign-chevron ${panelCollapsed ? "" : "open"}`}>▶</span>
+                    </button>
+                </div>
+
+                {!panelCollapsed && (
+                    <AssignationsPanel
+                        ref={assignationsPanelRef}
+                        data={stats.assignmentsParPromotion || []}
+                    />
+                )}
             </div>
+
 
             {/* ── Donuts row ── */}
             <div className="dash-row-3">
@@ -744,34 +907,48 @@ function DashboardDsi() {
                 </div>
             </div>
 
-            {/* ── Line chart cliquable ── */}
-            <div className={`dash-panel dash-panel-full ${filterPeriode ? "dash-panel-filtered" : ""}`}>
-                <h3 className="dash-panel-title">
-                    Promotions par période
-                    {filterPeriode && <span className="dash-panel-filter-badge">{filterPeriode}</span>}
-                </h3>
-                <LineChart
-                    data={filteredLineData}
-                    keyX="periode"
-                    keyY="count"
-                    activeFilter={filterPeriode}
-                    onFilter={setFilterPeriode}
-                />
+            {/* ── Catalogue : offres, services et plans ── */}
+            <div className="dash-row-3">
+                <div className="dash-panel">
+                    <h3 className="dash-panel-title">Répartition par type d'offre</h3>
+                    <DonutChart
+                        data={stats.repartitionTypeOffre || []}
+                        keyLabel="type"
+                        keyValue="count"
+                        colors={COLORS_OFFRES}
+                    />
+                </div>
+
+                <div className="dash-panel">
+                    <h3 className="dash-panel-title">Offres par plan tarifaire</h3>
+                    <BarChart
+                        data={stats.offresParPlan || []}
+                        keyLabel="plan"
+                        keyValue="count"
+                        colors={["#0F6E56", "#185FA5", "#854F0B", "#534AB7", "#A32D2D"]}
+                    />
+                </div>
+
+                <div className={`dash-panel ${activeOffer ? "dash-panel-filtered" : ""}`}>
+                    <h3 className="dash-panel-title">
+                        Services par offre
+                        {activeOffer && <span className="dash-panel-filter-badge">{activeOffer}</span>}
+                    </h3>
+                    <ServicesByOfferChart
+                        data={servicesParOffre}
+                        colors={COLORS_OFFRES}
+                        activeOffer={activeOffer}
+                        onSelect={setSelectedOffer}
+                    />
+                </div>
             </div>
 
-            {/* ── Bar chart filtré par période ── */}
-            <div className={`dash-panel dash-panel-full ${filterPeriode ? "dash-panel-filtered" : ""}`}>
-                <h3 className="dash-panel-title">
-                    Promotions par nombres
-                    {filterPeriode && (
-                        <span className="dash-panel-filter-badge">période : {filterPeriode}</span>
-                    )}
-                </h3>
-                <BarChart
-                    data={filteredBarData}
-                    keyLabel="promotion"
-                    keyValue="count"
-                    colors={["#185FA5"]}
+            <div className="dash-panel dash-panel-full">
+                <h3 className="dash-panel-title">Catalogue interactif</h3>
+                <OfferCatalogWidget
+                    data={servicesParOffre}
+                    activeOffer={activeOffer}
+                    onSelect={setSelectedOffer}
                 />
             </div>
         </div>
