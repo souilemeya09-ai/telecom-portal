@@ -52,7 +52,7 @@ const Users = () => {
 
   // Modifier utilisateur
   const handleEdit = (id) => {
-    navigate(`/edit-user/${id}`);
+    navigate(`/users/edit/${id}`);
   };
 
   // Ajouter utilisateur - redirection vers la page de création
@@ -103,9 +103,6 @@ const Users = () => {
             {users.length} utilisateur{users.length !== 1 ? "s" : ""} enregistré{users.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <button className="btn-primary" onClick={handleAdd}>
-          + Nouvel utilisateur
-        </button>
       </div>
 
       <div className="stats-grid users-stats">

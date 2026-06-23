@@ -66,6 +66,9 @@ function Offres() {
   const [csvError, setCsvError] = useState(null);
   const [csvUploading, setCsvUploading] = useState(false);
   const csvFileRef = useRef();
+  const [deleteError, setDeleteError] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState("");
+
 
   useEffect(() => { loadData(); }, []);
 
@@ -180,8 +183,21 @@ function Offres() {
   };
 
   const handleDelete = async (id) => {
-    try { await deleteOffre(id); setDeleteConfirm(null); setDetail(null); loadData(); }
-    catch (e) { console.error(e); }
+    try {
+      setDeleteError("");
+      await deleteOffre(id);
+      setDeleteConfirm(null);
+      setDetail(null);
+      setDeleteSuccess("L'offre a été supprimée avec succès.");
+      setTimeout(() => setDeleteSuccess(""), 3000); // auto-dismiss après 3s
+      loadData();
+    } catch (err) {
+      setDeleteError(
+        err.response?.data?.message ||
+        "Cette offre ne peut pas être supprimée car elle est utilisée par un ou plusieurs contrats. " +
+        "Veuillez d'abord supprimer ou modifier les contrats associés."
+      );
+    }
   };
 
   // ── Retirer un service depuis le détail ───────────────────
@@ -209,6 +225,14 @@ function Offres() {
 
   const role = localStorage.getItem("role");
 
+  {
+    deleteError && (
+      <div className="alert alert-error" style={{ marginTop: "1rem" }}>
+        {deleteError}
+      </div>
+    )
+  }
+
   return (
     <div className="page-wrapper">
 
@@ -231,7 +255,12 @@ function Offres() {
           </>
         )}
       </div>
-
+      {/* ── Toast succès suppression ── */}
+      {deleteSuccess && (
+        <div className="alert alert-success" style={{ marginBottom: "1rem" }}>
+          ✅ {deleteSuccess}
+        </div>
+      )}
       {csvError && (
         <div className="alert alert-error" style={{ marginBottom: "1rem" }}>
           Erreur import CSV : {csvError}
@@ -404,15 +433,30 @@ function Offres() {
 
       {/* ── Modal Suppression ── */}
       {deleteConfirm && (
-        <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
+        <div className="modal-overlay" onClick={() => { setDeleteConfirm(null); setDeleteError(""); }}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <h4 className="modal-title">Confirmer la suppression</h4>
             <p className="modal-text">
               Supprimer l'offre <strong>{deleteConfirm.nomOffre}</strong> ? Cette action est irréversible.
             </p>
+
+            {/* ← Erreur affichée ici, dans la modal */}
+            {deleteError && (
+              <div className="alert alert-error" style={{ margin: "0.75rem 0 0" }}>
+                {deleteError}
+              </div>
+            )}
+
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => setDeleteConfirm(null)}>Annuler</button>
-              <button className="btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>Supprimer</button>
+              <button
+                className="btn-secondary"
+                onClick={() => { setDeleteConfirm(null); setDeleteError(""); }}
+              >
+                Annuler
+              </button>
+              <button className="btn-danger" onClick={() => handleDelete(deleteConfirm.id)}>
+                Supprimer
+              </button>
             </div>
           </div>
         </div>
