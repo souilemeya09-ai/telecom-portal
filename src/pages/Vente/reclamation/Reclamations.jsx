@@ -498,7 +498,7 @@ function Reclamations() {
               {/* ── Panneau réponse DSI ── */}
               {role === "DSI" && (
                 <div className="detail-section detail-section-full">
-                  <p className="detail-section-title">Réponse DSI</p>
+                  <p className="detail-section-title">Réponse Responsable</p>
 
                   {detailRec.commentaireDsi && (
                     <p className="rec-description rec-comment" style={{ marginBottom: 12 }}>
@@ -544,7 +544,6 @@ function Reclamations() {
             </div>
 
             <div className="modal-actions">
-              <button className="btn-danger" onClick={() => setDeleteConfirm(detailRec)}>Supprimer</button>
               <button className="btn-secondary" onClick={() => setDetailRec(null)}>Fermer</button>
             </div>
           </div>
