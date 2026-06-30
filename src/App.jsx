@@ -34,6 +34,7 @@ import CreatePlanTarifaire from "./pages/metier/planTarifaire/CreatePlanTarifair
 import CreatePromotion from "./pages/metier/promotion/CreatePromotion";
 import CustomerPromotionDateManager from "./pages/Vente/promotion/CustomerPromotionDateManager";
 import NavigationLoader from "./components/navigation/NavigationLoader";
+import ChangePassword from "./pages/auth/ChangePassword";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           {/* mot de passe oublié */}
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/change-password" element={<ChangePassword />} />
 
           {/* Routes protégées */}
           <Route path="/" element={<TelecomConnect />} />
