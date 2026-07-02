@@ -9,7 +9,7 @@ import "./createReclamation.css";
 
 const EMPTY_FORM = {
   clientId: "",
-  groupId: "",
+  customerGroupId: "",
   description: "",
   commentaireVendeur: "",
 };
@@ -48,7 +48,7 @@ function CreateReclamation() {
       const payload = {
         ...(clientSearchMode === "client"
           ? { clientId: Number(form.clientId) }
-          : { groupId: Number(form.groupId) }),
+          : { customerGroupId: Number(form.customerGroupId) }),
         description: form.description,
         commentaireVendeur: form.commentaireVendeur || null,
       };
@@ -84,14 +84,14 @@ function CreateReclamation() {
           <div className="form-group">
             <label className="form-label">Client / Groupe *</label>
 
-            <div className="search-mode-toggle">
+            {/* <div className="search-mode-toggle">
               <button
                 type="button"
                 className={`toggle-btn ${clientSearchMode === "client" ? "toggle-active" : ""}`}
                 onClick={() => { 
                   setClientSearchMode("client"); 
                   setClientSearch(""); 
-                  setForm({ ...form, clientId: "", groupId: "" }); 
+                  setForm({ ...form, clientId: "", customerGroupId: "" }); 
                 }}
               >
                 👤 Par client
@@ -102,12 +102,12 @@ function CreateReclamation() {
                 onClick={() => { 
                   setClientSearchMode("groupe"); 
                   setClientSearch(""); 
-                  setForm({ ...form, clientId: "", groupId: "" }); 
+                  setForm({ ...form, clientId: "", customerGroupId: "" }); 
                 }}
               >
                 👥 Par groupe
               </button>
-            </div>
+            </div> */}
 
             <input
               type="text"
@@ -118,7 +118,7 @@ function CreateReclamation() {
               value={clientSearch}
               onChange={(e) => { 
                 setClientSearch(e.target.value); 
-                setForm({ ...form, clientId: "", groupId: "" }); 
+                setForm({ ...form, clientId: "", customerGroupId: "" }); 
               }}
               style={{ marginBottom: 6 }}
             />
@@ -137,7 +137,7 @@ function CreateReclamation() {
                           name="client"
                           value={c.id}
                           checked={form.clientId === c.id}
-                          onChange={() => setForm({ ...form, clientId: c.id, groupId: "" })}
+                          onChange={() => setForm({ ...form, clientId: c.id, customerGroupId: "" })}
                         />
                         <div className="client-info">
                           <div className="client-name">{c.nom} {c.prenom}</div>
@@ -151,13 +151,13 @@ function CreateReclamation() {
                       return !q || g.name?.toLowerCase().includes(q);
                     })
                     .map((g) => (
-                      <label key={g.id} className={`client-item ${form.groupId === g.id ? "active" : ""}`}>
+                      <label key={g.id} className={`client-item ${form.customerGroupId === g.id ? "active" : ""}`}>
                         <input
                           type="radio"
                           name="groupe"
                           value={g.id}
-                          checked={form.groupId === g.id}
-                          onChange={() => setForm({ ...form, groupId: g.id, clientId: "" })}
+                          checked={form.customerGroupId === g.id}
+                          onChange={() => setForm({ ...form, customerGroupId: g.id, clientId: "" })}
                         />
                         <div className="client-info">
                           <div className="client-name">👥 {g.name}</div>
@@ -201,7 +201,7 @@ function CreateReclamation() {
             <button
               type="submit"
               className="btn-primary"
-              disabled={submitting || (!form.clientId && !form.groupId)}
+              disabled={submitting || (!form.clientId && !form.customerGroupId)}
             >
               {submitting ? "Création en cours..." : "Créer la réclamation"}
             </button>
