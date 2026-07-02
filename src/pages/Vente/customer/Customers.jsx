@@ -423,6 +423,7 @@ const Customers = () => {
       cinNumber: c.cinNumber || "", passportNumber: c.passportNumber || "",
       image: null,
       customerGroupId: c.customerGroupId ? String(c.customerGroupId) : "",
+      status: c.status || "ACTIVE",
     });
     setShowForm(true);
   };
@@ -438,6 +439,7 @@ const Customers = () => {
     fd.append("adresse", form.adresse); fd.append("ville", form.ville);
     fd.append("documentType", form.documentType);
     fd.append("customerGroupId", form.customerGroupId);
+    fd.append("status", form.status || "ACTIVE");
     if (form.documentType === "1" && form.cinNumber) fd.append("cinNumber", form.cinNumber);
     if (form.documentType === "2" && form.passportNumber) fd.append("passportNumber", form.passportNumber);
     if (form.image) fd.append("image", form.image);
@@ -585,7 +587,7 @@ const Customers = () => {
 
                 <div className="form-group">
                   <label className="form-label">groupe client (optionnel)</label>
-                  <select className="form-control" name="" id="" value={form.customerGroupId}   onChange={set("customerGroupId")} >
+                  <select className="form-control" name="" id="" value={form.customerGroupId} onChange={set("customerGroupId")} >
                     <option value="">Sélectionner un groupe client</option>
                     {customerGroups.map((group) => (
                       <option key={group.id} value={group.id}>
@@ -594,6 +596,27 @@ const Customers = () => {
                     ))}
                   </select>
                 </div>
+                
+                {editingCustomer && (
+                  <div className="form-group">
+                    <label className="form-label">Statut du client</label>
+                    <select
+                      className="form-control"
+                      value={form.status || "ACTIVE"}
+                      onChange={set("status")}
+                    >
+                      <option value="ACTIVE">Actif</option>
+                      <option value="DESACTIVE">Désactivé</option>
+                    </select>
+                    {form.status !== (editingCustomer.status || "ACTIVE") && (
+                      <div className="client-email" style={{ marginTop: 4, color: "#BA7517" }}>
+                        {form.status === "DESACTIVE"
+                          ? "La date de désactivation sera enregistrée avec la date du jour."
+                          : "La date d'activation sera enregistrée avec la date du jour."}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="form-actions">
                   <button type="button" className="btn-secondary" onClick={closeForm}>Annuler</button>
