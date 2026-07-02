@@ -1,15 +1,6 @@
 import { Link } from "react-router-dom";
 
 
-const NAV_LINKS = [
-    { label: "Accueil", to: "/" },
-    { label: "Tableau de bord", to: "/dashboard" },
-    { label: "Clients", to: "/clients" },
-    { label: "Promotions", to: "/promotions" },
-    { label: "Groupes", to: "/customer-groups" },
-    { label: "Facturation", to: "/billing" },
-    { label: "Paramètres", to: "/settings" },
-];
 
 const SOCIALS = [
     {
@@ -62,24 +53,24 @@ export const LoginFooter = () => (
                 <p className="login-footer__tagline">
                     Gestion intelligente de vos promotions &amp; clients.
                 </p>
-                <div className="login-footer__socials">
-                    {SOCIALS.map((s) => (
-                        <a
-                            key={s.label}
-                            href={s.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={s.label}
-                            className="login-footer__social-btn"
-                        >
-                            {s.icon}
-                        </a>
-                    ))}
-                </div>
+            </div>
+            <div className="login-footer__socials">
+                {SOCIALS.map((s) => (
+                    <a
+                        key={s.label}
+                        href={s.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={s.label}
+                        className="login-footer__social-btn"
+                    >
+                        {s.icon}
+                    </a>
+                ))}
             </div>
 
             {/* Nav links */}
-            <div className="login-footer__nav">
+            {/* <div className="login-footer__nav">
                 <h4 className="login-footer__nav-title">Navigation</h4>
                 <ul className="login-footer__nav-list">
                     {NAV_LINKS.map((l) => (
@@ -90,17 +81,17 @@ export const LoginFooter = () => (
                         </li>
                     ))}
                 </ul>
-            </div>
+            </div> */}
 
             {/* Legal */}
-            <div className="login-footer__legal-col">
+            {/* <div className="login-footer__legal-col">
                 <h4 className="login-footer__nav-title">Légal</h4>
                 <ul className="login-footer__nav-list">
                     <li><Link to="/privacy" className="login-footer__nav-link">Politique de confidentialité</Link></li>
                     <li><Link to="/terms" className="login-footer__nav-link">Conditions d&apos;utilisation</Link></li>
                     <li><Link to="/contact" className="login-footer__nav-link">Contact</Link></li>
                 </ul>
-            </div>
+            </div> */}
 
         </div>
 

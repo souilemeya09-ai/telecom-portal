@@ -69,7 +69,7 @@ function EditUser() {
           onChange={(e) => setRole(e.target.value)}
         >
           <option value="VENTE">VENTE</option>
-          <option value="DSI">DSI</option>
+          <option value="DSI">RESPONSABLE</option>
           <option value="METIER">METIER</option>
           <option value="EXPLOIT">EXPLOIT</option>
         </select>

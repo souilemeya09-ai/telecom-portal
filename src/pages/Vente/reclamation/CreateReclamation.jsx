@@ -22,7 +22,6 @@ function CreateReclamation() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [clientSearch, setClientSearch] = useState("");
-  const [clientSearchMode, setClientSearchMode] = useState("client");
 
   useEffect(() => {
     loadData();
@@ -34,6 +33,8 @@ function CreateReclamation() {
       const [c, g] = await Promise.all([getClients(), getCustomerGroups()]);
       setClients(c.content || []);
       setGroups(g);
+      console.log("client :", c);
+
     } catch (e) {
       console.error(e);
     } finally {
@@ -46,19 +47,17 @@ function CreateReclamation() {
     setSubmitting(true);
     try {
       const payload = {
-        ...(clientSearchMode === "client"
-          ? { clientId: Number(form.clientId) }
-          : { customerGroupId: Number(form.customerGroupId) }),
+        clientId: Number(form.clientId),
         description: form.description,
         commentaireVendeur: form.commentaireVendeur || null,
       };
-      
+
       await createReclamation(payload);
-      navigate("/reclamations"); // Redirige vers la liste après création
-    } catch (e) { 
-      console.error(e); 
-    } finally { 
-      setSubmitting(false); 
+      navigate("/reclamations");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -82,89 +81,41 @@ function CreateReclamation() {
       <div className="form-container">
         <form className="reclamation-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Client / Groupe *</label>
-
-            {/* <div className="search-mode-toggle">
-              <button
-                type="button"
-                className={`toggle-btn ${clientSearchMode === "client" ? "toggle-active" : ""}`}
-                onClick={() => { 
-                  setClientSearchMode("client"); 
-                  setClientSearch(""); 
-                  setForm({ ...form, clientId: "", customerGroupId: "" }); 
-                }}
-              >
-                👤 Par client
-              </button>
-              <button
-                type="button"
-                className={`toggle-btn ${clientSearchMode === "groupe" ? "toggle-active" : ""}`}
-                onClick={() => { 
-                  setClientSearchMode("groupe"); 
-                  setClientSearch(""); 
-                  setForm({ ...form, clientId: "", customerGroupId: "" }); 
-                }}
-              >
-                👥 Par groupe
-              </button>
-            </div> */}
+            <label className="form-label">Client</label>
 
             <input
               type="text"
               className="form-control"
-              placeholder={clientSearchMode === "client"
-                ? "🔎 Nom, prénom, email ou CIN..."
-                : "🔎 Nom du groupe..."}
+              placeholder= "🔎 Nom, prénom, email ou CIN..."
               value={clientSearch}
-              onChange={(e) => { 
-                setClientSearch(e.target.value); 
-                setForm({ ...form, clientId: "", customerGroupId: "" }); 
+              onChange={(e) => {
+                setClientSearch(e.target.value);
+                setForm({ ...form, clientId: "", customerGroupId: "" });
               }}
               style={{ marginBottom: 6 }}
             />
 
             <div className="client-list">
-              {clientSearchMode === "client"
-                ? clients
-                    .filter((c) => {
-                      const q = clientSearch.toLowerCase().trim();
-                      return !q || [c.nom, c.prenom, c.email, c.cin].some((v) => v?.toLowerCase().includes(q));
-                    })
-                    .map((c) => (
-                      <label key={c.id} className={`client-item ${form.clientId === c.id ? "active" : ""}`}>
-                        <input
-                          type="radio"
-                          name="client"
-                          value={c.id}
-                          checked={form.clientId === c.id}
-                          onChange={() => setForm({ ...form, clientId: c.id, customerGroupId: "" })}
-                        />
-                        <div className="client-info">
-                          <div className="client-name">{c.nom} {c.prenom}</div>
-                          <div className="client-meta">{c.email || c.cin || "—"}</div>
-                        </div>
-                      </label>
-                    ))
-                : groups
-                    .filter((g) => {
-                      const q = clientSearch.toLowerCase().trim();
-                      return !q || g.name?.toLowerCase().includes(q);
-                    })
-                    .map((g) => (
-                      <label key={g.id} className={`client-item ${form.customerGroupId === g.id ? "active" : ""}`}>
-                        <input
-                          type="radio"
-                          name="groupe"
-                          value={g.id}
-                          checked={form.customerGroupId === g.id}
-                          onChange={() => setForm({ ...form, customerGroupId: g.id, clientId: "" })}
-                        />
-                        <div className="client-info">
-                          <div className="client-name">👥 {g.name}</div>
-                          <div className="client-meta">{g.memberCount || 0} clients</div>
-                        </div>
-                      </label>
-                    ))
+              {clients
+                .filter((c) => {
+                  const q = clientSearch.toLowerCase().trim();
+                  return !q || [c.nom, c.prenom, c.email, c.cin].some((v) => v?.toLowerCase().includes(q));
+                })
+                .map((c) => (
+                  <label key={c.id} className={`client-item ${form.clientId === c.id ? "active" : ""}`}>
+                    <input
+                      type="radio"
+                      name="client"
+                      value={c.id}
+                      checked={form.clientId === c.id}
+                      onChange={() => setForm({ ...form, clientId: c.id, customerGroupId: "" })}
+                    />
+                    <div className="client-info">
+                      <div className="client-name">{c.nom} {c.prenom}</div>
+                      <div className="client-meta">{c.email || c.cin || "—"}</div>
+                    </div>
+                  </label>
+                ))
               }
             </div>
           </div>

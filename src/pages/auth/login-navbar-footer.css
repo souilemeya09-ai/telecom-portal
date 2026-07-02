@@ -72,7 +72,7 @@
     margin: 0 auto;
     padding: 3rem 2rem 2rem;
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     gap: 3rem;
 }
 
@@ -115,7 +115,6 @@
     font-size: 14px;
     color: #64748b;
     line-height: 1.6;
-    max-width: 280px;
     margin: 0;
 }
 
@@ -123,6 +122,8 @@
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: end;
 }
 
 .login-footer__social-btn {

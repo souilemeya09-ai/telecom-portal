@@ -617,9 +617,9 @@ export default function TelecomConnect() {
                         <button style={S.btnPrimary} className="btn-hover" onClick={() => scrollToSection("offres")}>
                             Découvrir les offres
                         </button>
-                        <button style={S.btnOutline} className="btn-hover" onClick={() => scrollToSection("contact")}>
+                        {/* <button style={S.btnOutline} className="btn-hover" onClick={() => scrollToSection("contact")}>
                             Contacter un conseiller
-                        </button>
+                        </button> */}
                     </div>
                 </section>
 
